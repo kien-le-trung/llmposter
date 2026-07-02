@@ -12,7 +12,8 @@ The project now has its first service backbone in place:
 - frontend dependencies are installed in `frontend/node_modules`.
 - the backend exposes health and agent endpoints.
 - the backend has a fake inference boundary in `backend/app/services/inference.py`.
-- Docker and containerization are intentionally deferred.
+- The backend has completed first-pass Docker containerization.
+- Docker Compose is the current learning focus.
 
 This plan assumes prior experience with:
 
@@ -51,23 +52,26 @@ Completed:
 - The backend has five prompt/configured candidate agents sharing one model server.
 - The backend has an in-memory round API for shaping game/session state before persistence.
 - The MVP gameplay loop supports start round, role reveal, LLM clue generation, human clue entry, and agent voting.
+- The FastAPI backend can run as a Docker container.
+- The FastAPI backend can run through Docker Compose.
+- SQLAlchemy database scaffolding exists for `agent_configs`.
 - Environment examples exist for root, frontend, and backend.
 
 Not completed yet:
 
-- PostgreSQL persistence.
+- PostgreSQL service in Docker Compose.
 - PostgreSQL-backed game/session persistence.
 - structured inference logging.
 - model timeout and error handling.
 - CI checks.
 - deployment.
-- Docker.
+- database-backed agent config reads.
 
 Immediate learning focus:
 
-- make the local services useful before containerizing them.
+- add PostgreSQL as a second Docker Compose service.
 - keep API and inference boundaries explicit.
-- add persistence and model-serving behavior behind stable interfaces.
+- keep full gameplay persistence deferred until the database wiring is understood.
 - document decisions as they are made.
 
 ## Learning Priorities
@@ -334,24 +338,75 @@ Primary learning focus:
 - API error handling
 - tests around user-visible behavior
 
-### Step 4: Persistence Boundary
+### Step 4: Backend Docker Container
 
-Add PostgreSQL-backed game/session persistence after the local game loop is clear.
+Containerize the FastAPI backend while the frontend and Ollama still run locally.
 
-Status: pending.
+Status: complete.
+
+Instruction file: `.agent/learning/STEP_4_BACKEND_DOCKER_CONTAINER.md`
 
 Primary learning focus:
 
-- what state belongs in the database
+- Dockerfile design
+- image vs container
+- port publishing
+- runtime environment variables
+- host-to-container networking
+- `host.docker.internal` for host Ollama
+
+### Step 5: Docker Compose Backend And Env Files
+
+Run the backend with Docker Compose while the frontend and Ollama remain local.
+
+Status: complete.
+
+Instruction file: `.agent/learning/STEP_5_DOCKER_COMPOSE_BACKEND_ENV.md`
+
+Primary learning focus:
+
+- Docker Compose service definitions
+- env-file workflow
+- repeatable backend container runs
+- Compose logs and lifecycle commands
+- host-to-container model networking
+- `docker compose up`, logs, and shutdown
+
+### Step 6: Docker Compose With PostgreSQL
+
+Run backend and PostgreSQL together with Docker Compose.
+
+Status: complete.
+
+Instruction file: `.agent/learning/STEP_6_DOCKER_COMPOSE_POSTGRES.md`
+
+Primary learning focus:
+
+- multi-service Compose orchestration
+- Compose DNS service names
+- named volumes
+- PostgreSQL health checks
+- database initialization from the backend container
+
+### Step 7: Database-Backed Agent Configs
+
+Read agent configs from PostgreSQL instead of the in-memory config dictionary.
+
+Status: complete.
+
+Primary learning focus:
+
 - repository/service boundary design
-- migrations later
-- test data setup
+- database-backed configuration
+- keeping fallback seed data simple
 
-### Step 5: Real Model Server
+### Step 8: Containerized LLM Inference
 
-Run vLLM or llama.cpp locally, preferably in Docker, and point the backend inference client at it.
+Run an OpenAI-compatible model server as a Docker Compose service and point the backend inference client at it.
 
-Status: pending.
+Status: complete.
+
+Instruction file: `.agent/learning/STEP_8_CONTAINERIZED_LLM_INFERENCE.md`
 
 Primary learning focus:
 
@@ -359,46 +414,54 @@ Primary learning focus:
 - inference latency
 - model server APIs
 - sampling parameters
+- model cache volumes
+- backend-to-model Compose networking
 
-### Step 6: Partial Docker Compose
+### Step 9: Frontend Containerization
 
-Run PostgreSQL and the model server in Docker while frontend/backend still run locally.
+Containerize Next.js and run the frontend through Docker Compose.
 
-Status: deferred until the local game loop and persistence boundary are stable.
+Status: complete.
 
-Primary learning focus:
-
-- port mapping
-- environment variables
-- host-to-container networking
-
-### Step 7: Backend Container
-
-Containerize FastAPI and connect it to PostgreSQL and the model service through Compose DNS names.
-
-Status: deferred.
+Instruction file: `.agent/learning/STEP_9_FRONTEND_CONTAINERIZATION.md`
 
 Primary learning focus:
 
-- Dockerfile design
-- container-to-container networking
+- frontend build images
+- browser-facing vs container-internal URLs
+- `NEXT_PUBLIC_*` runtime implications
+- full local Compose stack
+
+### Step 10: Full Compose Cleanup
+
+Clean up service names, env examples, health checks, and local run documentation.
+
+Status: complete.
+
+Instruction file: `.agent/learning/STEP_10_FULL_COMPOSE_CLEANUP.md`
+
+Primary learning focus:
+
+- repeatable local setup
 - service readiness
+- developer documentation
+- Compose profiles later
 
-### Step 8: Full Compose Stack
+### Step 11: CI Checks
 
-Containerize Next.js and run the full app through Docker Compose.
+Add automated checks before deployment.
 
-Status: deferred.
+Status: next.
 
 Primary learning focus:
 
-- full-stack orchestration
-- runtime configuration
-- internal vs external ports
+- backend tests and lint
+- frontend typecheck and build
+- Docker image build checks
 
-### Step 9: Deployment And CI/CD
+### Step 12: Deployment
 
-Deploy the MVP and add minimal automated checks.
+Deploy the MVP.
 
 Status: pending.
 
@@ -472,7 +535,7 @@ Stronger technical talking points:
 - [ ] Game/session state is persisted.
 - [ ] PostgreSQL runs in Docker during local development.
 - [ ] Model server runs in Docker during local development.
-- [ ] FastAPI runs successfully as a container.
+- [x] FastAPI runs successfully as a container.
 - [ ] Next.js runs successfully as a container.
 - [ ] Full stack runs with Docker Compose.
 - [ ] Backend uses Compose service names for database and model connections.

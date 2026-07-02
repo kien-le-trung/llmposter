@@ -1,5 +1,14 @@
-const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8000";
+function getApiBaseUrl() {
+  if (typeof window === "undefined") {
+    return (
+      process.env.INTERNAL_API_BASE_URL ??
+      process.env.NEXT_PUBLIC_API_BASE_URL ??
+      "http://localhost:8000"
+    );
+  }
+
+  return process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8000";
+}
 
 export type HealthResponse = {
   status: string;
@@ -52,7 +61,7 @@ export type VoteResult = {
 };
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
-  const response = await fetch(`${API_BASE_URL}${path}`, {
+  const response = await fetch(`${getApiBaseUrl()}${path}`, {
     ...init,
     headers: {
       "Content-Type": "application/json",

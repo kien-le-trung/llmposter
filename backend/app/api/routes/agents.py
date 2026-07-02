@@ -1,13 +1,15 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
+from sqlalchemy.orm import Session
 
 from app.core.config import settings
-from app.services.agents import get_agent, list_agent_configs
+from app.db.session import get_db
 from app.services.inference import (
     InferenceClient,
     InferenceRequest,
     InferenceServiceError,
 )
+from app.services.runtime_agents import get_runtime_agent_config, list_runtime_agent_configs
 
 router = APIRouter(prefix="/agents", tags=["agents"])
 
@@ -31,16 +33,20 @@ class GenerateResponse(BaseModel):
 
 
 @router.get("", response_model=list[AgentResponse])
-def list_agents() -> list[AgentResponse]:
+def list_agents(db: Session = Depends(get_db)) -> list[AgentResponse]:
+    agents = list_runtime_agent_configs(db)
     return [
         AgentResponse(id=agent.id, name=agent.name, role=agent.role, version=agent.version)
-        for agent in list_agent_configs()
+        for agent in agents
     ]
 
 
 @router.post("/generate", response_model=GenerateResponse)
-async def generate_response(payload: GenerateRequest) -> GenerateResponse:
-    agent = get_agent(payload.agent_id)
+async def generate_response(
+    payload: GenerateRequest,
+    db: Session = Depends(get_db),
+) -> GenerateResponse:
+    agent = get_runtime_agent_config(db, payload.agent_id)
     if agent is None:
         raise HTTPException(status_code=404, detail="Unknown agent")
 

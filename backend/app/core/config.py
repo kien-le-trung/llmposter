@@ -15,6 +15,7 @@ class Settings(BaseSettings):
     model_server_url: str = Field(default="http://localhost:11434", alias="MODEL_SERVER_URL")
     model_name: str = Field(default="qwen2.5:1.5b", alias="MODEL_NAME")
     inference_mode: str = Field(default="fake", alias="INFERENCE_MODE")
+    agent_config_source: str = Field(default="static", alias="AGENT_CONFIG_SOURCE")
     backend_cors_origins: str = Field(
         default="http://localhost:3000",
         alias="BACKEND_CORS_ORIGINS",

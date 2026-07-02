@@ -4,7 +4,7 @@
 
 LLMposter has a working local MVP gameplay loop for a word-based imposter game.
 
-The project is intentionally still pre-Docker and pre-database persistence. The immediate goal is to start containerization from a stable service boundary rather than continuing to add gameplay complexity.
+The project now has a playable local MVP, backend containerization, multi-service Docker Compose, database-backed agent config reads with a static fallback, containerized model inference, frontend containerization, and a cleaned-up Compose runbook.
 
 ## Architecture
 
@@ -176,21 +176,44 @@ npm.cmd run build
 
 - Standard agent planning path is `.agent`, not `.agents`.
 - Docker was intentionally deferred until after a working local service boundary.
-- PostgreSQL persistence is intentionally deferred.
+- Full gameplay persistence is intentionally deferred.
+- `agent_configs` is the first PostgreSQL-backed table design.
+- Agent config reads now prefer PostgreSQL and fall back to static configs if the database is unavailable.
 - Current round storage is an in-memory dictionary.
 - Current model server is local Ollama.
 - Future production model serving should move toward containerized vLLM on cloud GPU.
 - Keep the backend as the only component that talks to the model server.
 - Stop gameplay expansion here for now and move to containerization/CI/CD learning.
 
+## Current Docker Status
+
+Completed:
+
+- Backend Dockerfile exists.
+- Backend can run as a Docker container.
+- Backend can run through Docker Compose.
+- Backend has SQLAlchemy database scaffolding for `agent_configs`.
+- Backend can read active agent configs from PostgreSQL.
+- Model inference can run as a Compose service.
+- Frontend can run locally for daily development or through Compose for full-stack smoke tests.
+- README documents daily development, full Compose smoke tests, initialization, and service URLs.
+
+Current Docker networking lesson:
+
+```env
+MODEL_SERVER_URL=http://host.docker.internal:11434
+```
+
+is needed when the backend container talks to Ollama on the Windows host.
+
 ## Next Step
 
-Start the containerization lesson.
+Start the CI checks lesson.
 
-Recommended first containerization objective:
+Recommended next objective:
 
 ```text
-Run the FastAPI backend in a Docker container while the frontend and Ollama still run locally.
+Add automated backend, frontend, and Docker build checks before deployment.
 ```
 
 Important networking lesson:
@@ -211,4 +234,4 @@ instead of:
 MODEL_SERVER_URL=http://localhost:11434
 ```
 
-Do not begin with full Docker Compose. Start with a single backend Dockerfile and one backend container.
+Do not containerize the frontend yet. Do not containerize Ollama yet.

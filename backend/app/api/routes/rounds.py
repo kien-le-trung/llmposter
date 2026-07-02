@@ -3,12 +3,16 @@ from datetime import UTC, datetime
 from random import choice
 from uuid import uuid4
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
+from sqlalchemy.orm import Session
 
 from app.core.config import settings
-from app.services.agents import build_clue_system_prompt, get_agent, list_agent_configs
+from app.db.session import get_db
+from app.services.agents import build_clue_system_prompt
+from app.services.inference import AgentConfig
 from app.services.inference import InferenceClient, InferenceRequest, InferenceServiceError
+from app.services.runtime_agents import get_runtime_agent_config, list_runtime_agent_configs
 
 router = APIRouter(prefix="/rounds", tags=["rounds"])
 
@@ -80,12 +84,15 @@ def to_round_response(round_state: RoundState) -> RoundResponse:
     )
 
 
-async def generate_opening_turn(round_state: RoundState) -> TurnResponse:
+async def generate_opening_turn(
+    round_state: RoundState,
+    agents: list[AgentConfig],
+) -> TurnResponse:
     client = InferenceClient(settings=settings)
     responses: list[AgentTurnResponse] = []
 
     try:
-        for agent in list_agent_configs():
+        for agent in agents:
             agent_knows_word = agent.id != round_state.imposter_player_id
             system_prompt = build_clue_system_prompt(
                 round_state.secret_word if agent_knows_word else None
@@ -113,8 +120,11 @@ async def generate_opening_turn(round_state: RoundState) -> TurnResponse:
 
 
 @router.post("", response_model=RoundResponse, status_code=201)
-async def create_round(payload: CreateRoundRequest) -> RoundResponse:
-    agents = list_agent_configs()
+async def create_round(
+    payload: CreateRoundRequest,
+    db: Session = Depends(get_db),
+) -> RoundResponse:
+    agents = list_runtime_agent_configs(db)
     if not agents:
         raise HTTPException(status_code=500, detail="No agents configured")
 
@@ -127,7 +137,7 @@ async def create_round(payload: CreateRoundRequest) -> RoundResponse:
         turns=[],
         created_at=datetime.now(UTC),
     )
-    opening_turn = await generate_opening_turn(round_state)
+    opening_turn = await generate_opening_turn(round_state, agents)
     round_state.turns.append(opening_turn)
     ROUNDS[round_state.id] = round_state
     return to_round_response(round_state)
@@ -143,19 +153,23 @@ def get_round(round_id: str) -> RoundResponse:
 
 
 @router.post("/{round_id}/vote", response_model=VoteResponse)
-def vote(round_id: str, payload: VoteRequest) -> VoteResponse:
+def vote(
+    round_id: str,
+    payload: VoteRequest,
+    db: Session = Depends(get_db),
+) -> VoteResponse:
     round_state = ROUNDS.get(round_id)
     if round_state is None:
         raise HTTPException(status_code=404, detail="Unknown round")
 
-    voted_agent = get_agent(payload.agent_id)
+    voted_agent = get_runtime_agent_config(db, payload.agent_id)
     if voted_agent is None:
         raise HTTPException(status_code=404, detail="Unknown agent")
 
     round_state.voted_agent_id = voted_agent.id
     round_state.status = "complete"
 
-    imposter_agent = get_agent(round_state.imposter_player_id)
+    imposter_agent = get_runtime_agent_config(db, round_state.imposter_player_id)
     imposter_was = imposter_agent.name if imposter_agent is not None else "You"
 
     return VoteResponse(

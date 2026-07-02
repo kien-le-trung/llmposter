@@ -1,8 +1,6 @@
 # LLMposter
 
-Multi-agent LLM game MVP scaffold with separate Next.js frontend and FastAPI backend.
-
-This skeleton intentionally does not include Docker or Docker Compose yet. Runtime boundaries are still explicit so containerization can be added later without restructuring the app.
+Multi-agent LLM social deduction game with a Next.js frontend, FastAPI backend, PostgreSQL, and an OpenAI-compatible local model server.
 
 ## Project Structure
 
@@ -10,38 +8,45 @@ This skeleton intentionally does not include Docker or Docker Compose yet. Runti
 llmposter/
   frontend/   # Next.js + TypeScript app
   backend/    # FastAPI app
-  .agent/     # project plans and agent notes
+  .agent/     # learning plans and project notes
 ```
 
-## Local Setup
+## Environment Files
 
-The root `.env.example` documents the full local configuration. Each service also has its own example file for the values it reads directly.
-
-Copy backend environment values before running the API:
+Local host development:
 
 ```powershell
+Copy-Item .env.example .env
 Copy-Item backend\.env.example backend\.env
+Copy-Item frontend\.env.local.example frontend\.env.local
 ```
 
-### Backend
+Docker Compose development:
 
 ```powershell
-cd backend
-python -m venv .venv
-.\.venv\Scripts\Activate.ps1
-python -m pip install -e ".[dev]"
-python -m uvicorn app.main:app --reload --port 8000
+Copy-Item .env.docker.example .env.docker
 ```
 
-Health check:
+Do not commit real `.env` files.
+
+`AGENT_CONFIG_SOURCE=static` uses the built-in agent configs. `AGENT_CONFIG_SOURCE=database` reads active agent configs from PostgreSQL and falls back to static configs if needed.
+
+## Daily Development
+
+Recommended daily workflow:
+
+```text
+frontend local
+backend/db/model in Docker Compose
+```
+
+Start backend dependencies and backend:
 
 ```powershell
-Invoke-RestMethod http://localhost:8000/health
+docker compose up -d --build backend db model
 ```
 
-### Frontend
-
-PowerShell may block `npm.ps1` on this machine, so use `npm.cmd`:
+Run the frontend locally:
 
 ```powershell
 cd frontend
@@ -49,31 +54,130 @@ npm.cmd install
 npm.cmd run dev
 ```
 
-Open `http://localhost:3000`.
+Open:
 
-The frontend defaults to `http://localhost:8000` for API calls. If you need to override it:
+```text
+http://localhost:3000
+```
+
+## Full Compose Smoke Test
+
+Run the full local stack:
 
 ```powershell
-Copy-Item frontend\.env.local.example frontend\.env.local
+docker compose up -d --build
 ```
 
-## Current Runtime Model
+Check containers:
 
-The backend exposes a fake inference client by default:
+```powershell
+docker compose ps
+```
+
+Watch logs:
+
+```powershell
+docker compose logs -f backend
+docker compose logs -f frontend
+```
+
+Open:
+
+```text
+http://localhost:3000
+```
+
+## One-Time Initialization
+
+Initialize database tables and seed agent configs:
+
+```powershell
+docker compose exec backend python -c "from app.db.seed import init_database; init_database()"
+```
+
+Pull the local model into the model container:
+
+```powershell
+docker compose exec model ollama pull qwen2.5:1.5b
+```
+
+## Smoke Checks
+
+Backend health:
+
+```powershell
+Invoke-RestMethod http://localhost:8000/health
+```
+
+Database seed check:
+
+```powershell
+docker compose exec db psql -U postgres -d llmposter -c "select count(*) from agent_configs;"
+```
+
+Model check:
+
+```powershell
+docker compose exec model ollama list
+```
+
+## Local Service URLs
+
+From the host machine:
+
+```text
+frontend: http://localhost:3000
+backend:  http://localhost:8000
+postgres: localhost:5432
+ollama:   http://localhost:11434
+```
+
+Inside Docker Compose:
+
+```text
+frontend -> backend: http://backend:8000
+backend -> db:       db:5432
+backend -> model:    http://model:11434
+```
+
+Browser-side frontend code must use a host-reachable backend URL such as:
 
 ```env
-INFERENCE_MODE=fake
+NEXT_PUBLIC_API_BASE_URL=http://localhost:8000
 ```
 
-This keeps the app runnable before self-hosted inference is implemented. Later, replace the fake client behind `backend/app/services/inference.py` with a vLLM or llama.cpp HTTP client using `MODEL_SERVER_URL`.
+Server-side Next.js code inside the frontend container can use:
 
-## No Docker Yet
+```env
+INTERNAL_API_BASE_URL=http://backend:8000
+```
 
-Do not add Dockerfiles or Compose files during the initial scaffold phase. The near-term goal is to stabilize:
+## Useful Commands
 
-- frontend/backend API contract
-- backend inference client boundary
-- agent configuration shape
-- local run commands
+Stop containers but keep volumes:
 
-Containerization can wrap these services later.
+```powershell
+docker compose down
+```
+
+Stop containers and delete database/model volumes:
+
+```powershell
+docker compose down -v
+```
+
+Run backend tests locally:
+
+```powershell
+cd backend
+.\venv\Scripts\python.exe -m pytest
+.\venv\Scripts\python.exe -m ruff check app tests
+```
+
+Run frontend checks locally:
+
+```powershell
+cd frontend
+npm.cmd run typecheck
+npm.cmd run build
+```

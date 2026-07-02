@@ -23,8 +23,22 @@ pnpm-debug.log*
 !.env.example
 !.env.*.example
 
+# Docker / local orchestration
+docker-compose.override.yml
+docker-compose.*.override.yml
+*.local.yml
+*.local.yaml
+
+# Test / coverage output
+.coverage
+coverage/
+htmlcov/
+
 # OS / editor
 .DS_Store
 Thumbs.db
 .idea/
 .vscode/
+
+# agent related
+.agent/
