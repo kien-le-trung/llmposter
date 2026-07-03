@@ -453,6 +453,8 @@ Add automated checks before deployment.
 
 Status: next.
 
+Instruction file: `.agent/learning/STEP_11_CI_WORKFLOW.md`
+
 Primary learning focus:
 
 - backend tests and lint
@@ -464,6 +466,8 @@ Primary learning focus:
 Deploy the MVP.
 
 Status: pending.
+
+Instruction file: `.agent/learning/STEP_12_DEPLOYMENT.md`
 
 Primary learning focus:
 

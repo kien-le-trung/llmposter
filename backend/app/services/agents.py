@@ -52,8 +52,16 @@ def get_agent(agent_id: str) -> AgentConfig | None:
     return AGENTS.get(agent_id)
 
 
-def build_clue_system_prompt(secret_word: str | None) -> str:
+def build_clue_system_prompt(secret_word: str | None, imposter_hint: str | None = None) -> str:
     if secret_word is None:
+        if imposter_hint:
+            return (
+                "You are the imposter in a word-based game. "
+                f"You do not know the secret word, but your hint is: {imposter_hint}. "
+                "Give a plausible clue that blends in. "
+                "Strictly 2-5 words. No explanation."
+            )
+
         return (
             "Reply with a random natural phrase. "
             "Strictly 2-5 words. No explanation."
@@ -63,4 +71,14 @@ def build_clue_system_prompt(secret_word: str | None) -> str:
         f"Secret word: {secret_word}. "
         f"Describe it without using '{secret_word}'. "
         "Strictly 2-5 words. No explanation."
+    )
+
+
+def build_vote_system_prompt(voter_name: str, candidate_names: list[str]) -> str:
+    candidates = ", ".join(candidate_names)
+    return (
+        f"You are {voter_name} in a word-based imposter game. "
+        "You will see the clues from every other player. "
+        f"Vote for exactly one suspected imposter from this list: {candidates}. "
+        "Reply with only the player name you vote for. No explanation."
     )

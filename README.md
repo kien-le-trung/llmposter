@@ -37,13 +37,38 @@ Recommended daily workflow:
 
 ```text
 frontend local
-backend/db/model in Docker Compose
+backend local
+db/model in Docker Compose
 ```
 
-Start backend dependencies and backend:
+Start the live-editing environment:
 
 ```powershell
-docker compose up -d --build backend db model
+scripts\dev.cmd
+```
+
+This starts PostgreSQL and Ollama through Docker Compose, then opens separate backend and frontend dev-server windows with autoreload enabled.
+
+Rounds use a random backend-selected noun by default. For repeatable testing, set:
+
+```env
+WORD_SELECTION_MODE=fixed
+FIXED_SECRET_WORD=satellite
+FIXED_IMPOSTER_HINT=Space, signals, or orbit
+```
+
+Manual equivalent:
+
+```powershell
+docker compose up -d db model
+```
+
+Run the backend locally:
+
+```powershell
+cd backend
+.\venv\Scripts\activate
+python -m uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 ```
 
 Run the frontend locally:

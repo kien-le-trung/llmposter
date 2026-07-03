@@ -13,11 +13,8 @@ type PlayerSeat = {
   kind: "human" | "agent";
 };
 
-const DEFAULT_SECRET_WORD = "satellite";
-
 export function GameConsole({ agents }: GameConsoleProps) {
   const [round, setRound] = useState<Round | null>(null);
-  const [secretWord, setSecretWord] = useState(DEFAULT_SECRET_WORD);
   const [humanClueDraft, setHumanClueDraft] = useState("");
   const [humanClue, setHumanClue] = useState<string | null>(null);
   const [voteResult, setVoteResult] = useState<VoteResult | null>(null);
@@ -40,16 +37,11 @@ export function GameConsole({ agents }: GameConsoleProps) {
   async function handleCreateRound(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
-    const trimmedSecretWord = secretWord.trim();
-    if (!trimmedSecretWord) {
-      return;
-    }
-
     setIsCreatingRound(true);
     setError(null);
 
     try {
-      const createdRound = await createRound(trimmedSecretWord);
+      const createdRound = await createRound();
       setRound(createdRound);
       setHumanClueDraft("");
       setHumanClue(null);
@@ -83,7 +75,7 @@ export function GameConsole({ agents }: GameConsoleProps) {
     setError(null);
 
     try {
-      const result = await voteRound(round.id, agentId);
+      const result = await voteRound(round.id, agentId, humanClue ?? "");
       setVoteResult(result);
       setRound((currentRound) =>
         currentRound ? { ...currentRound, status: "complete" } : currentRound,
@@ -143,7 +135,7 @@ export function GameConsole({ agents }: GameConsoleProps) {
                 else's clues, then vote out the player you suspect.
               </p>
             </div>
-            <button type="submit" disabled={isCreatingRound || secretWord.trim().length === 0}>
+            <button type="submit" disabled={isCreatingRound}>
               {isCreatingRound ? "Starting..." : "Start Round"}
             </button>
           </form>
@@ -153,7 +145,7 @@ export function GameConsole({ agents }: GameConsoleProps) {
               <span>Status: {round.status}</span>
               <strong>
                 {round.user_role === "imposter"
-                  ? "You are the imposter. Blend in without the word."
+                  ? `You are the imposter. Hint: ${round.imposter_hint}`
                   : `Your word: ${round.visible_word}`}
               </strong>
             </div>
@@ -186,8 +178,15 @@ export function GameConsole({ agents }: GameConsoleProps) {
                 </div>
 
                 {voteResult ? (
-                  <div className={voteResult.correct ? "vote-result correct" : "vote-result wrong"}>
-                    <strong>{voteResult.correct ? "Correct vote" : "Wrong vote"}</strong>
+                  <div className={voteResult.imposter_won ? "vote-result imposter" : "vote-result players"}>
+                    <strong>
+                      {voteResult.imposter_won ? "Imposter wins" : "Players win"}
+                    </strong>
+                    <span>
+                      Group vote:{" "}
+                      {voteResult.group_voted_player_name ?? "No consensus"}.
+                    </span>
+                    <span>Secret word: {voteResult.secret_word}.</span>
                     <span>The imposter was {voteResult.imposter_was}.</span>
                   </div>
                 ) : (
@@ -205,6 +204,29 @@ export function GameConsole({ agents }: GameConsoleProps) {
                     ))}
                   </div>
                 )}
+
+                {voteResult ? (
+                  <div className="agent-votes">
+                    <strong>Vote count</strong>
+                    <ul>
+                      {voteResult.vote_counts.map((count) => (
+                        <li key={count.player_id}>
+                          <span>{count.player_name}</span>
+                          <p>{count.votes} vote{count.votes === 1 ? "" : "s"}</p>
+                        </li>
+                      ))}
+                    </ul>
+                    <strong>Agent votes</strong>
+                    <ul>
+                      {voteResult.agent_votes.map((vote) => (
+                        <li key={vote.voter_agent_id}>
+                          <span>{vote.voter_agent_name}</span>
+                          <p>{vote.voted_for}</p>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ) : null}
               </section>
             ) : null}
 

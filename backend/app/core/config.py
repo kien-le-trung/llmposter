@@ -14,8 +14,14 @@ class Settings(BaseSettings):
 
     model_server_url: str = Field(default="http://localhost:11434", alias="MODEL_SERVER_URL")
     model_name: str = Field(default="qwen2.5:1.5b", alias="MODEL_NAME")
-    inference_mode: str = Field(default="fake", alias="INFERENCE_MODE")
+    inference_mode: str = Field(default="remote", alias="INFERENCE_MODE")
     agent_config_source: str = Field(default="static", alias="AGENT_CONFIG_SOURCE")
+    word_selection_mode: str = Field(default="random", alias="WORD_SELECTION_MODE")
+    fixed_secret_word: str = Field(default="satellite", alias="FIXED_SECRET_WORD")
+    fixed_imposter_hint: str = Field(
+        default="Space, signals, or orbit",
+        alias="FIXED_IMPOSTER_HINT",
+    )
     backend_cors_origins: str = Field(
         default="http://localhost:3000",
         alias="BACKEND_CORS_ORIGINS",
