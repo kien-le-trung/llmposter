@@ -40,5 +40,17 @@ Thumbs.db
 .idea/
 .vscode/
 
-# agent related
+# AI agent / assistant workspace
 .agent/
+.agents/
+.codex/
+.claude/
+.cursor/
+.aider*
+AGENTS.md
+CODEX.md
+CLAUDE.md
+SESSION_SUMMARY.md
+PROJECT_CONTEXT.md
+DECISIONS.md
+END_SESSION.md
