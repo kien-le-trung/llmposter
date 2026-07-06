@@ -16,7 +16,14 @@ from app.prompts.instruction_clues import (
     build_instruction_clue_system_prompt,
     build_instruction_clue_user_prompt,
 )
-from app.prompts.strategy_loader import IMPOSTER_CLUE_STRATEGIES, NON_IMPOSTER_CLUE_STRATEGIES
+from app.prompts.strategy_loader import (
+    IMPOSTER_CLUE_STRATEGIES,
+    NON_IMPOSTER_CLUE_STRATEGIES,
+    PROMPT_TECHNIQUES,
+    load_imposter_clue_strategies,
+    load_non_imposter_clue_strategies,
+    normalize_prompt_technique,
+)
 from app.prompts.votes import (
     VOTE_SYSTEM_PROMPT,
     build_vote_system_prompt,
@@ -32,6 +39,7 @@ __all__ = [
     "INSTRUCTION_CLUE_SYSTEM_PROMPT",
     "IMPOSTER_CLUE_STRATEGIES",
     "NON_IMPOSTER_CLUE_STRATEGIES",
+    "PROMPT_TECHNIQUES",
     "build_batched_clue_system_prompt",
     "build_batched_clue_user_prompt",
     "build_clue_system_prompt",
@@ -45,4 +53,7 @@ __all__ = [
     "clean_batched_clue_response",
     "clean_clue_response",
     "clean_vote_response",
+    "load_imposter_clue_strategies",
+    "load_non_imposter_clue_strategies",
+    "normalize_prompt_technique",
 ]
