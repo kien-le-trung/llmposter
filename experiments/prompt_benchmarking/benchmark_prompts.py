@@ -10,17 +10,17 @@ from api_client import PromptBenchmarkApiClient
 from metrics import summarize_results
 from schemas import BenchmarkCase, BenchmarkConfig, ClueBenchmarkRecord, RoundBenchmarkRecord
 
-DEFAULT_TECHNIQUES = ("zero_shot", "few_shot", "reasoning_guided", "meta")
+SUPPORTED_TECHNIQUES = {"zero_shot", "few_shot", "reasoning_guided", "meta"}
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Benchmark clue-generation prompt techniques.")
+    parser = argparse.ArgumentParser(description="Benchmark one clue-generation prompt technique.")
     parser.add_argument("--backend-url", default="http://localhost:8000")
     parser.add_argument(
         "--cases",
         default="experiments/prompt_benchmarking/benchmark_cases.json",
     )
-    parser.add_argument("--techniques", nargs="+", default=list(DEFAULT_TECHNIQUES))
+    parser.add_argument("--technique", default="few_shot", choices=sorted(SUPPORTED_TECHNIQUES))
     parser.add_argument("--repetitions", type=int, default=3)
     parser.add_argument(
         "--output-dir",
@@ -37,53 +37,46 @@ async def main() -> None:
     output_dir.mkdir(parents=True, exist_ok=True)
 
     timestamp = datetime.now(UTC).strftime("%Y%m%dT%H%M%SZ")
-    all_round_records: list[RoundBenchmarkRecord] = []
-    all_clue_records: list[ClueBenchmarkRecord] = []
-    summaries = []
+    config = BenchmarkConfig(
+        backend_url=args.backend_url,
+        technique=args.technique,
+        repetitions=args.repetitions,
+        timeout_seconds=args.timeout_seconds,
+    )
+    print(
+        f"Running {config.technique} against {config.backend_url}. "
+        "Ensure the backend was started with "
+        f"CLUE_PROMPT_TECHNIQUE={config.technique}."
+    )
 
-    for technique in args.techniques:
-        config = BenchmarkConfig(
-            backend_url=args.backend_url,
-            technique=technique,
-            repetitions=args.repetitions,
-            timeout_seconds=args.timeout_seconds,
-        )
-        print(
-            f"Running {config.technique} against {config.backend_url}. "
-            "Ensure the backend was started with "
-            f"CLUE_PROMPT_TECHNIQUE={config.technique}."
-        )
-        client = PromptBenchmarkApiClient(
-            backend_url=config.backend_url,
-            timeout_seconds=config.timeout_seconds,
-        )
+    client = PromptBenchmarkApiClient(
+        backend_url=config.backend_url,
+        timeout_seconds=config.timeout_seconds,
+    )
+    round_records: list[RoundBenchmarkRecord] = []
+    clue_records: list[ClueBenchmarkRecord] = []
 
-        round_records: list[RoundBenchmarkRecord] = []
-        clue_records: list[ClueBenchmarkRecord] = []
-        for _ in range(config.repetitions):
-            for case in cases:
-                round_record, case_clues = await client.run_case(case, config.technique)
-                round_records.append(round_record)
-                clue_records.extend(case_clues)
+    for _ in range(config.repetitions):
+        for case in cases:
+            round_record, case_clues = await client.run_case(case, config.technique)
+            round_records.append(round_record)
+            clue_records.extend(case_clues)
 
-        all_round_records.extend(round_records)
-        all_clue_records.extend(clue_records)
-        summaries.append(summarize_results(config.technique, round_records, clue_records))
-
+    summary = summarize_results(config.technique, round_records, clue_records)
     _write_jsonl(
-        output_dir / f"rounds_{timestamp}.jsonl",
-        [record.model_dump() for record in all_round_records],
+        output_dir / f"rounds_{config.technique}_{timestamp}.jsonl",
+        [record.model_dump() for record in round_records],
     )
     _write_jsonl(
-        output_dir / f"clues_{timestamp}.jsonl",
-        [record.model_dump() for record in all_clue_records],
+        output_dir / f"clues_{config.technique}_{timestamp}.jsonl",
+        [record.model_dump() for record in clue_records],
     )
-    (output_dir / f"summary_{timestamp}.json").write_text(
-        json.dumps([summary.model_dump() for summary in summaries], indent=2),
+    (output_dir / f"summary_{config.technique}_{timestamp}.json").write_text(
+        json.dumps(summary.model_dump(), indent=2),
         encoding="utf-8",
     )
 
-    print(json.dumps([summary.model_dump() for summary in summaries], indent=2))
+    print(json.dumps(summary.model_dump(), indent=2))
 
 
 def _load_cases(path: Path) -> list[BenchmarkCase]:
