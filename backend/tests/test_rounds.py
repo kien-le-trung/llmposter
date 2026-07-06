@@ -53,7 +53,7 @@ def test_create_round_selects_random_word_when_enabled(monkeypatch) -> None:
     agent_ids = [agent.id for agent in list_agent_configs()]
     monkeypatch.setattr(rounds.settings, "word_selection_mode", "random")
     monkeypatch.setattr(rounds.settings, "inference_mode", "fake")
-    monkeypatch.setattr(rounds, "random_choice", lambda word_bank: ("forest", "Trees and shade"))
+    monkeypatch.setattr(rounds, "select_random_word", lambda: ("forest", "Trees and shade"))
     set_playing_order(monkeypatch, [*agent_ids, rounds.HUMAN_PLAYER_ID])
     client = TestClient(create_app())
 
@@ -152,7 +152,7 @@ def test_opening_clues_generate_first_agent_then_batch_remaining_non_imposters(m
     body = response.json()
     assert body["status"] == "generating_clues"
     assert "Previous clues: none" in prompts[0]
-    assert f"Word: satellite" in prompts[0]
+    assert "Word: satellite" in prompts[0]
     assert [response["agent_response"] for response in body["turns"][0]["responses"]] == [
         "clue 1",
     ]

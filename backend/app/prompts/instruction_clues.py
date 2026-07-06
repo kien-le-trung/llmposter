@@ -29,11 +29,13 @@ def build_instruction_clue_user_prompt(
     previous_clue_block = _format_previous_clues(previous_clues)
 
     if secret_word is None:
+        strategy_prompt = _format_strategy_prompt(strategy)
         return (
             "You are the imposter. You do not know the secret word.\n"
             "Infer the shared theme from the hint and previous clues, then blend in.\n"
             f"Hint: {imposter_hint or 'common everyday thing'}\n"
             f"{previous_clue_block}"
+            f"{strategy_prompt}"
             "Constraints:\n"
             "- The clue must be 2 to 5 words.\n"
             "- Do not copy a previous clue.\n"

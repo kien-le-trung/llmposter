@@ -11,6 +11,7 @@ build_instruction_batched_clue_system_prompt = (
 build_instruction_batched_clue_user_prompt = prompts.build_instruction_batched_clue_user_prompt
 build_instruction_clue_system_prompt = prompts.build_instruction_clue_system_prompt
 build_instruction_clue_user_prompt = prompts.build_instruction_clue_user_prompt
+IMPOSTER_CLUE_STRATEGIES = prompts.IMPOSTER_CLUE_STRATEGIES
 NON_IMPOSTER_CLUE_STRATEGIES = prompts.NON_IMPOSTER_CLUE_STRATEGIES
 build_vote_system_prompt = prompts.build_vote_system_prompt
 build_vote_user_prompt = prompts.build_vote_user_prompt

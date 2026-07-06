@@ -8,6 +8,7 @@ import pytest
 from app.core.config import LLMConfig
 from app.main import create_app
 from app.services.agents import (
+    IMPOSTER_CLUE_STRATEGIES,
     build_batched_clue_user_prompt,
     build_clue_user_prompt,
     build_instruction_batched_clue_user_prompt,
@@ -112,6 +113,37 @@ def test_instruction_clue_prompt_uses_constraints_without_examples() -> None:
     assert "Examples:" not in prompt
     assert "Do not use the word itself." in prompt
     assert '{"clue":"your phrase"}' in prompt
+
+
+def test_instruction_imposter_clue_prompt_can_include_strategy() -> None:
+    prompt = build_instruction_clue_user_prompt(
+        secret_word=None,
+        imposter_hint="space",
+        previous_clues=[("Agent A", "moon orbit")],
+        strategy={
+            "name": "Ride previous clues",
+            "prompt": "Use previous clues without copying them.",
+        },
+    )
+
+    assert "You are the imposter." in prompt
+    assert "Hint: space" in prompt
+    assert "Agent A: moon orbit" in prompt
+    assert "Use previous clues without copying them." in prompt
+    assert '{"clue":"your clue"}' in prompt
+
+
+def test_imposter_strategies_are_loaded_from_json() -> None:
+    strategy_names = {strategy["name"] for strategy in IMPOSTER_CLUE_STRATEGIES}
+
+    assert strategy_names == {
+        "Ride previous clues",
+        "Abstraction",
+        "Cluster matching",
+        "Contextual guess",
+        "Adjacent association",
+    }
+    assert all(strategy["prompt"] for strategy in IMPOSTER_CLUE_STRATEGIES)
 
 
 def test_instruction_batched_clue_prompt_uses_named_json_shape() -> None:

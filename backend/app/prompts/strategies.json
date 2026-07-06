@@ -1,0 +1,50 @@
+{
+  "non_imposter": [
+    {
+      "name": "Indirect association",
+      "prompt": "Write a phrase that is indirectly related to the secret word, not a definition or obvious synonym. Use an association that a teammate who knows the word can connect, while an imposter would find ambiguous. Examples: satellite -> night dish; library -> quiet checkout; volcano -> buried pressure."
+    },
+    {
+      "name": "Side effect",
+      "prompt": "Write a phrase based on something caused by, enabled by, or resulting from the secret word. Do not describe the object directly. Prefer a consequence or outcome someone could infer from the word. Examples: camera -> frozen memory; bridge -> shorter commute; piano -> room applause."
+    },
+    {
+      "name": "Context scene",
+      "prompt": "Write a phrase that evokes a place, scene, or situation where the secret word naturally appears. The clue should feel concrete but not name the word or define it. Examples: guitar -> campfire chorus; island -> ferry arrival; theater -> velvet seats."
+    },
+    {
+      "name": "Hidden detail",
+      "prompt": "Write a phrase using a specific detail someone who knows the secret word may recognize. Avoid broad categories and obvious descriptions. Pick a small visual, sensory, or functional detail. Examples: rocket -> countdown plume; forest -> mossy fallen log; window -> morning condensation."
+    },
+    {
+      "name": "Contrast hint",
+      "prompt": "Write a phrase based on something the secret word is often compared with or contrasted against. The clue should point through contrast, not by direct definition. Examples: desert -> ocean opposite; mountain -> inverted valley; apple -> orange rival."
+    },
+    {
+      "name": "Specification",
+      "prompt": "Write a phrase naming a specific instance, person, brand, place, or example strongly associated with the secret word. The clue should be specific enough for teammates to connect, but avoid naming the secret word itself. Examples: social media -> Mark Zuckerberg; online marketplace -> Jeff Bezos; electric car -> Elon Musk."
+    }
+  ],
+  "imposter": [
+    {
+      "name": "Ride previous clues",
+      "prompt": "Strategy: ride previous clues. Use the hint and the previous clues to infer the table's shared direction, then write a clue that overlaps with one or two earlier clues without copying their exact words. This is strongest when previous clues exist. If there are no previous clues, use the hint to make a cautious related clue. Examples: space + moon orbit, rocket launch -> star travel; kitchen + recipe book, dinner prep -> cooking heat; ocean + salty waves, beach towel -> coastal breeze."
+    },
+    {
+      "name": "Abstraction",
+      "prompt": "Strategy: abstraction. Give a broad but still meaningful clue that could fit the hint and several possible secret words. Avoid being so generic that the clue sounds empty. Prefer category-level or high-level associations, and do not copy previous clues. Examples: phone + screen glow, pocket buzz -> daily technology; forest + pine shade, muddy trail -> natural place; coffee + morning cup, bitter smell -> warm drink."
+    },
+    {
+      "name": "Cluster matching",
+      "prompt": "Strategy: cluster matching. Look for the dominant semantic cluster in the previous clues, then add another clue from that same cluster. If previous clues disagree, follow the largest or most concrete cluster. Do not repeat an earlier clue. Examples: school + classroom desk, homework page, teacher voice -> hallway bell; hospital + doctor coat, nurse station, waiting room -> clinic light; music + guitar strings, concert stage, loud speakers -> rhythm crowd."
+    },
+    {
+      "name": "Contextual guess",
+      "prompt": "Strategy: contextual guess. Use the hint plus previous clues to guess the likely secret word, then give a normal teammate-style clue for that guessed word. Keep the clue confident, concrete, and consistent with the table. Examples: social + followers count, photo likes -> square photos; marketplace + shipping box, online cart -> doorstep package; wizard + magic school, lightning scar -> wand lesson."
+    },
+    {
+      "name": "Adjacent association",
+      "prompt": "Strategy: adjacent association. Give a clue that is near the hint or inferred theme, but not a direct synonym. Prefer a common collocation, use case, scene, or related object that sounds natural beside the previous clues. Examples: airport + boarding line, suitcase wheels -> passport check; garden + flower bed, watering can -> soil path; movie + dark theater, popcorn bucket -> ticket stub."
+    }
+  ]
+}

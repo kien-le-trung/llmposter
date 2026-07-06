@@ -16,7 +16,7 @@ from app.prompts.instruction_clues import (
     build_instruction_clue_system_prompt,
     build_instruction_clue_user_prompt,
 )
-from app.prompts.strategies import NON_IMPOSTER_CLUE_STRATEGIES
+from app.prompts.strategy_loader import IMPOSTER_CLUE_STRATEGIES, NON_IMPOSTER_CLUE_STRATEGIES
 from app.prompts.votes import (
     VOTE_SYSTEM_PROMPT,
     build_vote_system_prompt,
@@ -30,6 +30,7 @@ __all__ = [
     "VOTE_SYSTEM_PROMPT",
     "INSTRUCTION_BATCHED_CLUE_SYSTEM_PROMPT",
     "INSTRUCTION_CLUE_SYSTEM_PROMPT",
+    "IMPOSTER_CLUE_STRATEGIES",
     "NON_IMPOSTER_CLUE_STRATEGIES",
     "build_batched_clue_system_prompt",
     "build_batched_clue_user_prompt",

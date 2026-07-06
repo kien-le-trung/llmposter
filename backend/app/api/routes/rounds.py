@@ -1,9 +1,7 @@
 from dataclasses import replace
 from datetime import UTC, datetime
 import random
-import re
 from random import choice
-from random import choice as random_choice
 from uuid import uuid4
 
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException
@@ -13,6 +11,7 @@ from sqlalchemy.orm import Session
 from app.core.config import settings
 from app.db.session import get_db
 from app.services.agents import (
+    IMPOSTER_CLUE_STRATEGIES,
     NON_IMPOSTER_CLUE_STRATEGIES,
     build_instruction_batched_clue_system_prompt,
     build_instruction_batched_clue_user_prompt,
@@ -25,29 +24,13 @@ from app.services.inference import AgentConfig
 from app.services.inference import InferenceClient, InferenceRequest, InferenceServiceError
 from app.services.runtime_agents import get_runtime_agent_config, list_runtime_agent_configs
 from app.services.voting import VoteResponse, VotingStateError, submit_round_vote
+from app.services.word_bank import normalize_imposter_hint, select_random_word
 
 router = APIRouter(prefix="/rounds", tags=["rounds"])
 
 HUMAN_PLAYER_ID = "human"
 HUMAN_PLAYER_NAME = "You"
 OPENING_PROMPT = "Give your clue now."
-WORD_BANK: list[tuple[str, str]] = [
-    ("apple", "fruit"),
-    ("bridge", "crossing"),
-    ("camera", "photos"),
-    ("desert", "sand"),
-    ("forest", "trees"),
-    ("guitar", "music"),
-    ("island", "water"),
-    ("library", "books"),
-    ("mountain", "peak"),
-    ("piano", "music"),
-    ("rocket", "space"),
-    ("satellite", "orbit"),
-    ("theater", "stage"),
-    ("volcano", "hot"),
-    ("window", "glass"),
-]
 
 
 class AgentTurnResponse(BaseModel):
@@ -328,7 +311,11 @@ async def generate_agent_clue(
         secret_word,
         round_state.imposter_hint if agent_is_imposter else None,
         previous_responses,
-        None if agent_is_imposter else assign_non_imposter_clue_strategy(),
+        (
+            assign_imposter_clue_strategy()
+            if agent_is_imposter
+            else assign_non_imposter_clue_strategy()
+        ),
     )
     round_agent = replace(agent, system_prompt=system_prompt, max_tokens=max_tokens)
     structured_result, result = await client.generate_structured(
@@ -429,6 +416,10 @@ def assign_non_imposter_clue_strategy() -> dict[str, str]:
     return random.choice(NON_IMPOSTER_CLUE_STRATEGIES)
 
 
+def assign_imposter_clue_strategy() -> dict[str, str]:
+    return random.choice(IMPOSTER_CLUE_STRATEGIES)
+
+
 def assign_non_imposter_clue_strategies(
     player_names: list[str],
 ) -> dict[str, dict[str, str]]:
@@ -501,16 +492,8 @@ def select_round_word(payload: CreateRoundRequest | None) -> tuple[str, str]:
         imposter_hint = payload.imposter_hint if payload and payload.imposter_hint else settings.fixed_imposter_hint
         return secret_word, normalize_imposter_hint(imposter_hint)
 
-    secret_word, imposter_hint = random_choice(WORD_BANK)
+    secret_word, imposter_hint = select_random_word()
     return secret_word, normalize_imposter_hint(imposter_hint)
-
-
-def normalize_imposter_hint(hint: str) -> str:
-    match = re.search(r"[A-Za-z0-9][A-Za-z0-9'-]*", hint)
-    if match is None:
-        return "thing"
-
-    return match.group(0)
 
 
 @router.post("", response_model=RoundResponse, status_code=201)
