@@ -27,7 +27,7 @@ python -m uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 Run the benchmark for the same technique from another terminal:
 
 ```powershell
-python experiments/prompt_benchmarking/benchmark_prompts.py --techniques few_shot
+python experiments/prompt_benchmarking/benchmark_prompts.py --technique few_shot
 ```
 
 Repeat by restarting the backend with another `CLUE_PROMPT_TECHNIQUE` value and rerunning the script for that technique.
@@ -42,9 +42,9 @@ The runner intentionally does not mutate backend configuration at runtime. This 
 
 Generated files are written under `experiments/prompt_benchmarking/results/` and ignored by git:
 
-- `rounds_<timestamp>.jsonl`
-- `clues_<timestamp>.jsonl`
-- `summary_<timestamp>.json`
+- `rounds_<technique>_<timestamp>.jsonl`
+- `clues_<technique>_<timestamp>.jsonl`
+- `summary_<technique>_<timestamp>.json`
 
 The summary currently records:
 
