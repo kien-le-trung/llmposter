@@ -120,10 +120,11 @@ Initialize database tables and seed agent configs:
 docker compose exec backend python -c "from app.db.seed import init_database; init_database()"
 ```
 
-Pull the local model into the model container:
+Pull the local chat and embedding models into the model container:
 
 ```powershell
 docker compose exec model ollama pull qwen2.5:1.5b
+docker compose exec model ollama pull nomic-embed-text
 ```
 
 ## Smoke Checks

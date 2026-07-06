@@ -1,7 +1,16 @@
 "use client";
 
-import { FormEvent, useMemo, useState } from "react";
-import { Agent, Round, Turn, VoteResult, createRound, voteRound } from "@/lib/api";
+import { FormEvent, useEffect, useMemo, useState } from "react";
+import {
+  Agent,
+  Round,
+  Turn,
+  VoteResult,
+  createRound,
+  getRound,
+  submitRoundClue,
+  voteRound,
+} from "@/lib/api";
 
 type GameConsoleProps = {
   agents: Agent[];
@@ -16,11 +25,12 @@ type PlayerSeat = {
 export function GameConsole({ agents }: GameConsoleProps) {
   const [round, setRound] = useState<Round | null>(null);
   const [humanClueDraft, setHumanClueDraft] = useState("");
-  const [humanClue, setHumanClue] = useState<string | null>(null);
   const [voteResult, setVoteResult] = useState<VoteResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isCreatingRound, setIsCreatingRound] = useState(false);
+  const [isSubmittingClue, setIsSubmittingClue] = useState(false);
   const [isVoting, setIsVoting] = useState(false);
+  const [revealedClueCount, setRevealedClueCount] = useState(0);
 
   const seats = useMemo<PlayerSeat[]>(
     () => [
@@ -33,6 +43,57 @@ export function GameConsole({ agents }: GameConsoleProps) {
     ],
     [agents],
   );
+  const displayedSeats = round
+    ? round.playing_order.map((player) => ({
+        id: player.id,
+        name: player.name,
+        kind: player.kind,
+      }))
+    : seats;
+  const clueMessages = round?.turns[0]?.responses ?? [];
+
+  useEffect(() => {
+    setRevealedClueCount(0);
+  }, [round?.id]);
+
+  useEffect(() => {
+    if (!round || round.status !== "generating_clues") {
+      return;
+    }
+
+    let isCancelled = false;
+    const timeoutId = window.setTimeout(async () => {
+      try {
+        const updatedRound = await getRound(round.id);
+        if (!isCancelled) {
+          setRound(updatedRound);
+        }
+      } catch (caught) {
+        if (!isCancelled) {
+          setError(caught instanceof Error ? caught.message : "Could not refresh round");
+        }
+      }
+    }, 1000);
+
+    return () => {
+      isCancelled = true;
+      window.clearTimeout(timeoutId);
+    };
+  }, [round]);
+
+  useEffect(() => {
+    if (!round || revealedClueCount >= clueMessages.length) {
+      return;
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      setRevealedClueCount((currentCount) =>
+        Math.min(currentCount + 1, clueMessages.length),
+      );
+    }, 650);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [clueMessages.length, revealedClueCount, round?.id]);
 
   async function handleCreateRound(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -44,7 +105,6 @@ export function GameConsole({ agents }: GameConsoleProps) {
       const createdRound = await createRound();
       setRound(createdRound);
       setHumanClueDraft("");
-      setHumanClue(null);
       setVoteResult(null);
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : "Could not start the round");
@@ -53,17 +113,29 @@ export function GameConsole({ agents }: GameConsoleProps) {
     }
   }
 
-  function handleSubmitHumanClue(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmitHumanClue(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+
+    if (!round) {
+      return;
+    }
 
     const trimmedClue = humanClueDraft.trim();
     if (!trimmedClue) {
       return;
     }
 
+    setIsSubmittingClue(true);
     setError(null);
-    setHumanClue(trimmedClue);
-    setHumanClueDraft("");
+    try {
+      const updatedRound = await submitRoundClue(round.id, trimmedClue);
+      setRound(updatedRound);
+      setHumanClueDraft("");
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : "Could not submit clue");
+    } finally {
+      setIsSubmittingClue(false);
+    }
   }
 
   async function handleVote(agentId: string) {
@@ -75,7 +147,7 @@ export function GameConsole({ agents }: GameConsoleProps) {
     setError(null);
 
     try {
-      const result = await voteRound(round.id, agentId, humanClue ?? "");
+      const result = await voteRound(round.id, agentId);
       setVoteResult(result);
       setRound((currentRound) =>
         currentRound ? { ...currentRound, status: "complete" } : currentRound,
@@ -90,7 +162,6 @@ export function GameConsole({ agents }: GameConsoleProps) {
   function resetRound() {
     setRound(null);
     setHumanClueDraft("");
-    setHumanClue(null);
     setVoteResult(null);
     setError(null);
   }
@@ -104,7 +175,7 @@ export function GameConsole({ agents }: GameConsoleProps) {
         </div>
 
         <ul className="player-list">
-          {seats.map((seat) => (
+          {displayedSeats.map((seat) => (
             <li key={seat.id}>
               <span className={`seat-token ${seat.kind}`}>
                 {seat.name.slice(0, 1).toUpperCase()}
@@ -151,26 +222,24 @@ export function GameConsole({ agents }: GameConsoleProps) {
             </div>
 
             <ol className="turn-list" aria-live="polite">
-              {humanClue ? (
-                <li className="turn-card human-clue">
-                  <div className="turn-answer">
-                    <div className="candidate-response">
-                      <strong>You</strong>
-                      <p>{humanClue}</p>
-                    </div>
-                  </div>
-                </li>
-              ) : null}
-              {humanClue ? (
-                round.turns.map((turn) => <TurnCard key={turn.id} turn={turn} />)
+              {round.turns.length > 0 ? (
+                round.turns.map((turn) => (
+                  <TurnCard
+                    key={turn.id}
+                    turn={turn}
+                    revealedCount={revealedClueCount}
+                  />
+                ))
               ) : (
                 <li className="empty-turn">
-                  Lock your clue before the candidates reveal theirs.
+                  {round.current_player_id === "human"
+                    ? "You are first. Lock your clue to continue."
+                    : "Waiting for opening clues."}
                 </li>
               )}
             </ol>
 
-            {humanClue ? (
+            {round.status === "ready_to_vote" || round.status === "complete" ? (
               <section className="vote-panel">
                 <div className="panel-heading">
                   <p className="eyebrow">Vote</p>
@@ -230,28 +299,36 @@ export function GameConsole({ agents }: GameConsoleProps) {
               </section>
             ) : null}
 
-            <form className="game-form" onSubmit={handleSubmitHumanClue}>
-              <label className="field">
-                <span>Your clue</span>
-                <textarea
-                  value={humanClueDraft}
-                  onChange={(event) => setHumanClueDraft(event.target.value)}
-                  placeholder="Add your own 2-5 word clue."
-                />
-              </label>
+            {round.status === "awaiting_human_clue" ? (
+              <form className="game-form" onSubmit={handleSubmitHumanClue}>
+                <label className="field">
+                  <span>Your clue</span>
+                  <textarea
+                    value={humanClueDraft}
+                    onChange={(event) => setHumanClueDraft(event.target.value)}
+                    placeholder="Add your own 2-5 word clue."
+                  />
+                </label>
 
+                <div className="actions">
+                  <button
+                    type="submit"
+                    disabled={humanClueDraft.trim().length === 0 || isSubmittingClue}
+                  >
+                    {isSubmittingClue ? "Submitting..." : "Lock Clue"}
+                  </button>
+                  <button type="button" className="secondary-button" onClick={resetRound}>
+                    New Round
+                  </button>
+                </div>
+              </form>
+            ) : (
               <div className="actions">
-                <button
-                  type="submit"
-                  disabled={humanClueDraft.trim().length === 0}
-                >
-                  Lock Clue
-                </button>
                 <button type="button" className="secondary-button" onClick={resetRound}>
                   New Round
                 </button>
               </div>
-            </form>
+            )}
           </>
         )}
 
@@ -265,18 +342,34 @@ export function GameConsole({ agents }: GameConsoleProps) {
   );
 }
 
-function TurnCard({ turn }: { turn: Turn }) {
+function TurnCard({
+  turn,
+  revealedCount,
+}: {
+  turn: Turn;
+  revealedCount: number;
+}) {
+  const visibleResponses = turn.responses.slice(0, revealedCount);
+
   return (
-    <li className="turn-card">
-      <div className="turn-prompt">
+    <li className="chat-panel">
+      <div className="chat-heading">
         <span>Opening clues</span>
         <p>{turn.user_prompt}</p>
       </div>
-      <div className="turn-answer">
-        {turn.responses.map((response) => (
-          <div key={response.agent_id} className="candidate-response">
-            <strong>{response.agent_name}</strong>
-            <p>{response.agent_response}</p>
+      <div className="chat-thread">
+        {visibleResponses.map((response, index) => (
+          <div
+            key={`${response.agent_id}-${index}`}
+            className={`chat-message ${response.agent_id === "human" ? "human" : "agent"}`}
+          >
+            <div className="chat-avatar">
+              {response.agent_name.slice(0, 1).toUpperCase()}
+            </div>
+            <div className="chat-bubble">
+              <strong>{response.agent_name}</strong>
+              <p>{response.agent_response}</p>
+            </div>
           </div>
         ))}
       </div>

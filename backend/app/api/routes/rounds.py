@@ -1,20 +1,30 @@
-from collections import Counter
 from dataclasses import replace
 from datetime import UTC, datetime
+import random
+import re
 from random import choice
 from random import choice as random_choice
 from uuid import uuid4
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
 from app.core.config import settings
 from app.db.session import get_db
-from app.services.agents import build_clue_system_prompt, build_vote_system_prompt
+from app.services.agents import (
+    NON_IMPOSTER_CLUE_STRATEGIES,
+    build_instruction_batched_clue_system_prompt,
+    build_instruction_batched_clue_user_prompt,
+    build_instruction_clue_system_prompt,
+    build_instruction_clue_user_prompt,
+    clean_batched_clue_response,
+    clean_clue_response,
+)
 from app.services.inference import AgentConfig
 from app.services.inference import InferenceClient, InferenceRequest, InferenceServiceError
 from app.services.runtime_agents import get_runtime_agent_config, list_runtime_agent_configs
+from app.services.voting import VoteResponse, VotingStateError, submit_round_vote
 
 router = APIRouter(prefix="/rounds", tags=["rounds"])
 
@@ -22,21 +32,21 @@ HUMAN_PLAYER_ID = "human"
 HUMAN_PLAYER_NAME = "You"
 OPENING_PROMPT = "Give your clue now."
 WORD_BANK: list[tuple[str, str]] = [
-    ("apple", "Fruit, orchard, or red"),
-    ("bridge", "Crossing, river, or structure"),
-    ("camera", "Photos, lens, or memories"),
-    ("desert", "Sand, heat, or dunes"),
-    ("forest", "Trees, shade, or wilderness"),
-    ("guitar", "Music, strings, or stage"),
-    ("island", "Water, coast, or isolation"),
-    ("library", "Books, shelves, or quiet"),
-    ("mountain", "Peak, climb, or snow"),
-    ("piano", "Music, keys, or concert"),
-    ("rocket", "Launch, space, or engines"),
-    ("satellite", "Space, signals, or orbit"),
-    ("theater", "Stage, actors, or curtains"),
-    ("volcano", "Lava, ash, or eruption"),
-    ("window", "Glass, view, or sunlight"),
+    ("apple", "fruit"),
+    ("bridge", "crossing"),
+    ("camera", "photos"),
+    ("desert", "sand"),
+    ("forest", "trees"),
+    ("guitar", "music"),
+    ("island", "water"),
+    ("library", "books"),
+    ("mountain", "peak"),
+    ("piano", "music"),
+    ("rocket", "space"),
+    ("satellite", "orbit"),
+    ("theater", "stage"),
+    ("volcano", "hot"),
+    ("window", "glass"),
 ]
 
 
@@ -55,12 +65,21 @@ class TurnResponse(BaseModel):
     created_at: datetime
 
 
+class PlayerResponse(BaseModel):
+    id: str
+    name: str
+    kind: str
+
+
 class RoundResponse(BaseModel):
     id: str
     visible_word: str | None
     imposter_hint: str | None
     user_role: str
     status: str
+    playing_order: list[PlayerResponse]
+    current_player_id: str | None
+    current_player_name: str | None
     turns: list[TurnResponse]
     created_at: datetime
 
@@ -71,8 +90,12 @@ class RoundState(BaseModel):
     imposter_hint: str
     imposter_player_id: str
     status: str
+    playing_order: list[str]
+    player_names_by_id: dict[str, str]
+    current_player_index: int
     turns: list[TurnResponse]
     created_at: datetime
+    human_clue: str | None = None
     voted_agent_id: str | None = None
 
 
@@ -83,33 +106,19 @@ class CreateRoundRequest(BaseModel):
 
 class VoteRequest(BaseModel):
     agent_id: str
-    human_clue: str = Field(min_length=1, max_length=200)
+    human_clue: str | None = Field(default=None, min_length=1, max_length=200)
 
 
-class AgentVoteResponse(BaseModel):
-    voter_agent_id: str
-    voter_agent_name: str
-    voted_for: str
-    inference_mode: str
+class SubmitClueRequest(BaseModel):
+    clue: str = Field(min_length=1, max_length=200)
 
 
-class VoteCountResponse(BaseModel):
-    player_id: str
-    player_name: str
-    votes: int
+class ClueModelResponse(BaseModel):
+    clue: str = Field(min_length=1)
 
 
-class VoteResponse(BaseModel):
-    voted_agent_id: str
-    voted_agent_name: str
-    secret_word: str
-    imposter_was: str
-    agent_votes: list[AgentVoteResponse]
-    vote_counts: list[VoteCountResponse]
-    group_voted_player_id: str | None
-    group_voted_player_name: str | None
-    imposter_won: bool
-    round_winner: str
+class BatchedClueModelResponse(BaseModel):
+    clues: dict[str, str] = Field(min_length=1)
 
 
 ROUNDS: dict[str, RoundState] = {}
@@ -117,131 +126,346 @@ ROUNDS: dict[str, RoundState] = {}
 
 def to_round_response(round_state: RoundState) -> RoundResponse:
     human_is_imposter = round_state.imposter_player_id == HUMAN_PLAYER_ID
+    player_names_by_id = get_player_names_by_id_from_round(round_state)
+    current_player_id = get_current_player_id(round_state)
     return RoundResponse(
         id=round_state.id,
         visible_word=None if human_is_imposter else round_state.secret_word,
         imposter_hint=round_state.imposter_hint if human_is_imposter else None,
         user_role="imposter" if human_is_imposter else "player",
         status=round_state.status,
+        playing_order=[
+            PlayerResponse(
+                id=player_id,
+                name=player_names_by_id.get(player_id, player_id),
+                kind="human" if player_id == HUMAN_PLAYER_ID else "agent",
+            )
+            for player_id in round_state.playing_order
+        ],
+        current_player_id=current_player_id,
+        current_player_name=(
+            player_names_by_id.get(current_player_id) if current_player_id is not None else None
+        ),
         turns=round_state.turns,
         created_at=round_state.created_at,
     )
 
 
-async def generate_opening_turn(
+async def advance_clue_generation(
     round_state: RoundState,
     agents: list[AgentConfig],
-) -> TurnResponse:
-    client = InferenceClient(settings=settings)
-    responses: list[AgentTurnResponse] = []
+    stop_after_first_agent: bool = False,
+) -> None:
+    agents_by_id = {agent.id: agent for agent in agents}
+    opening_turn = get_or_create_opening_turn(round_state)
 
     try:
-        for agent in agents:
-            agent_knows_word = agent.id != round_state.imposter_player_id
-            system_prompt = build_clue_system_prompt(
-                round_state.secret_word if agent_knows_word else None,
-                None if agent_knows_word else round_state.imposter_hint,
-            )
-            round_agent = replace(agent, system_prompt=system_prompt)
-            result = await client.generate(
-                InferenceRequest(prompt=build_opening_prompt(responses), agent=round_agent)
-            )
-            responses.append(
-                AgentTurnResponse(
-                    agent_id=agent.id,
-                    agent_name=agent.name,
-                    agent_response=result.text,
-                    inference_mode=result.inference_mode,
+        while round_state.current_player_index < len(round_state.playing_order):
+            player_id = round_state.playing_order[round_state.current_player_index]
+            if player_id == HUMAN_PLAYER_ID:
+                if not append_human_clue_if_available(round_state, opening_turn):
+                    round_state.status = "awaiting_human_clue"
+                    return
+
+                round_state.current_player_index += 1
+                continue
+
+            segment = collect_agent_generation_segment(round_state, agents_by_id)
+            if not segment:
+                round_state.current_player_index += 1
+                continue
+
+            if stop_after_first_agent and not opening_turn.responses:
+                response = await generate_agent_clue(
+                    round_state,
+                    segment[0],
+                    opening_turn.responses,
                 )
+                opening_turn.responses.append(response)
+                round_state.current_player_index += 1
+                round_state.status = "generating_clues"
+                return
+
+            responses = await generate_agent_segment(
+                round_state,
+                segment,
+                opening_turn.responses,
             )
+            opening_turn.responses.extend(responses)
+            round_state.current_player_index += len(segment)
     except InferenceServiceError as exc:
         raise HTTPException(status_code=503, detail=str(exc)) from exc
 
-    return TurnResponse(
+    round_state.status = "ready_to_vote"
+
+
+async def continue_clue_generation(round_id: str, agents: list[AgentConfig]) -> None:
+    round_state = ROUNDS.get(round_id)
+    if round_state is None:
+        return
+
+    try:
+        await advance_clue_generation(round_state, agents)
+    except HTTPException:
+        round_state.status = "generation_failed"
+
+
+def append_human_clue_if_available(
+    round_state: RoundState,
+    opening_turn: TurnResponse,
+) -> bool:
+    if round_state.human_clue is None:
+        return False
+
+    if not has_response(opening_turn, HUMAN_PLAYER_ID):
+        opening_turn.responses.append(
+            AgentTurnResponse(
+                agent_id=HUMAN_PLAYER_ID,
+                agent_name=HUMAN_PLAYER_NAME,
+                agent_response=round_state.human_clue,
+                inference_mode="human",
+            )
+        )
+
+    return True
+
+
+def collect_agent_generation_segment(
+    round_state: RoundState,
+    agents_by_id: dict[str, AgentConfig],
+) -> list[AgentConfig]:
+    segment: list[AgentConfig] = []
+    index = round_state.current_player_index
+
+    while index < len(round_state.playing_order):
+        player_id = round_state.playing_order[index]
+        if player_id == HUMAN_PLAYER_ID:
+            break
+
+        agent = agents_by_id.get(player_id)
+        if agent is not None:
+            segment.append(agent)
+
+        index += 1
+
+    return segment
+
+
+async def generate_agent_segment(
+    round_state: RoundState,
+    agents: list[AgentConfig],
+    previous_responses: list[AgentTurnResponse],
+) -> list[AgentTurnResponse]:
+    if not agents:
+        return []
+
+    generated_by_agent_id: dict[str, AgentTurnResponse] = {}
+    working_previous_responses = previous_responses.copy()
+    first_player_is_human = round_state.playing_order[0] == HUMAN_PLAYER_ID
+
+    if not first_player_is_human and not previous_responses:
+        first_agent = agents[0]
+        first_response = await generate_agent_clue(
+            round_state,
+            first_agent,
+            working_previous_responses,
+        )
+        generated_by_agent_id[first_agent.id] = first_response
+        working_previous_responses.append(first_response)
+
+    remaining_non_imposters = [
+        agent
+        for agent in agents
+        if agent.id != round_state.imposter_player_id and agent.id not in generated_by_agent_id
+    ]
+    if remaining_non_imposters:
+        non_imposter_responses = await generate_non_imposter_agent_batch(
+            round_state,
+            remaining_non_imposters,
+            working_previous_responses,
+        )
+        for response in non_imposter_responses:
+            generated_by_agent_id[response.agent_id] = response
+        working_previous_responses.extend(non_imposter_responses)
+
+    imposter_agent = next(
+        (
+            agent
+            for agent in agents
+            if agent.id == round_state.imposter_player_id and agent.id not in generated_by_agent_id
+        ),
+        None,
+    )
+    if imposter_agent is not None:
+        imposter_response = await generate_agent_clue(
+            round_state,
+            imposter_agent,
+            working_previous_responses,
+        )
+        generated_by_agent_id[imposter_agent.id] = imposter_response
+
+    return [
+        generated_by_agent_id[agent.id]
+        for agent in agents
+        if agent.id in generated_by_agent_id
+    ]
+
+
+async def generate_agent_clue(
+    round_state: RoundState,
+    agent: AgentConfig,
+    previous_responses: list[AgentTurnResponse],
+) -> AgentTurnResponse:
+    client = InferenceClient(settings=settings)
+    agent_is_imposter = agent.id == round_state.imposter_player_id
+    secret_word = None if agent_is_imposter else round_state.secret_word
+    system_prompt = build_instruction_clue_system_prompt(
+        secret_word,
+        round_state.imposter_hint if agent_is_imposter else None,
+    )
+    max_tokens = 24
+    prompt = build_opening_prompt(
+        secret_word,
+        round_state.imposter_hint if agent_is_imposter else None,
+        previous_responses,
+        None if agent_is_imposter else assign_non_imposter_clue_strategy(),
+    )
+    round_agent = replace(agent, system_prompt=system_prompt, max_tokens=max_tokens)
+    structured_result, result = await client.generate_structured(
+        InferenceRequest(prompt=prompt, agent=round_agent),
+        ClueModelResponse,
+    )
+    clue_text = clean_clue_response(
+        structured_result.clue,
+        secret_word,
+        round_state.imposter_hint,
+    )
+    return AgentTurnResponse(
+        agent_id=agent.id,
+        agent_name=agent.name,
+        agent_response=clue_text,
+        inference_mode=result.inference_mode,
+    )
+
+
+async def generate_non_imposter_agent_batch(
+    round_state: RoundState,
+    agents: list[AgentConfig],
+    previous_responses: list[AgentTurnResponse],
+) -> list[AgentTurnResponse]:
+    player_names = [agent.name for agent in agents]
+    client = InferenceClient(settings=settings)
+    prompt = build_batched_opening_prompt(
+        round_state.secret_word,
+        player_names,
+        previous_responses,
+        assign_non_imposter_clue_strategies(player_names),
+    )
+    batch_agent = replace(
+        agents[0],
+        id="non_imposter_batch",
+        name="Non-imposter batch",
+        system_prompt=build_instruction_batched_clue_system_prompt(),
+        max_tokens=max(48, len(agents) * 24),
+    )
+    structured_result, result = await client.generate_structured(
+        InferenceRequest(prompt=prompt, agent=batch_agent),
+        BatchedClueModelResponse,
+        validate=lambda response: validate_batched_clues_response(response, player_names),
+    )
+    clues_by_player_name = clean_batched_clue_response(
+        structured_result.clues,
+        player_names,
+        round_state.secret_word,
+        round_state.imposter_hint,
+    )
+
+    return [
+        AgentTurnResponse(
+            agent_id=agent.id,
+            agent_name=agent.name,
+            agent_response=clues_by_player_name[agent.name],
+            inference_mode=result.inference_mode,
+        )
+        for agent in agents
+    ]
+
+
+def build_opening_prompt(
+    secret_word: str | None,
+    imposter_hint: str | None,
+    previous_responses: list[AgentTurnResponse],
+    strategy: dict[str, str] | None = None,
+) -> str:
+    previous_clues = [
+        (response.agent_name, response.agent_response) for response in previous_responses
+    ]
+    return build_instruction_clue_user_prompt(
+        secret_word,
+        imposter_hint,
+        previous_clues,
+        strategy,
+    )
+
+
+def build_batched_opening_prompt(
+    secret_word: str,
+    player_names: list[str],
+    previous_responses: list[AgentTurnResponse],
+    strategies_by_player_name: dict[str, dict[str, str]],
+) -> str:
+    previous_clues = [
+        (response.agent_name, response.agent_response) for response in previous_responses
+    ]
+    return build_instruction_batched_clue_user_prompt(
+        secret_word,
+        player_names,
+        strategies_by_player_name,
+        previous_clues,
+    )
+
+
+def assign_non_imposter_clue_strategy() -> dict[str, str]:
+    return random.choice(NON_IMPOSTER_CLUE_STRATEGIES)
+
+
+def assign_non_imposter_clue_strategies(
+    player_names: list[str],
+) -> dict[str, dict[str, str]]:
+    return {
+        player_name: assign_non_imposter_clue_strategy()
+        for player_name in player_names
+    }
+
+
+def validate_batched_clues_response(
+    response: BatchedClueModelResponse,
+    player_names: list[str],
+) -> None:
+    missing_players = [
+        player_name for player_name in player_names if player_name not in response.clues
+    ]
+    if missing_players:
+        raise ValueError(f"Missing clues for players: {', '.join(missing_players)}")
+
+
+def get_or_create_opening_turn(round_state: RoundState) -> TurnResponse:
+    if round_state.turns:
+        return round_state.turns[0]
+
+    opening_turn = TurnResponse(
         id=str(uuid4()),
         sequence=1,
         user_prompt=OPENING_PROMPT,
-        responses=responses,
+        responses=[],
         created_at=datetime.now(UTC),
     )
+    round_state.turns.append(opening_turn)
+    return opening_turn
 
 
-def build_opening_prompt(previous_responses: list[AgentTurnResponse]) -> str:
-    if not previous_responses:
-        return OPENING_PROMPT
-
-    clue_lines = [
-        f"{response.agent_name}: {response.agent_response}" for response in previous_responses
-    ]
-    return (
-        "Previous clues from this round:\n"
-        + "\n".join(clue_lines)
-        + f"\n\n{OPENING_PROMPT}"
-    )
-
-
-def build_vote_prompt(
-    voter_agent_id: str,
-    human_clue: str,
-    opening_turn: TurnResponse,
-) -> str:
-    clue_lines = [f"{HUMAN_PLAYER_NAME}: {human_clue}"]
-    for response in opening_turn.responses:
-        if response.agent_id != voter_agent_id:
-            clue_lines.append(f"{response.agent_name}: {response.agent_response}")
-
-    return "Clues from the other players:\n" + "\n".join(clue_lines)
-
-
-async def generate_agent_votes(
-    round_state: RoundState,
-    agents: list[AgentConfig],
-    human_clue: str,
-) -> list[AgentVoteResponse]:
-    if not round_state.turns:
-        return []
-
-    client = InferenceClient(settings=settings)
-    opening_turn = round_state.turns[0]
-    agent_names_by_id = {agent.id: agent.name for agent in agents}
-    votes: list[AgentVoteResponse] = []
-
-    try:
-        for agent_index, agent in enumerate(agents):
-            other_agent_names = [
-                candidate_name
-                for candidate_id, candidate_name in agent_names_by_id.items()
-                if candidate_id != agent.id
-            ]
-            rotation_index = agent_index % len(other_agent_names) if other_agent_names else 0
-            rotated_agent_names = (
-                other_agent_names[rotation_index:] + other_agent_names[:rotation_index]
-            )
-            candidate_names = [*rotated_agent_names, HUMAN_PLAYER_NAME]
-            vote_agent = replace(
-                agent,
-                system_prompt=build_vote_system_prompt(agent.name, candidate_names),
-                max_tokens=12,
-                temperature=0.2,
-            )
-            result = await client.generate(
-                InferenceRequest(
-                    prompt=build_vote_prompt(agent.id, human_clue, opening_turn),
-                    agent=vote_agent,
-                )
-            )
-            votes.append(
-                AgentVoteResponse(
-                    voter_agent_id=agent.id,
-                    voter_agent_name=agent.name,
-                    voted_for=result.text.strip(),
-                    inference_mode=result.inference_mode,
-                )
-            )
-    except InferenceServiceError as exc:
-        raise HTTPException(status_code=503, detail=str(exc)) from exc
-
-    return votes
+def has_response(turn: TurnResponse, player_id: str) -> bool:
+    return any(response.agent_id == player_id for response in turn.responses)
 
 
 def get_player_names_by_id(agents: list[AgentConfig]) -> dict[str, str]:
@@ -251,70 +475,47 @@ def get_player_names_by_id(agents: list[AgentConfig]) -> dict[str, str]:
     }
 
 
-def resolve_vote_target(vote_text: str, agents: list[AgentConfig]) -> str | None:
-    normalized_vote = vote_text.strip().lower().strip(" .!?,:;\"'")
-    if not normalized_vote:
+def get_player_names_by_id_from_round(round_state: RoundState) -> dict[str, str]:
+    names_by_id = dict(round_state.player_names_by_id)
+    names_by_id.setdefault(HUMAN_PLAYER_ID, HUMAN_PLAYER_NAME)
+    if round_state.turns:
+        names_by_id.update(
+            {
+                response.agent_id: response.agent_name
+                for response in round_state.turns[0].responses
+            }
+        )
+    return names_by_id
+
+
+def get_current_player_id(round_state: RoundState) -> str | None:
+    if round_state.current_player_index >= len(round_state.playing_order):
         return None
 
-    if normalized_vote in {"you", "human", "player"}:
-        return HUMAN_PLAYER_ID
-
-    for agent in agents:
-        if normalized_vote == agent.id.lower() or normalized_vote == agent.name.lower():
-            return agent.id
-
-    return None
-
-
-def tally_round_votes(
-    human_voted_agent_id: str,
-    agent_votes: list[AgentVoteResponse],
-    agents: list[AgentConfig],
-) -> tuple[list[VoteCountResponse], str | None]:
-    player_names_by_id = get_player_names_by_id(agents)
-    vote_counter: Counter[str] = Counter([human_voted_agent_id])
-
-    for agent_vote in agent_votes:
-        target_id = resolve_vote_target(agent_vote.voted_for, agents)
-        if target_id is not None:
-            vote_counter[target_id] += 1
-
-    if not vote_counter:
-        return [], None
-
-    highest_vote_total = max(vote_counter.values())
-    leading_player_ids = [
-        player_id for player_id, vote_total in vote_counter.items() if vote_total == highest_vote_total
-    ]
-    group_voted_player_id = leading_player_ids[0] if len(leading_player_ids) == 1 else None
-
-    vote_counts = [
-        VoteCountResponse(
-            player_id=player_id,
-            player_name=player_names_by_id.get(player_id, player_id),
-            votes=vote_total,
-        )
-        for player_id, vote_total in sorted(
-            vote_counter.items(),
-            key=lambda item: (-item[1], player_names_by_id.get(item[0], item[0])),
-        )
-    ]
-
-    return vote_counts, group_voted_player_id
+    return round_state.playing_order[round_state.current_player_index]
 
 
 def select_round_word(payload: CreateRoundRequest | None) -> tuple[str, str]:
     if settings.word_selection_mode == "fixed":
-        return (
-            payload.secret_word if payload and payload.secret_word else settings.fixed_secret_word,
-            payload.imposter_hint if payload and payload.imposter_hint else settings.fixed_imposter_hint,
-        )
+        secret_word = payload.secret_word if payload and payload.secret_word else settings.fixed_secret_word
+        imposter_hint = payload.imposter_hint if payload and payload.imposter_hint else settings.fixed_imposter_hint
+        return secret_word, normalize_imposter_hint(imposter_hint)
 
-    return random_choice(WORD_BANK)
+    secret_word, imposter_hint = random_choice(WORD_BANK)
+    return secret_word, normalize_imposter_hint(imposter_hint)
+
+
+def normalize_imposter_hint(hint: str) -> str:
+    match = re.search(r"[A-Za-z0-9][A-Za-z0-9'-]*", hint)
+    if match is None:
+        return "thing"
+
+    return match.group(0)
 
 
 @router.post("", response_model=RoundResponse, status_code=201)
 async def create_round(
+    background_tasks: BackgroundTasks,
     payload: CreateRoundRequest | None = None,
     db: Session = Depends(get_db),
 ) -> RoundResponse:
@@ -323,6 +524,9 @@ async def create_round(
         raise HTTPException(status_code=500, detail="No agents configured")
 
     player_ids = [HUMAN_PLAYER_ID, *[agent.id for agent in agents]]
+    playing_order = player_ids.copy()
+    random.shuffle(playing_order)
+    player_names_by_id = get_player_names_by_id(agents)
     secret_word, imposter_hint = select_round_word(payload)
     round_state = RoundState(
         id=str(uuid4()),
@@ -330,12 +534,20 @@ async def create_round(
         imposter_hint=imposter_hint,
         imposter_player_id=choice(player_ids),
         status="active",
+        playing_order=playing_order,
+        player_names_by_id=player_names_by_id,
+        current_player_index=0,
         turns=[],
         created_at=datetime.now(UTC),
     )
-    opening_turn = await generate_opening_turn(round_state, agents)
-    round_state.turns.append(opening_turn)
     ROUNDS[round_state.id] = round_state
+    await advance_clue_generation(
+        round_state,
+        agents,
+        stop_after_first_agent=True,
+    )
+    if round_state.status == "generating_clues":
+        background_tasks.add_task(continue_clue_generation, round_state.id, agents)
     return to_round_response(round_state)
 
 
@@ -344,6 +556,34 @@ def get_round(round_id: str) -> RoundResponse:
     round_state = ROUNDS.get(round_id)
     if round_state is None:
         raise HTTPException(status_code=404, detail="Unknown round")
+
+    return to_round_response(round_state)
+
+
+@router.post("/{round_id}/clue", response_model=RoundResponse)
+async def submit_clue(
+    round_id: str,
+    payload: SubmitClueRequest,
+    db: Session = Depends(get_db),
+) -> RoundResponse:
+    round_state = ROUNDS.get(round_id)
+    if round_state is None:
+        raise HTTPException(status_code=404, detail="Unknown round")
+
+    if round_state.status != "awaiting_human_clue":
+        raise HTTPException(status_code=409, detail="Round is not waiting for a human clue")
+
+    current_player_id = get_current_player_id(round_state)
+    if current_player_id != HUMAN_PLAYER_ID:
+        raise HTTPException(status_code=409, detail="It is not the human player's turn")
+
+    human_clue = payload.clue.strip()
+    if not human_clue:
+        raise HTTPException(status_code=422, detail="Human clue cannot be blank")
+
+    round_state.human_clue = human_clue
+    agents = list_runtime_agent_configs(db)
+    await advance_clue_generation(round_state, agents)
 
     return to_round_response(round_state)
 
@@ -361,31 +601,19 @@ async def vote(
     voted_agent = get_runtime_agent_config(db, payload.agent_id)
     if voted_agent is None:
         raise HTTPException(status_code=404, detail="Unknown agent")
+    if round_state.status != "ready_to_vote":
+        raise HTTPException(status_code=409, detail="Round is not ready for voting")
 
     agents = list_runtime_agent_configs(db)
-    agent_votes = await generate_agent_votes(round_state, agents, payload.human_clue)
-    vote_counts, group_voted_player_id = tally_round_votes(voted_agent.id, agent_votes, agents)
-
-    round_state.voted_agent_id = voted_agent.id
-    round_state.status = "complete"
-
-    imposter_agent = get_runtime_agent_config(db, round_state.imposter_player_id)
-    imposter_was = imposter_agent.name if imposter_agent is not None else "You"
-    player_names_by_id = get_player_names_by_id(agents)
-    group_voted_player_name = (
-        player_names_by_id.get(group_voted_player_id) if group_voted_player_id is not None else None
-    )
-    imposter_won = group_voted_player_id != round_state.imposter_player_id
-
-    return VoteResponse(
-        voted_agent_id=voted_agent.id,
-        voted_agent_name=voted_agent.name,
-        secret_word=round_state.secret_word,
-        imposter_was=imposter_was,
-        agent_votes=agent_votes,
-        vote_counts=vote_counts,
-        group_voted_player_id=group_voted_player_id,
-        group_voted_player_name=group_voted_player_name,
-        imposter_won=imposter_won,
-        round_winner="imposter" if imposter_won else "players",
-    )
+    try:
+        return await submit_round_vote(
+            round_state,
+            agents,
+            voted_agent,
+            payload.human_clue,
+            settings,
+        )
+    except VotingStateError as exc:
+        raise HTTPException(status_code=409, detail=str(exc)) from exc
+    except InferenceServiceError as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc

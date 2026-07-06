@@ -1,0 +1,297 @@
+from collections import Counter
+from math import sqrt
+from typing import Any
+
+from pydantic import BaseModel
+
+from app.services.inference import AgentConfig, InferenceClient, InferenceServiceError
+
+HUMAN_PLAYER_ID = "human"
+HUMAN_PLAYER_NAME = "You"
+
+ROUND_EMBEDDINGS: dict[str, dict[str, list[float]]] = {}
+EMBEDDING_CACHE: dict[tuple[str, str], list[float]] = {}
+
+
+class AgentVoteResponse(BaseModel):
+    voter_agent_id: str
+    voter_agent_name: str
+    voted_for: str
+    inference_mode: str
+
+
+class VoteCountResponse(BaseModel):
+    player_id: str
+    player_name: str
+    votes: int
+
+
+class VoteResponse(BaseModel):
+    voted_agent_id: str
+    voted_agent_name: str
+    secret_word: str
+    imposter_was: str
+    agent_votes: list[AgentVoteResponse]
+    vote_counts: list[VoteCountResponse]
+    group_voted_player_id: str | None
+    group_voted_player_name: str | None
+    imposter_won: bool
+    round_winner: str
+
+
+class VotingStateError(Exception):
+    """Raised when the current round state cannot produce votes."""
+
+
+async def submit_round_vote(
+    round_state: Any,
+    agents: list[AgentConfig],
+    voted_agent: AgentConfig,
+    human_clue: str | None,
+    settings: Any,
+) -> VoteResponse:
+    agent_votes = await _build_embedding_agent_votes(
+        round_state,
+        agents,
+        settings,
+        human_clue,
+    )
+    vote_counts, group_voted_player_id = _tally_round_votes(
+        voted_agent.id,
+        agent_votes,
+        agents,
+    )
+
+    round_state.voted_agent_id = voted_agent.id
+    round_state.status = "complete"
+
+    imposter_agent = next(
+        (agent for agent in agents if agent.id == round_state.imposter_player_id),
+        None,
+    )
+    imposter_was = imposter_agent.name if imposter_agent is not None else HUMAN_PLAYER_NAME
+    player_names_by_id = _get_player_names_by_id(agents)
+    group_voted_player_name = (
+        player_names_by_id.get(group_voted_player_id)
+        if group_voted_player_id is not None
+        else None
+    )
+    imposter_won = group_voted_player_id != round_state.imposter_player_id
+
+    return VoteResponse(
+        voted_agent_id=voted_agent.id,
+        voted_agent_name=voted_agent.name,
+        secret_word=round_state.secret_word,
+        imposter_was=imposter_was,
+        agent_votes=agent_votes,
+        vote_counts=vote_counts,
+        group_voted_player_id=group_voted_player_id,
+        group_voted_player_name=group_voted_player_name,
+        imposter_won=imposter_won,
+        round_winner="imposter" if imposter_won else "players",
+    )
+
+
+async def _build_embedding_agent_votes(
+    round_state: Any,
+    agents: list[AgentConfig],
+    settings: Any,
+    human_clue: str | None = None,
+) -> list[AgentVoteResponse]:
+    if not round_state.turns:
+        return []
+
+    opening_turn = round_state.turns[0]
+    agent_names_by_id = {agent.id: agent.name for agent in agents}
+    phrase_by_player_id = {
+        response.agent_id: response.agent_response for response in opening_turn.responses
+    }
+    resolved_human_clue = human_clue or round_state.human_clue
+    if resolved_human_clue is None:
+        raise VotingStateError("Human clue has not been submitted")
+
+    phrase_by_player_id[HUMAN_PLAYER_ID] = resolved_human_clue
+
+    embeddings_by_player_id = await _get_or_create_round_embeddings(
+        round_state.id,
+        phrase_by_player_id,
+        settings,
+    )
+
+    votes: list[AgentVoteResponse] = []
+    for agent in agents:
+        target_id = _choose_embedding_vote_target(agent.id, embeddings_by_player_id)
+        voted_for = (
+            HUMAN_PLAYER_NAME
+            if target_id == HUMAN_PLAYER_ID
+            else agent_names_by_id.get(target_id, target_id)
+        )
+        votes.append(
+            AgentVoteResponse(
+                voter_agent_id=agent.id,
+                voter_agent_name=agent.name,
+                voted_for=voted_for,
+                inference_mode="embedding",
+            )
+        )
+
+    return votes
+
+
+async def _get_or_create_round_embeddings(
+    round_id: str,
+    phrase_by_player_id: dict[str, str],
+    settings: Any,
+) -> dict[str, list[float]]:
+    round_embeddings = ROUND_EMBEDDINGS.setdefault(round_id, {})
+    missing_player_ids = [
+        player_id
+        for player_id in phrase_by_player_id
+        if player_id not in round_embeddings
+    ]
+    missing_cache_keys = [
+        (settings.embedding_model_name, _normalize_embedding_text(phrase_by_player_id[player_id]))
+        for player_id in missing_player_ids
+    ]
+
+    uncached_player_ids: list[str] = []
+    uncached_phrases: list[str] = []
+    for player_id, cache_key in zip(missing_player_ids, missing_cache_keys, strict=True):
+        cached_embedding = EMBEDDING_CACHE.get(cache_key)
+        if cached_embedding is not None:
+            round_embeddings[player_id] = cached_embedding
+            continue
+
+        uncached_player_ids.append(player_id)
+        uncached_phrases.append(phrase_by_player_id[player_id])
+
+    if uncached_phrases:
+        client = InferenceClient(settings=settings)
+        result = await client.embed(uncached_phrases)
+        if len(result.embeddings) != len(uncached_player_ids):
+            raise InferenceServiceError("Embedding model returned the wrong number of vectors")
+
+        for player_id, phrase, embedding in zip(
+            uncached_player_ids,
+            uncached_phrases,
+            result.embeddings,
+            strict=True,
+        ):
+            cache_key = (settings.embedding_model_name, _normalize_embedding_text(phrase))
+            EMBEDDING_CACHE[cache_key] = embedding
+            round_embeddings[player_id] = embedding
+
+    return {
+        player_id: embedding
+        for player_id, embedding in round_embeddings.items()
+        if player_id in phrase_by_player_id
+    }
+
+
+def _choose_embedding_vote_target(
+    voter_player_id: str,
+    embeddings_by_player_id: dict[str, list[float]],
+) -> str:
+    candidate_ids = [
+        player_id for player_id in embeddings_by_player_id if player_id != voter_player_id
+    ]
+    if not candidate_ids:
+        return HUMAN_PLAYER_ID
+
+    best_candidate_id = candidate_ids[0]
+    best_score = float("-inf")
+    for candidate_id in candidate_ids:
+        reference_ids = [
+            player_id for player_id in candidate_ids if player_id != candidate_id
+        ]
+        if not reference_ids:
+            score = 0.0
+        else:
+            score = sum(
+                _cosine_distance(
+                    embeddings_by_player_id[candidate_id],
+                    embeddings_by_player_id[reference_id],
+                )
+                for reference_id in reference_ids
+            ) / len(reference_ids)
+
+        if score > best_score:
+            best_score = score
+            best_candidate_id = candidate_id
+
+    return best_candidate_id
+
+
+def _cosine_distance(left: list[float], right: list[float]) -> float:
+    dot_product = sum(left_value * right_value for left_value, right_value in zip(left, right))
+    left_norm = sqrt(sum(value * value for value in left))
+    right_norm = sqrt(sum(value * value for value in right))
+    if left_norm == 0.0 or right_norm == 0.0:
+        return 1.0
+
+    return 1.0 - (dot_product / (left_norm * right_norm))
+
+
+def _normalize_embedding_text(text: str) -> str:
+    return " ".join(text.strip().lower().split())
+
+
+def _resolve_vote_target(vote_text: str, agents: list[AgentConfig]) -> str | None:
+    normalized_vote = vote_text.strip().lower().strip(" .!?,:;\"'")
+    if not normalized_vote:
+        return None
+
+    if normalized_vote in {"you", "human", "player"}:
+        return HUMAN_PLAYER_ID
+
+    for agent in agents:
+        if normalized_vote == agent.id.lower() or normalized_vote == agent.name.lower():
+            return agent.id
+
+    return None
+
+
+def _tally_round_votes(
+    human_voted_agent_id: str,
+    agent_votes: list[AgentVoteResponse],
+    agents: list[AgentConfig],
+) -> tuple[list[VoteCountResponse], str | None]:
+    player_names_by_id = _get_player_names_by_id(agents)
+    vote_counter: Counter[str] = Counter([human_voted_agent_id])
+
+    for agent_vote in agent_votes:
+        target_id = _resolve_vote_target(agent_vote.voted_for, agents)
+        if target_id is not None:
+            vote_counter[target_id] += 1
+
+    if not vote_counter:
+        return [], None
+
+    highest_vote_total = max(vote_counter.values())
+    leading_player_ids = [
+        player_id
+        for player_id, vote_total in vote_counter.items()
+        if vote_total == highest_vote_total
+    ]
+    group_voted_player_id = leading_player_ids[0] if len(leading_player_ids) == 1 else None
+
+    vote_counts = [
+        VoteCountResponse(
+            player_id=player_id,
+            player_name=player_names_by_id.get(player_id, player_id),
+            votes=vote_total,
+        )
+        for player_id, vote_total in sorted(
+            vote_counter.items(),
+            key=lambda item: (-item[1], player_names_by_id.get(item[0], item[0])),
+        )
+    ]
+
+    return vote_counts, group_voted_player_id
+
+
+def _get_player_names_by_id(agents: list[AgentConfig]) -> dict[str, str]:
+    return {
+        HUMAN_PLAYER_ID: HUMAN_PLAYER_NAME,
+        **{agent.id: agent.name for agent in agents},
+    }

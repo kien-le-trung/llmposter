@@ -23,17 +23,17 @@ export type Agent = {
   version: string;
 };
 
-export type GenerateResponse = {
-  agent_id: string;
-  text: string;
-  inference_mode: string;
-};
-
 export type AgentTurnResponse = {
   agent_id: string;
   agent_name: string;
   agent_response: string;
   inference_mode: string;
+};
+
+export type RoundPlayer = {
+  id: string;
+  name: string;
+  kind: "human" | "agent";
 };
 
 export type Turn = {
@@ -50,6 +50,9 @@ export type Round = {
   imposter_hint: string | null;
   user_role: "player" | "imposter";
   status: string;
+  playing_order: RoundPlayer[];
+  current_player_id: string | null;
+  current_player_name: string | null;
   turns: Turn[];
   created_at: string;
 };
@@ -105,13 +108,6 @@ export function getAgents() {
   return request<Agent[]>("/agents");
 }
 
-export function generateAgentResponse(prompt: string, agentId = "host") {
-  return request<GenerateResponse>("/agents/generate", {
-    method: "POST",
-    body: JSON.stringify({ prompt, agent_id: agentId }),
-  });
-}
-
 export function createRound() {
   return request<Round>("/rounds", {
     method: "POST",
@@ -123,9 +119,16 @@ export function getRound(roundId: string) {
   return request<Round>(`/rounds/${roundId}`);
 }
 
-export function voteRound(roundId: string, agentId: string, humanClue: string) {
+export function submitRoundClue(roundId: string, clue: string) {
+  return request<Round>(`/rounds/${roundId}/clue`, {
+    method: "POST",
+    body: JSON.stringify({ clue }),
+  });
+}
+
+export function voteRound(roundId: string, agentId: string) {
   return request<VoteResult>(`/rounds/${roundId}/vote`, {
     method: "POST",
-    body: JSON.stringify({ agent_id: agentId, human_clue: humanClue }),
+    body: JSON.stringify({ agent_id: agentId }),
   });
 }

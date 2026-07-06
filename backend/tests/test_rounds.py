@@ -1,23 +1,33 @@
-import asyncio
-
 from fastapi.testclient import TestClient
 
 from app.api.routes import rounds
 from app.main import create_app
 from app.services.agents import list_agent_configs
 from app.services.inference import InferenceResult, InferenceServiceError
+from app.services import voting
 
 
 def setup_function() -> None:
     rounds.ROUNDS.clear()
+    voting.ROUND_EMBEDDINGS.clear()
+    voting.EMBEDDING_CACHE.clear()
     rounds.settings.inference_mode = "fake"
     rounds.settings.word_selection_mode = "fixed"
     rounds.settings.fixed_secret_word = "satellite"
-    rounds.settings.fixed_imposter_hint = "Space, signals, or orbit"
+    rounds.settings.fixed_imposter_hint = "orbit"
+
+
+def set_playing_order(monkeypatch, player_ids: list[str]) -> None:
+    def use_order(order: list[str]) -> None:
+        order[:] = player_ids
+
+    monkeypatch.setattr(rounds.random, "shuffle", use_order)
 
 
 def test_create_round_generates_agent_opening_clues(monkeypatch) -> None:
+    agent_ids = [agent.id for agent in list_agent_configs()]
     monkeypatch.setattr(rounds.settings, "inference_mode", "fake")
+    set_playing_order(monkeypatch, [*agent_ids, rounds.HUMAN_PLAYER_ID])
     client = TestClient(create_app())
 
     response = client.post("/rounds", json={"secret_word": "satellite"})
@@ -25,19 +35,26 @@ def test_create_round_generates_agent_opening_clues(monkeypatch) -> None:
     assert response.status_code == 201
     body = response.json()
     assert body["id"]
-    assert body["status"] == "active"
+    assert body["status"] == "generating_clues"
     assert body["user_role"] in {"player", "imposter"}
     assert "secret_word" not in body
+    assert [player["id"] for player in body["playing_order"]] == [
+        *agent_ids,
+        rounds.HUMAN_PLAYER_ID,
+    ]
+    assert body["current_player_id"] == agent_ids[1]
     assert len(body["turns"]) == 1
-    assert len(body["turns"][0]["responses"]) == len(list_agent_configs())
+    assert len(body["turns"][0]["responses"]) == 1
     assert rounds.ROUNDS[body["id"]].secret_word == "satellite"
     assert rounds.ROUNDS[body["id"]].imposter_player_id
 
 
 def test_create_round_selects_random_word_when_enabled(monkeypatch) -> None:
+    agent_ids = [agent.id for agent in list_agent_configs()]
     monkeypatch.setattr(rounds.settings, "word_selection_mode", "random")
     monkeypatch.setattr(rounds.settings, "inference_mode", "fake")
     monkeypatch.setattr(rounds, "random_choice", lambda word_bank: ("forest", "Trees and shade"))
+    set_playing_order(monkeypatch, [*agent_ids, rounds.HUMAN_PLAYER_ID])
     client = TestClient(create_app())
 
     response = client.post("/rounds", json={})
@@ -45,11 +62,14 @@ def test_create_round_selects_random_word_when_enabled(monkeypatch) -> None:
     assert response.status_code == 201
     body = response.json()
     assert rounds.ROUNDS[body["id"]].secret_word == "forest"
+    assert rounds.ROUNDS[body["id"]].imposter_hint == "Trees"
 
 
 def test_create_round_hides_word_when_human_is_imposter(monkeypatch) -> None:
+    agent_ids = [agent.id for agent in list_agent_configs()]
     monkeypatch.setattr(rounds.settings, "inference_mode", "fake")
     monkeypatch.setattr(rounds, "choice", lambda player_ids: rounds.HUMAN_PLAYER_ID)
+    set_playing_order(monkeypatch, [*agent_ids, rounds.HUMAN_PLAYER_ID])
     client = TestClient(create_app())
 
     response = client.post(
@@ -61,13 +81,15 @@ def test_create_round_hides_word_when_human_is_imposter(monkeypatch) -> None:
     body = response.json()
     assert body["user_role"] == "imposter"
     assert body["visible_word"] is None
-    assert body["imposter_hint"] == "Space and signals"
+    assert body["imposter_hint"] == "Space"
 
 
 def test_create_round_reveals_word_when_human_is_player(monkeypatch) -> None:
     first_agent_id = list_agent_configs()[0].id
+    agent_ids = [agent.id for agent in list_agent_configs()]
     monkeypatch.setattr(rounds.settings, "inference_mode", "fake")
     monkeypatch.setattr(rounds, "choice", lambda player_ids: first_agent_id)
+    set_playing_order(monkeypatch, [*agent_ids, rounds.HUMAN_PLAYER_ID])
     client = TestClient(create_app())
 
     response = client.post("/rounds", json={"secret_word": "satellite"})
@@ -79,27 +101,202 @@ def test_create_round_reveals_word_when_human_is_player(monkeypatch) -> None:
     assert body["imposter_hint"] is None
 
 
-def test_opening_clues_are_generated_with_previous_clues(monkeypatch) -> None:
+def test_opening_clues_stop_when_human_is_first(monkeypatch) -> None:
     prompts: list[str] = []
 
     async def record_prompt(self, request):
         prompts.append(request.prompt)
-        return InferenceResult(
-            text=f"clue {len(prompts)}",
-            inference_mode="fake",
-        )
+        return InferenceResult(text='{"clue":"space signal"}', inference_mode="fake")
 
     monkeypatch.setattr(rounds.InferenceClient, "generate", record_prompt)
+    monkeypatch.setattr(rounds, "choice", lambda player_ids: rounds.HUMAN_PLAYER_ID)
+    set_playing_order(monkeypatch, [rounds.HUMAN_PLAYER_ID, *[agent.id for agent in list_agent_configs()]])
     client = TestClient(create_app())
 
     response = client.post("/rounds", json={"secret_word": "satellite"})
 
     assert response.status_code == 201
-    assert prompts[0] == rounds.OPENING_PROMPT
-    assert "Agent A: clue 1" in prompts[1]
-    assert "Agent A: clue 1" in prompts[2]
-    assert "Agent B: clue 2" in prompts[2]
-    assert "Agent C: clue 3" not in prompts[2]
+    body = response.json()
+    assert body["status"] == "awaiting_human_clue"
+    assert body["current_player_id"] == rounds.HUMAN_PLAYER_ID
+    assert body["turns"][0]["responses"] == []
+    assert prompts == []
+
+
+def test_opening_clues_generate_first_agent_then_batch_remaining_non_imposters(monkeypatch) -> None:
+    prompts: list[str] = []
+    agents = list_agent_configs()
+
+    async def record_prompt(self, request):
+        prompts.append(request.prompt)
+        if '"clues"' in request.prompt:
+            return InferenceResult(
+                text=(
+                    '{"clues":{'
+                    f'"{agents[0].name}":"clue 1",'
+                    f'"{agents[1].name}":"clue 2"'
+                    "}}"
+                ),
+                inference_mode="fake",
+            )
+        return InferenceResult(text=f'{{"clue":"clue {len(prompts)}"}}', inference_mode="fake")
+
+    monkeypatch.setattr(rounds.InferenceClient, "generate", record_prompt)
+    monkeypatch.setattr(rounds, "choice", lambda player_ids: rounds.HUMAN_PLAYER_ID)
+    set_playing_order(monkeypatch, [agents[0].id, agents[1].id, rounds.HUMAN_PLAYER_ID, agents[2].id, agents[3].id])
+    client = TestClient(create_app())
+
+    response = client.post("/rounds", json={"secret_word": "satellite"})
+
+    assert response.status_code == 201
+    body = response.json()
+    assert body["status"] == "generating_clues"
+    assert "Previous clues: none" in prompts[0]
+    assert f"Word: satellite" in prompts[0]
+    assert [response["agent_response"] for response in body["turns"][0]["responses"]] == [
+        "clue 1",
+    ]
+
+    round_state = rounds.ROUNDS[body["id"]]
+    assert round_state.status == "awaiting_human_clue"
+    assert len(prompts) == 2
+    assert f"- {agents[1].name}" in prompts[1]
+    assert f"{agents[0].name}: clue 1" in prompts[1]
+    assert [response.agent_response for response in round_state.turns[0].responses] == [
+        "clue 1",
+        "clue 2",
+    ]
+
+
+def test_submit_human_clue_resumes_and_batches_remaining_non_imposters(monkeypatch) -> None:
+    prompts: list[str] = []
+    agents = list_agent_configs()
+
+    async def record_prompt(self, request):
+        prompts.append(request.prompt)
+        if '"clues"' in request.prompt:
+            return InferenceResult(
+                text=(
+                    '{"clues":{'
+                    f'"{agents[1].name}":"clue 2",'
+                    f'"{agents[2].name}":"clue 3",'
+                    f'"{agents[3].name}":"clue 4"'
+                    "}}"
+                ),
+                inference_mode="fake",
+            )
+        return InferenceResult(text=f'{{"clue":"clue {len(prompts)}"}}', inference_mode="fake")
+
+    monkeypatch.setattr(rounds.InferenceClient, "generate", record_prompt)
+    monkeypatch.setattr(rounds, "choice", lambda player_ids: rounds.HUMAN_PLAYER_ID)
+    set_playing_order(
+        monkeypatch,
+        [agents[0].id, rounds.HUMAN_PLAYER_ID, agents[1].id, agents[2].id, agents[3].id],
+    )
+    client = TestClient(create_app())
+    create_response = client.post("/rounds", json={"secret_word": "satellite"})
+    round_id = create_response.json()["id"]
+
+    response = client.post(f"/rounds/{round_id}/clue", json={"clue": "human clue"})
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["status"] == "ready_to_vote"
+    assert len(prompts) == 2
+    assert "You: human clue" in prompts[1]
+    assert f"- {agents[1].name}" in prompts[1]
+    assert f"- {agents[2].name}" in prompts[1]
+    assert f"- {agents[3].name}" in prompts[1]
+    assert [response["agent_id"] for response in body["turns"][0]["responses"]] == [
+        agents[0].id,
+        rounds.HUMAN_PLAYER_ID,
+        agents[1].id,
+        agents[2].id,
+        agents[3].id,
+    ]
+
+
+def test_opening_clues_keep_imposter_prompt_separate(monkeypatch) -> None:
+    prompts: list[str] = []
+    agents = list_agent_configs()
+    imposter_agent = agents[0]
+
+    async def record_prompt(self, request):
+        prompts.append(request.prompt)
+        return InferenceResult(text='{"clue":"space clue"}', inference_mode="fake")
+
+    monkeypatch.setattr(rounds.InferenceClient, "generate", record_prompt)
+    monkeypatch.setattr(rounds, "choice", lambda player_ids: imposter_agent.id)
+    set_playing_order(monkeypatch, [agents[1].id, imposter_agent.id, rounds.HUMAN_PLAYER_ID, agents[2].id, agents[3].id])
+    client = TestClient(create_app())
+
+    response = client.post("/rounds", json={"secret_word": "satellite"})
+
+    assert response.status_code == 201
+    assert len(prompts) == 2
+    assert "Word: satellite" in prompts[0]
+    assert f"{imposter_agent.name}:" not in prompts[0]
+    assert "Hint: orbit" in prompts[1]
+    assert f"{agents[1].name}: space clue" in prompts[1]
+    assert "Secret word: satellite" not in prompts[1]
+
+
+def test_human_first_batches_non_imposters_then_generates_imposter(monkeypatch) -> None:
+    prompts: list[str] = []
+    agents = list_agent_configs()
+    imposter_agent = agents[1]
+
+    async def record_prompt(self, request):
+        prompts.append(request.prompt)
+        if '"clues"' in request.prompt:
+            return InferenceResult(
+                text=(
+                    '{"clues":{'
+                    f'"{agents[0].name}":"clue 1",'
+                    f'"{agents[2].name}":"clue 3",'
+                    f'"{agents[3].name}":"clue 4"'
+                    "}}"
+                ),
+                inference_mode="fake",
+            )
+        return InferenceResult(text='{"clue":"imposter clue"}', inference_mode="fake")
+
+    monkeypatch.setattr(rounds.InferenceClient, "generate", record_prompt)
+    monkeypatch.setattr(rounds, "choice", lambda player_ids: imposter_agent.id)
+    set_playing_order(
+        monkeypatch,
+        [
+            rounds.HUMAN_PLAYER_ID,
+            agents[0].id,
+            imposter_agent.id,
+            agents[2].id,
+            agents[3].id,
+        ],
+    )
+    client = TestClient(create_app())
+    create_response = client.post("/rounds", json={"secret_word": "satellite"})
+    round_id = create_response.json()["id"]
+
+    response = client.post(f"/rounds/{round_id}/clue", json={"clue": "human clue"})
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["status"] == "ready_to_vote"
+    assert len(prompts) == 2
+    assert f"- {agents[0].name}" in prompts[0]
+    assert f"- {agents[2].name}" in prompts[0]
+    assert f"- {agents[3].name}" in prompts[0]
+    assert "Hint: orbit" in prompts[1]
+    assert f"{agents[0].name}: clue 1" in prompts[1]
+    assert f"{agents[2].name}: clue 3" in prompts[1]
+    assert f"{agents[3].name}: clue 4" in prompts[1]
+    assert [response["agent_id"] for response in body["turns"][0]["responses"]] == [
+        rounds.HUMAN_PLAYER_ID,
+        agents[0].id,
+        imposter_agent.id,
+        agents[2].id,
+        agents[3].id,
+    ]
 
 
 def test_get_round() -> None:
@@ -127,6 +324,7 @@ def test_create_round_returns_503_when_inference_fails(monkeypatch) -> None:
         raise InferenceServiceError("Model server is unavailable")
 
     monkeypatch.setattr(rounds.InferenceClient, "generate", raise_inference_error)
+    set_playing_order(monkeypatch, [list_agent_configs()[0].id, rounds.HUMAN_PLAYER_ID])
     client = TestClient(create_app())
 
     response = client.post("/rounds", json={"secret_word": "satellite"})
@@ -137,15 +335,33 @@ def test_create_round_returns_503_when_inference_fails(monkeypatch) -> None:
 
 def test_group_vote_eliminates_imposter_when_human_vote_matches(monkeypatch) -> None:
     first_agent_id = list_agent_configs()[0].id
+    first_agent_name = list_agent_configs()[0].name
+    agent_ids = [agent.id for agent in list_agent_configs()]
+
+    async def vote_for_first_agent(round_state, agents, settings, human_clue):
+        return [
+            voting.AgentVoteResponse(
+                voter_agent_id=agent.id,
+                voter_agent_name=agent.name,
+                voted_for=first_agent_name,
+                inference_mode="embedding",
+            )
+            for agent in agents
+        ]
+
     monkeypatch.setattr(rounds.settings, "inference_mode", "fake")
     monkeypatch.setattr(rounds, "choice", lambda player_ids: first_agent_id)
+    monkeypatch.setattr(voting, "_build_embedding_agent_votes", vote_for_first_agent)
+    set_playing_order(monkeypatch, [*agent_ids, rounds.HUMAN_PLAYER_ID])
     client = TestClient(create_app())
     create_response = client.post("/rounds", json={"secret_word": "satellite"})
     round_id = create_response.json()["id"]
+    clue_response = client.post(f"/rounds/{round_id}/clue", json={"clue": "circles earth"})
+    assert clue_response.status_code == 200
 
     response = client.post(
         f"/rounds/{round_id}/vote",
-        json={"agent_id": first_agent_id, "human_clue": "circles earth"},
+        json={"agent_id": first_agent_id},
     )
 
     assert response.status_code == 200
@@ -159,66 +375,75 @@ def test_group_vote_eliminates_imposter_when_human_vote_matches(monkeypatch) -> 
     assert rounds.ROUNDS[round_id].status == "complete"
 
 
-def test_agent_vote_candidate_order_rotates(monkeypatch) -> None:
-    system_prompts: list[str] = []
-
-    async def record_system_prompt(self, request):
-        system_prompts.append(request.agent.system_prompt)
-        return InferenceResult(text="You", inference_mode="fake")
-
+def test_embedding_votes_reuse_cached_agent_phrase_embeddings(monkeypatch) -> None:
     agents = list_agent_configs()
-    round_state = rounds.RoundState(
-        id="round_1",
-        secret_word="satellite",
-        imposter_hint="Space, signals, or orbit",
-        imposter_player_id=agents[0].id,
-        status="active",
-        turns=[
-            rounds.TurnResponse(
-                id="turn_1",
-                sequence=1,
-                user_prompt=rounds.OPENING_PROMPT,
-                responses=[],
-                created_at=rounds.datetime.now(rounds.UTC),
-            )
-        ],
-        created_at=rounds.datetime.now(rounds.UTC),
+    first_agent_id = agents[0].id
+    agent_ids = [agent.id for agent in agents]
+    embedding_calls: list[list[str]] = []
+
+    async def record_embed(self, texts):
+        embedding_calls.append(texts)
+        return await original_embed(self, texts)
+
+    original_embed = rounds.InferenceClient.embed
+    monkeypatch.setattr(rounds.InferenceClient, "embed", record_embed)
+    monkeypatch.setattr(rounds.settings, "inference_mode", "fake")
+    monkeypatch.setattr(rounds, "choice", lambda player_ids: first_agent_id)
+    set_playing_order(monkeypatch, [*agent_ids, rounds.HUMAN_PLAYER_ID])
+    client = TestClient(create_app())
+    create_response = client.post("/rounds", json={"secret_word": "satellite"})
+    round_id = create_response.json()["id"]
+
+    assert embedding_calls == []
+
+    clue_response = client.post(f"/rounds/{round_id}/clue", json={"clue": "circles earth"})
+    assert clue_response.status_code == 200
+    assert embedding_calls == []
+
+    response = client.post(
+        f"/rounds/{round_id}/vote",
+        json={"agent_id": first_agent_id},
     )
 
-    monkeypatch.setattr(rounds.InferenceClient, "generate", record_system_prompt)
-
-    asyncio.run(rounds.generate_agent_votes(round_state, agents, "circles earth"))
-
-    assert "Agent B, Agent C, Agent D, You" in system_prompts[0]
-    assert "Agent C, Agent D, Agent A, You" in system_prompts[1]
+    assert response.status_code == 200
+    assert len(embedding_calls) == 1
+    assert len(embedding_calls[0]) == len(agents) + 1
+    assert set(voting.ROUND_EMBEDDINGS[round_id]) == {
+        rounds.HUMAN_PLAYER_ID,
+        *[agent.id for agent in agents],
+    }
 
 
 def test_group_vote_decides_round_outcome(monkeypatch) -> None:
     agents = list_agent_configs()
     imposter_agent = agents[0]
     human_vote_agent = agents[1]
+    agent_ids = [agent.id for agent in agents]
 
-    async def vote_for_imposter(round_state, agents, human_clue):
+    async def vote_for_imposter(round_state, agents, settings, human_clue):
         return [
-            rounds.AgentVoteResponse(
+            voting.AgentVoteResponse(
                 voter_agent_id=agent.id,
                 voter_agent_name=agent.name,
                 voted_for=imposter_agent.name,
-                inference_mode="fake",
+                inference_mode="embedding",
             )
             for agent in agents
         ]
 
     monkeypatch.setattr(rounds.settings, "inference_mode", "fake")
     monkeypatch.setattr(rounds, "choice", lambda player_ids: imposter_agent.id)
-    monkeypatch.setattr(rounds, "generate_agent_votes", vote_for_imposter)
+    monkeypatch.setattr(voting, "_build_embedding_agent_votes", vote_for_imposter)
+    set_playing_order(monkeypatch, [*agent_ids, rounds.HUMAN_PLAYER_ID])
     client = TestClient(create_app())
     create_response = client.post("/rounds", json={"secret_word": "satellite"})
     round_id = create_response.json()["id"]
+    clue_response = client.post(f"/rounds/{round_id}/clue", json={"clue": "circles earth"})
+    assert clue_response.status_code == 200
 
     response = client.post(
         f"/rounds/{round_id}/vote",
-        json={"agent_id": human_vote_agent.id, "human_clue": "circles earth"},
+        json={"agent_id": human_vote_agent.id},
     )
 
     assert response.status_code == 200
@@ -233,15 +458,33 @@ def test_group_vote_decides_round_outcome(monkeypatch) -> None:
 
 def test_imposter_wins_when_group_votes_out_non_imposter(monkeypatch) -> None:
     first_agent_id = list_agent_configs()[0].id
+    first_agent_name = list_agent_configs()[0].name
+    agent_ids = [agent.id for agent in list_agent_configs()]
+
+    async def vote_for_first_agent(round_state, agents, settings, human_clue):
+        return [
+            voting.AgentVoteResponse(
+                voter_agent_id=agent.id,
+                voter_agent_name=agent.name,
+                voted_for=first_agent_name,
+                inference_mode="embedding",
+            )
+            for agent in agents
+        ]
+
     monkeypatch.setattr(rounds.settings, "inference_mode", "fake")
     monkeypatch.setattr(rounds, "choice", lambda player_ids: rounds.HUMAN_PLAYER_ID)
+    monkeypatch.setattr(voting, "_build_embedding_agent_votes", vote_for_first_agent)
+    set_playing_order(monkeypatch, [*agent_ids, rounds.HUMAN_PLAYER_ID])
     client = TestClient(create_app())
     create_response = client.post("/rounds", json={"secret_word": "satellite"})
     round_id = create_response.json()["id"]
+    clue_response = client.post(f"/rounds/{round_id}/clue", json={"clue": "circles earth"})
+    assert clue_response.status_code == 200
 
     response = client.post(
         f"/rounds/{round_id}/vote",
-        json={"agent_id": first_agent_id, "human_clue": "circles earth"},
+        json={"agent_id": first_agent_id},
     )
 
     assert response.status_code == 200
