@@ -34,6 +34,14 @@ docker-compose.*.override.yml
 coverage/
 htmlcov/
 
+# Experiments / MLflow
+experiments/prompt_benchmarking/results/*.jsonl
+experiments/prompt_benchmarking/results/*.json
+experiments/prompt_benchmarking/results/*.csv
+experiments/prompt_benchmarking/results/*.md
+!experiments/prompt_benchmarking/results/.gitkeep
+mlruns/
+
 # OS / editor
 .DS_Store
 Thumbs.db
