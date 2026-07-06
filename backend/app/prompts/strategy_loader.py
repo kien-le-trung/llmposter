@@ -30,7 +30,8 @@ def load_strategy_group(
     if not isinstance(raw_group, list):
         raise ValueError(f"strategies.json must contain a {group_name!r} list")
 
-    selected_technique = normalize_prompt_technique(technique or settings.clue_prompt_technique)
+    configured_technique = technique or settings.clue_prompt_technique
+    selected_technique = normalize_prompt_technique(configured_technique)
     return tuple(
         _parse_strategy(group_name, index, strategy, selected_technique)
         for index, strategy in enumerate(raw_group)
