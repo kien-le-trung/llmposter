@@ -2,49 +2,104 @@
   "non_imposter": [
     {
       "name": "Indirect association",
-      "prompt": "Write a phrase that is indirectly related to the secret word, not a definition or obvious synonym. Use an association that a teammate who knows the word can connect, while an imposter would find ambiguous. Examples: satellite -> night dish; library -> quiet checkout; volcano -> buried pressure."
+      "prompts": {
+        "zero_shot": "Write a phrase that is indirectly related to the secret word, not a definition or obvious synonym. Use an association that a teammate who knows the word can connect, while an imposter would find ambiguous.",
+        "few_shot": "Write a phrase that is indirectly related to the secret word, not a definition or obvious synonym. Use an association that a teammate who knows the word can connect, while an imposter would find ambiguous. Examples: satellite -> night dish; library -> quiet checkout; volcano -> buried pressure.",
+        "reasoning_guided": "Write a phrase that is indirectly related to the secret word, not a definition or obvious synonym. Silently reason about what teammates can infer, what would be too obvious, and what would still sound natural. Do not reveal your reasoning. Return only the final clue.",
+        "meta": "Write a phrase that is indirectly related to the secret word. Before answering, silently choose the best indirect clue style for this round: subtle association, concrete object, small scene, or sensory cue. Apply the chosen style and return only the final clue."
+      }
     },
     {
       "name": "Side effect",
-      "prompt": "Write a phrase based on something caused by, enabled by, or resulting from the secret word. Do not describe the object directly. Prefer a consequence or outcome someone could infer from the word. Examples: camera -> frozen memory; bridge -> shorter commute; piano -> room applause."
+      "prompts": {
+        "zero_shot": "Write a phrase based on something caused by, enabled by, or resulting from the secret word. Do not describe the object directly. Prefer a consequence or outcome someone could infer from the word.",
+        "few_shot": "Write a phrase based on something caused by, enabled by, or resulting from the secret word. Do not describe the object directly. Prefer a consequence or outcome someone could infer from the word. Examples: camera -> frozen memory; bridge -> shorter commute; piano -> room applause.",
+        "reasoning_guided": "Write a phrase based on something caused by, enabled by, or resulting from the secret word. Silently reason about possible effects, avoid direct definitions, and choose a consequence that teammates can connect. Do not reveal your reasoning. Return only the final clue.",
+        "meta": "Write a phrase based on a side effect of the secret word. Before answering, silently choose whether a physical effect, social effect, emotional effect, or practical outcome would be most useful. Apply the chosen style and return only the final clue."
+      }
     },
     {
       "name": "Context scene",
-      "prompt": "Write a phrase that evokes a place, scene, or situation where the secret word naturally appears. The clue should feel concrete but not name the word or define it. Examples: guitar -> campfire chorus; island -> ferry arrival; theater -> velvet seats."
+      "prompts": {
+        "zero_shot": "Write a phrase that evokes a place, scene, or situation where the secret word naturally appears. The clue should feel concrete but not name the word or define it.",
+        "few_shot": "Write a phrase that evokes a place, scene, or situation where the secret word naturally appears. The clue should feel concrete but not name the word or define it. Examples: guitar -> campfire chorus; island -> ferry arrival; theater -> velvet seats.",
+        "reasoning_guided": "Write a phrase that evokes a place, scene, or situation where the secret word naturally appears. Silently reason about scenes connected to the word and pick one that is concrete but not revealing. Do not reveal your reasoning. Return only the final clue.",
+        "meta": "Write a context-scene clue for the secret word. Before answering, silently choose the best scene type: location, activity, event, or background detail. Apply the chosen scene style and return only the final clue."
+      }
     },
     {
       "name": "Hidden detail",
-      "prompt": "Write a phrase using a specific detail someone who knows the secret word may recognize. Avoid broad categories and obvious descriptions. Pick a small visual, sensory, or functional detail. Examples: rocket -> countdown plume; forest -> mossy fallen log; window -> morning condensation."
+      "prompts": {
+        "zero_shot": "Write a phrase using a specific detail someone who knows the secret word may recognize. Avoid broad categories and obvious descriptions. Pick a small visual, sensory, or functional detail.",
+        "few_shot": "Write a phrase using a specific detail someone who knows the secret word may recognize. Avoid broad categories and obvious descriptions. Pick a small visual, sensory, or functional detail. Examples: rocket -> countdown plume; forest -> mossy fallen log; window -> morning condensation.",
+        "reasoning_guided": "Write a phrase using a specific detail someone who knows the secret word may recognize. Silently reason about small details and reject clues that are too broad or too obvious. Do not reveal your reasoning. Return only the final clue.",
+        "meta": "Write a hidden-detail clue for the secret word. Before answering, silently choose the best detail type: visual, sensory, functional, or situational. Apply that detail type and return only the final clue."
+      }
     },
     {
       "name": "Contrast hint",
-      "prompt": "Write a phrase based on something the secret word is often compared with or contrasted against. The clue should point through contrast, not by direct definition. Examples: desert -> ocean opposite; mountain -> inverted valley; apple -> orange rival."
+      "prompts": {
+        "zero_shot": "Write a phrase based on something the secret word is often compared with or contrasted against. The clue should point through contrast, not by direct definition.",
+        "few_shot": "Write a phrase based on something the secret word is often compared with or contrasted against. The clue should point through contrast, not by direct definition. Examples: desert -> ocean opposite; mountain -> inverted valley; apple -> orange rival.",
+        "reasoning_guided": "Write a phrase based on something the secret word is often compared with or contrasted against. Silently reason about useful contrasts and choose one that points indirectly. Do not reveal your reasoning. Return only the final clue.",
+        "meta": "Write a contrast-based clue for the secret word. Before answering, silently choose the best contrast style: opposite, rival, missing feature, or paired comparison. Apply that style and return only the final clue."
+      }
     },
     {
       "name": "Specification",
-      "prompt": "Write a phrase naming a specific instance, person, brand, place, or example strongly associated with the secret word. The clue should be specific enough for teammates to connect, but avoid naming the secret word itself. Examples: social media -> Mark Zuckerberg; online marketplace -> Jeff Bezos; electric car -> Elon Musk."
+      "prompts": {
+        "zero_shot": "Write a phrase naming a specific instance, person, brand, place, or example strongly associated with the secret word. The clue should be specific enough for teammates to connect, but avoid naming the secret word itself.",
+        "few_shot": "Write a phrase naming a specific instance, person, brand, place, or example strongly associated with the secret word. The clue should be specific enough for teammates to connect, but avoid naming the secret word itself. Examples: social media -> Mark Zuckerberg; online marketplace -> Jeff Bezos; electric car -> Elon Musk.",
+        "reasoning_guided": "Write a phrase naming a specific instance, person, brand, place, or example strongly associated with the secret word. Silently reason about which specific reference is recognizable but not too revealing. Do not reveal your reasoning. Return only the final clue.",
+        "meta": "Write a specification clue for the secret word. Before answering, silently choose the best reference type: person, place, brand, object, or named example. Apply that reference type and return only the final clue."
+      }
     }
   ],
   "imposter": [
     {
       "name": "Ride previous clues",
-      "prompt": "Strategy: ride previous clues. Use the hint and the previous clues to infer the table's shared direction, then write a clue that overlaps with one or two earlier clues without copying their exact words. This is strongest when previous clues exist. If there are no previous clues, use the hint to make a cautious related clue. Examples: space + moon orbit, rocket launch -> star travel; kitchen + recipe book, dinner prep -> cooking heat; ocean + salty waves, beach towel -> coastal breeze."
+      "prompts": {
+        "zero_shot": "Strategy: ride previous clues. Use the hint and the previous clues to infer the table's shared direction, then write a clue that overlaps with one or two earlier clues without copying their exact words. If there are no previous clues, use the hint to make a cautious related clue.",
+        "few_shot": "Strategy: ride previous clues. Use the hint and the previous clues to infer the table's shared direction, then write a clue that overlaps with one or two earlier clues without copying their exact words. If there are no previous clues, use the hint to make a cautious related clue. Examples: space + moon orbit, rocket launch -> star travel; kitchen + recipe book, dinner prep -> cooking heat; ocean + salty waves, beach towel -> coastal breeze.",
+        "reasoning_guided": "Strategy: ride previous clues. Silently reason about the strongest shared direction in the hint and previous clues, then write a clue that overlaps with that direction without copying. Do not reveal your reasoning. Return only the final clue.",
+        "meta": "Strategy: ride previous clues. Before answering, silently choose whether to imitate wording, imitate topic, imitate concreteness, or imitate scene. Apply the best blend-in style and return only the final clue."
+      }
     },
     {
       "name": "Abstraction",
-      "prompt": "Strategy: abstraction. Give a broad but still meaningful clue that could fit the hint and several possible secret words. Avoid being so generic that the clue sounds empty. Prefer category-level or high-level associations, and do not copy previous clues. Examples: phone + screen glow, pocket buzz -> daily technology; forest + pine shade, muddy trail -> natural place; coffee + morning cup, bitter smell -> warm drink."
+      "prompts": {
+        "zero_shot": "Strategy: abstraction. Give a broad but still meaningful clue that could fit the hint and several possible secret words. Avoid being so generic that the clue sounds empty. Prefer category-level or high-level associations, and do not copy previous clues.",
+        "few_shot": "Strategy: abstraction. Give a broad but still meaningful clue that could fit the hint and several possible secret words. Avoid being so generic that the clue sounds empty. Prefer category-level or high-level associations, and do not copy previous clues. Examples: phone + screen glow, pocket buzz -> daily technology; forest + pine shade, muddy trail -> natural place; coffee + morning cup, bitter smell -> warm drink.",
+        "reasoning_guided": "Strategy: abstraction. Silently reason about the hint and previous clues, then choose a broad category-level clue that sounds meaningful but does not overcommit. Do not reveal your reasoning. Return only the final clue.",
+        "meta": "Strategy: abstraction. Before answering, silently choose the best abstraction level: category, use case, emotion, setting, or material. Apply that level and return only the final clue."
+      }
     },
     {
       "name": "Cluster matching",
-      "prompt": "Strategy: cluster matching. Look for the dominant semantic cluster in the previous clues, then add another clue from that same cluster. If previous clues disagree, follow the largest or most concrete cluster. Do not repeat an earlier clue. Examples: school + classroom desk, homework page, teacher voice -> hallway bell; hospital + doctor coat, nurse station, waiting room -> clinic light; music + guitar strings, concert stage, loud speakers -> rhythm crowd."
+      "prompts": {
+        "zero_shot": "Strategy: cluster matching. Look for the dominant semantic cluster in the previous clues, then add another clue from that same cluster. If previous clues disagree, follow the largest or most concrete cluster. Do not repeat an earlier clue.",
+        "few_shot": "Strategy: cluster matching. Look for the dominant semantic cluster in the previous clues, then add another clue from that same cluster. If previous clues disagree, follow the largest or most concrete cluster. Do not repeat an earlier clue. Examples: school + classroom desk, homework page, teacher voice -> hallway bell; hospital + doctor coat, nurse station, waiting room -> clinic light; music + guitar strings, concert stage, loud speakers -> rhythm crowd.",
+        "reasoning_guided": "Strategy: cluster matching. Silently reason about which previous clues form the strongest cluster, then produce a clue from that cluster without copying. Do not reveal your reasoning. Return only the final clue.",
+        "meta": "Strategy: cluster matching. Before answering, silently choose the most useful cluster signal: object, place, action, feeling, or event. Add a clue from that cluster and return only the final clue."
+      }
     },
     {
       "name": "Contextual guess",
-      "prompt": "Strategy: contextual guess. Use the hint plus previous clues to guess the likely secret word, then give a normal teammate-style clue for that guessed word. Keep the clue confident, concrete, and consistent with the table. Examples: social + followers count, photo likes -> square photos; marketplace + shipping box, online cart -> doorstep package; wizard + magic school, lightning scar -> wand lesson."
+      "prompts": {
+        "zero_shot": "Strategy: contextual guess. Use the hint plus previous clues to guess the likely secret word, then give a normal teammate-style clue for that guessed word. Keep the clue confident, concrete, and consistent with the table.",
+        "few_shot": "Strategy: contextual guess. Use the hint plus previous clues to guess the likely secret word, then give a normal teammate-style clue for that guessed word. Keep the clue confident, concrete, and consistent with the table. Examples: social + followers count, photo likes -> square photos; marketplace + shipping box, online cart -> doorstep package; wizard + magic school, lightning scar -> wand lesson.",
+        "reasoning_guided": "Strategy: contextual guess. Silently infer the most likely secret word from the hint and previous clues, then write a normal teammate-style clue for that guess. Do not reveal your reasoning. Return only the final clue.",
+        "meta": "Strategy: contextual guess. Before answering, silently choose whether to guess from the hint, from previous clues, from the strongest concrete clue, or from the dominant category. Apply that guess and return only the final clue."
+      }
     },
     {
       "name": "Adjacent association",
-      "prompt": "Strategy: adjacent association. Give a clue that is near the hint or inferred theme, but not a direct synonym. Prefer a common collocation, use case, scene, or related object that sounds natural beside the previous clues. Examples: airport + boarding line, suitcase wheels -> passport check; garden + flower bed, watering can -> soil path; movie + dark theater, popcorn bucket -> ticket stub."
+      "prompts": {
+        "zero_shot": "Strategy: adjacent association. Give a clue that is near the hint or inferred theme, but not a direct synonym. Prefer a common collocation, use case, scene, or related object that sounds natural beside the previous clues.",
+        "few_shot": "Strategy: adjacent association. Give a clue that is near the hint or inferred theme, but not a direct synonym. Prefer a common collocation, use case, scene, or related object that sounds natural beside the previous clues. Examples: airport + boarding line, suitcase wheels -> passport check; garden + flower bed, watering can -> soil path; movie + dark theater, popcorn bucket -> ticket stub.",
+        "reasoning_guided": "Strategy: adjacent association. Silently reason about nearby concepts that would sound natural beside the hint and previous clues, then choose one that is not a direct synonym. Do not reveal your reasoning. Return only the final clue.",
+        "meta": "Strategy: adjacent association. Before answering, silently choose the best adjacent clue type: collocation, nearby object, use case, location, or activity. Apply that type and return only the final clue."
+      }
     }
   ]
 }
