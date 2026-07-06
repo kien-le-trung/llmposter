@@ -10,20 +10,22 @@ from sqlalchemy.orm import Session
 
 from app.core.config import settings
 from app.db.session import get_db
-from app.services.agents import (
-    IMPOSTER_CLUE_STRATEGIES,
-    NON_IMPOSTER_CLUE_STRATEGIES,
-    build_instruction_batched_clue_system_prompt,
+from app.services.agents.clue_generation import (
     build_instruction_batched_clue_user_prompt,
-    build_instruction_clue_system_prompt,
     build_instruction_clue_user_prompt,
     clean_batched_clue_response,
     clean_clue_response,
 )
-from app.services.inference import AgentConfig
-from app.services.inference import InferenceClient, InferenceRequest, InferenceServiceError
-from app.services.runtime_agents import get_runtime_agent_config, list_runtime_agent_configs
-from app.services.voting import VoteResponse, VotingStateError, submit_round_vote
+from app.services.agents.strategy_loader import (
+    PROMPT_TECHNIQUES,
+    assign_imposter_clue_strategy,
+    assign_non_imposter_clue_strategy,
+    normalize_prompt_technique,
+)
+from app.services.agents.inference import AgentConfig
+from app.services.agents.inference import InferenceClient, InferenceRequest, InferenceServiceError
+from app.services.agents.runtime_agents import get_runtime_agent_config, list_runtime_agent_configs
+from app.services.voting.voting import VoteResponse, VotingStateError, submit_round_vote
 from app.services.word_bank import normalize_imposter_hint, select_random_word
 
 router = APIRouter(prefix="/rounds", tags=["rounds"])
@@ -59,6 +61,7 @@ class RoundResponse(BaseModel):
     visible_word: str | None
     imposter_hint: str | None
     user_role: str
+    prompt_technique: str
     status: str
     playing_order: list[PlayerResponse]
     current_player_id: str | None
@@ -75,6 +78,7 @@ class RoundState(BaseModel):
     status: str
     playing_order: list[str]
     player_names_by_id: dict[str, str]
+    prompt_technique: str
     current_player_index: int
     turns: list[TurnResponse]
     created_at: datetime
@@ -85,6 +89,7 @@ class RoundState(BaseModel):
 class CreateRoundRequest(BaseModel):
     secret_word: str | None = Field(default=None, min_length=1, max_length=80)
     imposter_hint: str | None = Field(default=None, min_length=1, max_length=160)
+    prompt_technique: str | None = Field(default=None, min_length=1, max_length=80)
 
 
 class VoteRequest(BaseModel):
@@ -110,12 +115,13 @@ ROUNDS: dict[str, RoundState] = {}
 def to_round_response(round_state: RoundState) -> RoundResponse:
     human_is_imposter = round_state.imposter_player_id == HUMAN_PLAYER_ID
     player_names_by_id = get_player_names_by_id_from_round(round_state)
-    current_player_id = get_current_player_id(round_state)
+    current_player_id = round_state.playing_order[round_state.current_player_index] if round_state.current_player_index < len(round_state.playing_order) else None
     return RoundResponse(
         id=round_state.id,
         visible_word=None if human_is_imposter else round_state.secret_word,
         imposter_hint=round_state.imposter_hint if human_is_imposter else None,
         user_role="imposter" if human_is_imposter else "player",
+        prompt_technique=round_state.prompt_technique,
         status=round_state.status,
         playing_order=[
             PlayerResponse(
@@ -200,7 +206,7 @@ def append_human_clue_if_available(
     if round_state.human_clue is None:
         return False
 
-    if not has_response(opening_turn, HUMAN_PLAYER_ID):
+    if not any(response.agent_id == HUMAN_PLAYER_ID for response in opening_turn.responses):
         opening_turn.responses.append(
             AgentTurnResponse(
                 agent_id=HUMAN_PLAYER_ID,
@@ -302,20 +308,17 @@ async def generate_agent_clue(
     client = InferenceClient(settings=settings)
     agent_is_imposter = agent.id == round_state.imposter_player_id
     secret_word = None if agent_is_imposter else round_state.secret_word
-    system_prompt = build_instruction_clue_system_prompt(
-        secret_word,
-        round_state.imposter_hint if agent_is_imposter else None,
-    )
+    system_prompt = "You write 2 to 5 word clues for an imposter word game. Return valid JSON only. If you know the secret word, do not use it or define it."
     max_tokens = 24
-    prompt = build_opening_prompt(
+    prompt = build_instruction_clue_user_prompt(
         secret_word,
         round_state.imposter_hint if agent_is_imposter else None,
-        previous_responses,
+        [(response.agent_name, response.agent_response) for response in previous_responses],
         (
-            assign_imposter_clue_strategy()
+            assign_imposter_clue_strategy(round_state.prompt_technique)
             if agent_is_imposter
-            else assign_non_imposter_clue_strategy()
-        ),
+            else assign_non_imposter_clue_strategy(round_state.prompt_technique)
+        )
     )
     round_agent = replace(agent, system_prompt=system_prompt, max_tokens=max_tokens)
     structured_result, result = await client.generate_structured(
@@ -342,17 +345,20 @@ async def generate_non_imposter_agent_batch(
 ) -> list[AgentTurnResponse]:
     player_names = [agent.name for agent in agents]
     client = InferenceClient(settings=settings)
-    prompt = build_batched_opening_prompt(
+    prompt = build_instruction_batched_clue_user_prompt(
         round_state.secret_word,
         player_names,
-        previous_responses,
-        assign_non_imposter_clue_strategies(player_names),
+        {
+            player_name: assign_non_imposter_clue_strategy(round_state.prompt_technique)
+            for player_name in player_names
+        },
+        [(response.agent_name, response.agent_response) for response in previous_responses]
     )
     batch_agent = replace(
         agents[0],
         id="non_imposter_batch",
         name="Non-imposter batch",
-        system_prompt=build_instruction_batched_clue_system_prompt(),
+        system_prompt="You write 2 to 5 word clues for several players in an imposter word game. Return valid JSON only. Do not use or define the secret word.",
         max_tokens=max(48, len(agents) * 24),
     )
     structured_result, result = await client.generate_structured(
@@ -366,7 +372,6 @@ async def generate_non_imposter_agent_batch(
         round_state.secret_word,
         round_state.imposter_hint,
     )
-
     return [
         AgentTurnResponse(
             agent_id=agent.id,
@@ -376,57 +381,6 @@ async def generate_non_imposter_agent_batch(
         )
         for agent in agents
     ]
-
-
-def build_opening_prompt(
-    secret_word: str | None,
-    imposter_hint: str | None,
-    previous_responses: list[AgentTurnResponse],
-    strategy: dict[str, str] | None = None,
-) -> str:
-    previous_clues = [
-        (response.agent_name, response.agent_response) for response in previous_responses
-    ]
-    return build_instruction_clue_user_prompt(
-        secret_word,
-        imposter_hint,
-        previous_clues,
-        strategy,
-    )
-
-
-def build_batched_opening_prompt(
-    secret_word: str,
-    player_names: list[str],
-    previous_responses: list[AgentTurnResponse],
-    strategies_by_player_name: dict[str, dict[str, str]],
-) -> str:
-    previous_clues = [
-        (response.agent_name, response.agent_response) for response in previous_responses
-    ]
-    return build_instruction_batched_clue_user_prompt(
-        secret_word,
-        player_names,
-        strategies_by_player_name,
-        previous_clues,
-    )
-
-
-def assign_non_imposter_clue_strategy() -> dict[str, str]:
-    return random.choice(NON_IMPOSTER_CLUE_STRATEGIES)
-
-
-def assign_imposter_clue_strategy() -> dict[str, str]:
-    return random.choice(IMPOSTER_CLUE_STRATEGIES)
-
-
-def assign_non_imposter_clue_strategies(
-    player_names: list[str],
-) -> dict[str, dict[str, str]]:
-    return {
-        player_name: assign_non_imposter_clue_strategy()
-        for player_name in player_names
-    }
 
 
 def validate_batched_clues_response(
@@ -455,17 +409,6 @@ def get_or_create_opening_turn(round_state: RoundState) -> TurnResponse:
     return opening_turn
 
 
-def has_response(turn: TurnResponse, player_id: str) -> bool:
-    return any(response.agent_id == player_id for response in turn.responses)
-
-
-def get_player_names_by_id(agents: list[AgentConfig]) -> dict[str, str]:
-    return {
-        HUMAN_PLAYER_ID: HUMAN_PLAYER_NAME,
-        **{agent.id: agent.name for agent in agents},
-    }
-
-
 def get_player_names_by_id_from_round(round_state: RoundState) -> dict[str, str]:
     names_by_id = dict(round_state.player_names_by_id)
     names_by_id.setdefault(HUMAN_PLAYER_ID, HUMAN_PLAYER_NAME)
@@ -477,13 +420,6 @@ def get_player_names_by_id_from_round(round_state: RoundState) -> dict[str, str]
             }
         )
     return names_by_id
-
-
-def get_current_player_id(round_state: RoundState) -> str | None:
-    if round_state.current_player_index >= len(round_state.playing_order):
-        return None
-
-    return round_state.playing_order[round_state.current_player_index]
 
 
 def select_round_word(payload: CreateRoundRequest | None) -> tuple[str, str]:
@@ -509,8 +445,25 @@ async def create_round(
     player_ids = [HUMAN_PLAYER_ID, *[agent.id for agent in agents]]
     playing_order = player_ids.copy()
     random.shuffle(playing_order)
-    player_names_by_id = get_player_names_by_id(agents)
+    player_names_by_id = {
+        HUMAN_PLAYER_ID: HUMAN_PLAYER_NAME,
+        **{agent.id: agent.name for agent in agents},
+    }
     secret_word, imposter_hint = select_round_word(payload)
+    prompt_technique = (
+        payload.prompt_technique.strip()
+        if payload is not None and payload.prompt_technique is not None
+        else settings.clue_prompt_technique
+    )
+    normalized_prompt_technique = normalize_prompt_technique(prompt_technique)
+    if prompt_technique.lower() not in PROMPT_TECHNIQUES:
+        raise HTTPException(
+            status_code=422,
+            detail=(
+                "Unknown prompt technique. Allowed values: "
+                f"{', '.join(PROMPT_TECHNIQUES)}"
+            ),
+        )
     round_state = RoundState(
         id=str(uuid4()),
         secret_word=secret_word,
@@ -519,6 +472,7 @@ async def create_round(
         status="active",
         playing_order=playing_order,
         player_names_by_id=player_names_by_id,
+        prompt_technique=normalized_prompt_technique,
         current_player_index=0,
         turns=[],
         created_at=datetime.now(UTC),
@@ -556,7 +510,7 @@ async def submit_clue(
     if round_state.status != "awaiting_human_clue":
         raise HTTPException(status_code=409, detail="Round is not waiting for a human clue")
 
-    current_player_id = get_current_player_id(round_state)
+    current_player_id = round_state.playing_order[round_state.current_player_index] if round_state.current_player_index < len(round_state.playing_order) else None
     if current_player_id != HUMAN_PLAYER_ID:
         raise HTTPException(status_code=409, detail="It is not the human player's turn")
 

@@ -30,6 +30,7 @@ class PromptBenchmarkApiClient:
                     json={
                         "secret_word": case.secret_word,
                         "imposter_hint": case.imposter_hint,
+                        "prompt_technique": technique,
                     },
                 )
                 create_response.raise_for_status()

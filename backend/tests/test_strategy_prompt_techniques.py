@@ -1,8 +1,6 @@
-from app.prompts.strategy_loader import (
+from app.services.agents.strategy_loader import (
     DEFAULT_PROMPT_TECHNIQUE,
     PROMPT_TECHNIQUES,
-    IMPOSTER_CLUE_STRATEGIES,
-    NON_IMPOSTER_CLUE_STRATEGIES,
     load_imposter_clue_strategies,
     load_non_imposter_clue_strategies,
     normalize_prompt_technique,
@@ -38,8 +36,11 @@ def test_prompt_changes_across_techniques() -> None:
     assert len({zero_shot, few_shot, reasoning, meta}) == 4
 
 
-def test_strategy_constants_keep_sequence_shape() -> None:
-    assert len(NON_IMPOSTER_CLUE_STRATEGIES) > 0
-    assert len(IMPOSTER_CLUE_STRATEGIES) > 0
-    assert set(NON_IMPOSTER_CLUE_STRATEGIES[0]) == {"name", "prompt"}
-    assert set(IMPOSTER_CLUE_STRATEGIES[0]) == {"name", "prompt"}
+def test_strategy_loaders_keep_sequence_shape() -> None:
+    non_imposter_strategies = load_non_imposter_clue_strategies()
+    imposter_strategies = load_imposter_clue_strategies()
+
+    assert len(non_imposter_strategies) > 0
+    assert len(imposter_strategies) > 0
+    assert set(non_imposter_strategies[0]) == {"name", "prompt"}
+    assert set(imposter_strategies[0]) == {"name", "prompt"}

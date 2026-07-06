@@ -1,101 +1,100 @@
 import re
 
-CLUE_SYSTEM_PROMPT = (
-    "You complete short clue examples for a word game. "
-    "Output only the clue text."
-)
-BATCHED_CLUE_SYSTEM_PROMPT = (
-    "You complete short clue examples for several word game players. "
-    "Output valid JSON only."
-)
 
-CLUE_EXAMPLES = """Examples:
-Secret word: apple
-Clue: red orchard fruit
-
-Secret word: bridge
-Clue: crosses a river
-
-Secret word: guitar
-Clue: strings on stage"""
-
-IMPOSTER_CLUE_EXAMPLES = """Examples:
-Hint: Fruit, orchard, or red
-Clue: sweet red snack
-
-Hint: Crossing, river, or structure
-Clue: over the water
-
-Hint: Music, strings, or stage
-Clue: concert sound"""
-
-
-def build_clue_system_prompt(
-    secret_word: str | None,
-    imposter_hint: str | None = None,
-) -> str:
-    return CLUE_SYSTEM_PROMPT
-
-
-def build_batched_clue_system_prompt() -> str:
-    return BATCHED_CLUE_SYSTEM_PROMPT
-
-
-def build_clue_user_prompt(
+def build_instruction_clue_user_prompt(
     secret_word: str | None,
     imposter_hint: str | None,
     previous_clues: list[tuple[str, str]],
+    strategy: dict[str, str] | None = None,
 ) -> str:
-    previous_clue_block = _format_previous_clues(previous_clues)
+    if not previous_clues:
+        previous_clue_block = "Previous clues: none\n"
+    else:
+        previous_clue_block = "Previous clues:\n" + "\n".join(
+            f"{player_name}: {clue}" for player_name, clue in previous_clues
+        ) + "\n"
 
     if secret_word is None:
-        hint = imposter_hint or "common everyday thing"
+        strategy_prompt = strategy["prompt"]
         return (
-            "Task: write one short clue that sounds related to the hint.\n"
-            "Rules:\n"
-            "- 2 to 5 words\n"
-            "- return JSON with one key: clue\n\n"
-            f"{IMPOSTER_CLUE_EXAMPLES}\n\n"
-            f"Hint: {hint}\n"
+            "You are the imposter. You do not know the secret word.\n"
+            f"Hint: {imposter_hint or 'common everyday thing'}\n"
             f"{previous_clue_block}"
-            "JSON:"
+            f"{strategy_prompt}"
+            "Constraints:\n"
+            "- Return JSON with exactly this shape: {\"clue\":\"your clue\"}\n"
         )
 
+    strategy_prompt = strategy["prompt"]
     return (
-        "Task: write one short clue for the secret word.\n"
-        "Rules:\n"
-        "- 2 to 5 words\n"
-        "- do not say the secret word\n"
-        "- return JSON with one key: clue\n\n"
-        f"{CLUE_EXAMPLES}\n\n"
-        f"Secret word: {secret_word}\n"
+        f"{strategy_prompt}"
+        f"Word: {secret_word}\n"
         f"{previous_clue_block}"
-        "JSON:"
+        "Output requirements:\n"
+        "- Return JSON with exactly this shape: {\"clue\":\"your phrase\"}\n"
     )
 
 
-def build_batched_clue_user_prompt(
+def build_instruction_batched_clue_user_prompt(
     secret_word: str,
     player_names: list[str],
+    strategies_by_player_name: dict[str, dict[str, str]] | None = None,
+    previous_clues: list[tuple[str, str]] | None = None,
 ) -> str:
+    
+    if not previous_clues:
+        previous_clue_block = "Previous clues: none\n"
+    else:
+        previous_clue_block = "Previous clues:\n" + "\n".join(
+            f"{player_name}: {clue}" for player_name, clue in previous_clues
+        ) + "\n"
+
     players = "\n".join(f"- {player_name}" for player_name in player_names)
+    strategy_block = _format_strategy_assignments(
+        player_names,
+        strategies_by_player_name,
+    )
     clue_placeholders = ",".join(
-        f'"{player_name}":"2 to 5 word clue"' for player_name in player_names
+        f'"{player_name}":"your clue"' for player_name in player_names
     )
 
     return (
-        "Task: write one short clue for each player.\n"
-        "Rules:\n"
-        "- each clue is 2 to 5 words\n"
-        "- do not say the secret word\n"
-        "- return JSON with one top-level key: clues\n"
-        "- clues must contain every player name shown\n\n"
-        f"Secret word: {secret_word}\n"
+        "Each listed player knows the secret word.\n"
+        f"Word: {secret_word}\n"
+        f"{previous_clue_block}"
         "Players:\n"
         f"{players}\n"
-        "Return this exact JSON shape, replacing only clue text:\n"
+        f"{strategy_block}"
+        "Output requirements:\n"
+        "- Each phrase must be 2 to 5 words.\n"
+        "- Include every listed player exactly once.\n"
+        "- Return JSON only.\n"
+        "Required JSON shape:\n"
         f'{{"clues":{{{clue_placeholders}}}}}'
     )
+
+
+def _format_strategy_assignments(
+    player_names: list[str],
+    strategies_by_player_name: dict[str, dict[str, str]] | None,
+) -> str:
+    if not strategies_by_player_name:
+        return ""
+
+    strategy_lines = []
+    for player_name in player_names:
+        strategy = strategies_by_player_name.get(player_name)
+        if strategy is None:
+            continue
+
+        strategy_lines.append(
+            f"{player_name} strategy - {strategy['name']}:\n{strategy['prompt']}"
+        )
+
+    if not strategy_lines:
+        return ""
+
+    return "Player-specific prompts:\n" + "\n\n".join(strategy_lines) + "\n"
 
 
 def clean_clue_response(
@@ -160,14 +159,6 @@ def _parse_batched_clues(response_text: str, player_names: list[str]) -> dict[st
             clues[player_name] = raw_clue.strip()
 
     return clues
-
-
-def _format_previous_clues(previous_clues: list[tuple[str, str]]) -> str:
-    if not previous_clues:
-        return "Previous clues: none\n\n"
-
-    clue_lines = [f"{player_name}: {clue}" for player_name, clue in previous_clues]
-    return "Previous clues:\n" + "\n".join(clue_lines) + "\n\n"
 
 
 def _first_output_line(response_text: str) -> str:

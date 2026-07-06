@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 
 from app.db.models import AgentConfigModel
 from app.db.session import Base
-from app.services.runtime_agents import get_runtime_agent_config, list_runtime_agent_configs
+from app.services.agents.runtime_agents import get_runtime_agent_config, list_runtime_agent_configs
 
 
 def test_agent_config_model_can_persist() -> None:
@@ -35,7 +35,7 @@ def test_agent_config_model_can_persist() -> None:
 
 
 def test_runtime_agent_configs_read_from_database(monkeypatch) -> None:
-    from app.services import runtime_agents
+    from app.services.agents import runtime_agents
 
     monkeypatch.setattr(runtime_agents.settings, "agent_config_source", "database")
     engine = create_engine("sqlite:///:memory:")

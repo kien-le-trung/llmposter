@@ -45,8 +45,7 @@ async def main() -> None:
     )
     print(
         f"Running {config.technique} against {config.backend_url}. "
-        "Ensure the backend was started with "
-        f"CLUE_PROMPT_TECHNIQUE={config.technique}."
+        "The prompt technique will be sent with each benchmark round request."
     )
 
     client = PromptBenchmarkApiClient(

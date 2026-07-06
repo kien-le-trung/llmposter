@@ -1,21 +1,26 @@
 from __future__ import annotations
 
 import json
-from collections.abc import Sequence
+import random
 from pathlib import Path
 from typing import Any
 
 from app.core.config import settings
 
-STRATEGIES_PATH = Path(__file__).with_name("strategies.json")
+STRATEGIES_PATH = Path(__file__).resolve().parents[2] / "prompts" / "strategies.json"
 PROMPT_TECHNIQUES = ("zero_shot", "few_shot", "reasoning_guided", "meta")
 DEFAULT_PROMPT_TECHNIQUE = "few_shot"
 
 
 def normalize_prompt_technique(technique: str | None) -> str:
-    if technique in PROMPT_TECHNIQUES:
-        return technique
-    return DEFAULT_PROMPT_TECHNIQUE
+    if technique is None:
+        return DEFAULT_PROMPT_TECHNIQUE
+
+    normalized = technique.lower()
+    if normalized not in PROMPT_TECHNIQUES:
+        return DEFAULT_PROMPT_TECHNIQUE
+
+    return normalized
 
 
 def load_strategy_group(
@@ -30,45 +35,20 @@ def load_strategy_group(
     if not isinstance(raw_group, list):
         raise ValueError(f"strategies.json must contain a {group_name!r} list")
 
-    configured_technique = technique or settings.clue_prompt_technique
-    selected_technique = normalize_prompt_technique(configured_technique)
+    technique = normalize_prompt_technique(technique or settings.clue_prompt_technique)
+
     return tuple(
-        _parse_strategy(group_name, index, strategy, selected_technique)
+        _parse_strategy(group_name, index, strategy, technique)
         for index, strategy in enumerate(raw_group)
     )
 
 
-def load_non_imposter_clue_strategies(
-    technique: str | None = None,
-) -> tuple[dict[str, str], ...]:
-    return load_strategy_group("non_imposter", technique)
+def assign_non_imposter_clue_strategy(technique: str | None = None,) -> dict[str, str]:
+    return random.choice(load_strategy_group("non_imposter", technique))
 
 
-def load_imposter_clue_strategies(
-    technique: str | None = None,
-) -> tuple[dict[str, str], ...]:
-    return load_strategy_group("imposter", technique)
-
-
-class ConfiguredStrategyGroup(Sequence[dict[str, str]]):
-    """Sequence facade that resolves strategies from the active prompt technique.
-
-    Existing game code can keep using random.choice(CONSTANT), while each item is
-    rendered from the currently configured CLUE_PROMPT_TECHNIQUE.
-    """
-
-    def __init__(self, group_name: str) -> None:
-        self.group_name = group_name
-
-    def __getitem__(self, index: int) -> dict[str, str]:
-        return load_strategy_group(self.group_name)[index]
-
-    def __len__(self) -> int:
-        raw_groups = json.loads(STRATEGIES_PATH.read_text(encoding="utf-8"))
-        raw_group = raw_groups.get(self.group_name)
-        if not isinstance(raw_group, list):
-            raise ValueError(f"strategies.json must contain a {self.group_name!r} list")
-        return len(raw_group)
+def assign_imposter_clue_strategy(technique: str | None = None) -> dict[str, str]:
+    return random.choice(load_strategy_group("imposter", technique))
 
 
 def _parse_strategy(
@@ -105,7 +85,3 @@ def _validate_prompt_variants(group_name: str, index: int, prompts: dict[str, An
                 f"{group_name} strategy {index} must contain a non-empty "
                 f"{technique!r} prompt"
             )
-
-
-NON_IMPOSTER_CLUE_STRATEGIES = ConfiguredStrategyGroup("non_imposter")
-IMPOSTER_CLUE_STRATEGIES = ConfiguredStrategyGroup("imposter")

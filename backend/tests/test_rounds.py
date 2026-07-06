@@ -2,9 +2,9 @@ from fastapi.testclient import TestClient
 
 from app.api.routes import rounds
 from app.main import create_app
-from app.services.agents import list_agent_configs
-from app.services.inference import InferenceResult, InferenceServiceError
-from app.services import voting
+from app.services.agents.inference import InferenceResult, InferenceServiceError
+from app.services.agents.runtime_agents import list_static_agent_configs as list_agent_configs
+from app.services.voting import voting
 
 
 def setup_function() -> None:
@@ -15,6 +15,7 @@ def setup_function() -> None:
     rounds.settings.word_selection_mode = "fixed"
     rounds.settings.fixed_secret_word = "satellite"
     rounds.settings.fixed_imposter_hint = "orbit"
+    rounds.settings.clue_prompt_technique = "few_shot"
 
 
 def set_playing_order(monkeypatch, player_ids: list[str]) -> None:
@@ -121,6 +122,64 @@ def test_opening_clues_stop_when_human_is_first(monkeypatch) -> None:
     assert body["current_player_id"] == rounds.HUMAN_PLAYER_ID
     assert body["turns"][0]["responses"] == []
     assert prompts == []
+
+
+def test_create_round_rejects_unknown_prompt_technique() -> None:
+    client = TestClient(create_app())
+
+    response = client.post(
+        "/rounds",
+        json={"secret_word": "satellite", "prompt_technique": "missing"},
+    )
+
+    assert response.status_code == 422
+    assert "Unknown prompt technique" in response.json()["detail"]
+
+
+def test_prompt_technique_override_is_stored_and_reused_after_human_clue(
+    monkeypatch,
+) -> None:
+    captured_techniques: list[str | None] = []
+    agents = list_agent_configs()
+
+    def record_non_imposter_strategy(technique=None):
+        captured_techniques.append(technique)
+        return {"name": "Recorded", "prompt": "Write a recorded clue.\n"}
+
+    async def record_prompt(self, request):
+        if '"clues"' in request.prompt:
+            return InferenceResult(
+                text=(
+                    '{"clues":{'
+                    f'"{agents[0].name}":"clue 1",'
+                    f'"{agents[1].name}":"clue 2",'
+                    f'"{agents[2].name}":"clue 3",'
+                    f'"{agents[3].name}":"clue 4"'
+                    "}}"
+                ),
+                inference_mode="fake",
+            )
+        return InferenceResult(text='{"clue":"clue"}', inference_mode="fake")
+
+    monkeypatch.setattr(rounds, "assign_non_imposter_clue_strategy", record_non_imposter_strategy)
+    monkeypatch.setattr(rounds.InferenceClient, "generate", record_prompt)
+    monkeypatch.setattr(rounds, "choice", lambda player_ids: rounds.HUMAN_PLAYER_ID)
+    set_playing_order(monkeypatch, [rounds.HUMAN_PLAYER_ID, *[agent.id for agent in agents]])
+    client = TestClient(create_app())
+
+    create_response = client.post(
+        "/rounds",
+        json={"secret_word": "satellite", "prompt_technique": "meta"},
+    )
+    round_id = create_response.json()["id"]
+    rounds.settings.clue_prompt_technique = "zero_shot"
+    response = client.post(f"/rounds/{round_id}/clue", json={"clue": "human clue"})
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["prompt_technique"] == "meta"
+    assert rounds.ROUNDS[round_id].prompt_technique == "meta"
+    assert captured_techniques == ["meta", "meta", "meta", "meta"]
 
 
 def test_opening_clues_generate_first_agent_then_batch_remaining_non_imposters(monkeypatch) -> None:

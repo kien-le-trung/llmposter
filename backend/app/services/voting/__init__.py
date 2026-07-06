@@ -1,0 +1,1 @@
+"""Voting service package."""

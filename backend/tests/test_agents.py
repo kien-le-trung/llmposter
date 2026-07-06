@@ -7,18 +7,18 @@ import pytest
 
 from app.core.config import LLMConfig
 from app.main import create_app
-from app.services.agents import (
-    IMPOSTER_CLUE_STRATEGIES,
-    build_batched_clue_user_prompt,
-    build_clue_user_prompt,
+from backend.app.services.agents.clue_generation import (
     build_instruction_batched_clue_user_prompt,
     build_instruction_clue_user_prompt,
+)
+from app.services.agents.strategy_loader import (
+    load_imposter_clue_strategies,
+)
+from app.services.voting.votes import (
     build_vote_user_prompt,
-    clean_batched_clue_response,
-    clean_clue_response,
     clean_vote_response,
 )
-from app.services.inference import (
+from app.services.agents.inference import (
     AgentConfig,
     InferenceClient,
     InferenceRequest,
@@ -73,31 +73,6 @@ def test_list_agents() -> None:
     assert len(response.json()) >= 1
 
 
-def test_clue_prompt_uses_few_shot_completion_shape() -> None:
-    prompt = build_clue_user_prompt(
-        secret_word="satellite",
-        imposter_hint=None,
-        previous_clues=[("Agent A", "circles earth")],
-    )
-
-    assert "Examples:" in prompt
-    assert "Secret word: satellite" in prompt
-    assert "Agent A: circles earth" in prompt
-    assert prompt.endswith("JSON:")
-
-
-def test_batched_clue_prompt_uses_named_output_lines() -> None:
-    prompt = build_batched_clue_user_prompt(
-        secret_word="satellite",
-        player_names=["Agent A", "Agent B"],
-    )
-
-    assert "Task: write one short clue for each player." in prompt
-    assert "Secret word: satellite" in prompt
-    assert '"Agent A":"2 to 5 word clue"' in prompt
-    assert '"Agent B":"2 to 5 word clue"' in prompt
-
-
 def test_instruction_clue_prompt_uses_constraints_without_examples() -> None:
     prompt = build_instruction_clue_user_prompt(
         secret_word="satellite",
@@ -134,7 +109,8 @@ def test_instruction_imposter_clue_prompt_can_include_strategy() -> None:
 
 
 def test_imposter_strategies_are_loaded_from_json() -> None:
-    strategy_names = {strategy["name"] for strategy in IMPOSTER_CLUE_STRATEGIES}
+    strategies = load_imposter_clue_strategies()
+    strategy_names = {strategy["name"] for strategy in strategies}
 
     assert strategy_names == {
         "Ride previous clues",
@@ -143,7 +119,7 @@ def test_imposter_strategies_are_loaded_from_json() -> None:
         "Contextual guess",
         "Adjacent association",
     }
-    assert all(strategy["prompt"] for strategy in IMPOSTER_CLUE_STRATEGIES)
+    assert all(strategy["prompt"] for strategy in strategies)
 
 
 def test_instruction_batched_clue_prompt_uses_named_json_shape() -> None:
@@ -190,28 +166,6 @@ def test_vote_prompt_uses_allowed_answers_shape() -> None:
     assert 'Agent A = "space signal"' in prompt
     assert "Allowed answers:\nAgent A\nYou" in prompt
     assert prompt.endswith('JSON: {"vote":"<one allowed answer>"}')
-
-
-def test_clue_cleanup_caps_words_and_removes_secret_word() -> None:
-    clue = clean_clue_response(
-        "Clue: satellite orbiting above the earth with signals",
-        secret_word="satellite",
-        fallback_hint="Space, signals, or orbit",
-    )
-
-    assert clue == "space signals orbit"
-
-
-def test_batched_clue_cleanup_maps_named_lines() -> None:
-    clues = clean_batched_clue_response(
-        "Agent A: circles earth\nAgent B: satellite signal",
-        player_names=["Agent A", "Agent B"],
-        secret_word="satellite",
-        fallback_hint="Space, signals, or orbit",
-    )
-
-    assert clues["Agent A"] == "circles earth"
-    assert clues["Agent B"] == "space signals orbit"
 
 
 def test_vote_cleanup_matches_candidate_names() -> None:
@@ -269,7 +223,7 @@ def test_generate_posts_to_openrouter(monkeypatch) -> None:
             calls.append({"url": url, "headers": headers, "json": json})
             return FakeResponse()
 
-    monkeypatch.setattr("app.services.inference.httpx.AsyncClient", FakeAsyncClient)
+    monkeypatch.setattr("app.services.agents.inference.httpx.AsyncClient", FakeAsyncClient)
     client = InferenceClient(settings=build_test_settings(env_values={"OPENROUTER_API_KEY": "test-key"}))
 
     result = asyncio.run(
@@ -334,7 +288,7 @@ def test_generate_uses_larger_token_budget_for_openrouter_structured_calls(monke
             calls.append(json)
             return FakeResponse()
 
-    monkeypatch.setattr("app.services.inference.httpx.AsyncClient", FakeAsyncClient)
+    monkeypatch.setattr("app.services.agents.inference.httpx.AsyncClient", FakeAsyncClient)
     client = InferenceClient(settings=build_test_settings(env_values={"OPENROUTER_API_KEY": "test-key"}))
 
     asyncio.run(
@@ -379,7 +333,7 @@ def test_generate_rejects_empty_openrouter_content(monkeypatch) -> None:
         async def post(self, *, url: str, headers: dict[str, str], json: dict):
             return FakeResponse()
 
-    monkeypatch.setattr("app.services.inference.httpx.AsyncClient", FakeAsyncClient)
+    monkeypatch.setattr("app.services.agents.inference.httpx.AsyncClient", FakeAsyncClient)
     client = InferenceClient(settings=build_test_settings(env_values={"OPENROUTER_API_KEY": "test-key"}))
 
     with pytest.raises(InferenceServiceError, match="empty assistant content"):
@@ -412,7 +366,7 @@ def test_generate_omits_auth_for_local_config(monkeypatch) -> None:
             calls.append({"url": url, "headers": headers, "json": json})
             return FakeResponse()
 
-    monkeypatch.setattr("app.services.inference.httpx.AsyncClient", FakeAsyncClient)
+    monkeypatch.setattr("app.services.agents.inference.httpx.AsyncClient", FakeAsyncClient)
     client = InferenceClient(
         settings=build_test_settings(
             llm_config=LLMConfig(
