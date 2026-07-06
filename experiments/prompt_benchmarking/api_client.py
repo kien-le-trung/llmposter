@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio
 import time
 from typing import Any
 
@@ -98,7 +99,7 @@ class PromptBenchmarkApiClient:
             if status in TERMINAL_STATUSES:
                 return round_payload
 
-            time.sleep(0.25)
+            await asyncio.sleep(0.25)
 
         raise TimeoutError(f"Round {round_id} did not finish within {self.timeout_seconds}s")
 
