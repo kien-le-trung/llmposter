@@ -50,6 +50,7 @@ class Settings(BaseSettings):
     embedding_model_name: str = Field(default="nomic-embed-text", alias="EMBEDDING_MODEL_NAME")
     inference_mode: str = Field(default="remote", alias="INFERENCE_MODE")
     agent_config_source: str = Field(default="static", alias="AGENT_CONFIG_SOURCE")
+    clue_prompt_technique: str = Field(default="few_shot", alias="CLUE_PROMPT_TECHNIQUE")
     word_selection_mode: str = Field(default="random", alias="WORD_SELECTION_MODE")
     fixed_secret_word: str = Field(default="satellite", alias="FIXED_SECRET_WORD")
     fixed_imposter_hint: str = Field(default="orbit", alias="FIXED_IMPOSTER_HINT")

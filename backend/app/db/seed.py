@@ -3,11 +3,11 @@ from sqlalchemy.orm import Session
 
 from app.db.models import AgentConfigModel
 from app.db.session import SessionLocal, create_db_and_tables
-from app.services.agents import list_agent_configs
+from app.services.agents.runtime_agents import list_static_agent_configs
 
 
 def seed_agent_configs(db: Session) -> None:
-    for agent in list_agent_configs():
+    for agent in list_static_agent_configs():
         existing = db.scalar(
             select(AgentConfigModel).where(AgentConfigModel.id == agent.id)
         )

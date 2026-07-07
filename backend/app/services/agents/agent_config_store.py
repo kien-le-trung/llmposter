@@ -2,7 +2,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.db.models import AgentConfigModel
-from app.services.inference import AgentConfig
+from app.services.agents.inference import AgentConfig
 
 
 def model_to_agent_config(agent: AgentConfigModel) -> AgentConfig:

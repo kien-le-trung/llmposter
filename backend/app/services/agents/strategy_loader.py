@@ -1,0 +1,87 @@
+from __future__ import annotations
+
+import json
+import random
+from pathlib import Path
+from typing import Any
+
+from app.core.config import settings
+
+STRATEGIES_PATH = Path(__file__).resolve().parents[2] / "prompts" / "strategies.json"
+PROMPT_TECHNIQUES = ("zero_shot", "few_shot", "reasoning_guided", "meta")
+DEFAULT_PROMPT_TECHNIQUE = "few_shot"
+
+
+def normalize_prompt_technique(technique: str | None) -> str:
+    if technique is None:
+        return DEFAULT_PROMPT_TECHNIQUE
+
+    normalized = technique.lower()
+    if normalized not in PROMPT_TECHNIQUES:
+        return DEFAULT_PROMPT_TECHNIQUE
+
+    return normalized
+
+
+def load_strategy_group(
+    group_name: str,
+    technique: str | None = None,
+) -> tuple[dict[str, str], ...]:
+    raw_groups = json.loads(STRATEGIES_PATH.read_text(encoding="utf-8"))
+    if not isinstance(raw_groups, dict):
+        raise ValueError("strategies.json must contain an object")
+
+    raw_group = raw_groups.get(group_name)
+    if not isinstance(raw_group, list):
+        raise ValueError(f"strategies.json must contain a {group_name!r} list")
+
+    technique = normalize_prompt_technique(technique or settings.clue_prompt_technique)
+
+    return tuple(
+        _parse_strategy(group_name, index, strategy, technique)
+        for index, strategy in enumerate(raw_group)
+    )
+
+
+def assign_non_imposter_clue_strategy(technique: str | None = None,) -> dict[str, str]:
+    return random.choice(load_strategy_group("non_imposter", technique))
+
+
+def assign_imposter_clue_strategy(technique: str | None = None) -> dict[str, str]:
+    return random.choice(load_strategy_group("imposter", technique))
+
+
+def _parse_strategy(
+    group_name: str,
+    index: int,
+    strategy: Any,
+    technique: str,
+) -> dict[str, str]:
+    if not isinstance(strategy, dict):
+        raise ValueError(f"{group_name} strategy {index} must be an object")
+
+    name = strategy.get("name")
+    prompts = strategy.get("prompts")
+    if not isinstance(name, str) or not name.strip():
+        raise ValueError(f"{group_name} strategy {index} must contain a name")
+    if not isinstance(prompts, dict):
+        raise ValueError(f"{group_name} strategy {index} must contain a prompts object")
+
+    _validate_prompt_variants(group_name, index, prompts)
+    prompt = prompts.get(technique) or prompts[DEFAULT_PROMPT_TECHNIQUE]
+    if not isinstance(prompt, str) or not prompt.strip():
+        raise ValueError(
+            f"{group_name} strategy {index} must contain a non-empty {technique!r} prompt"
+        )
+
+    return {"name": name.strip(), "prompt": prompt.strip()}
+
+
+def _validate_prompt_variants(group_name: str, index: int, prompts: dict[str, Any]) -> None:
+    for technique in PROMPT_TECHNIQUES:
+        prompt = prompts.get(technique)
+        if not isinstance(prompt, str) or not prompt.strip():
+            raise ValueError(
+                f"{group_name} strategy {index} must contain a non-empty "
+                f"{technique!r} prompt"
+            )

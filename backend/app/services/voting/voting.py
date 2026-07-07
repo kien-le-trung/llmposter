@@ -4,7 +4,7 @@ from typing import Any
 
 from pydantic import BaseModel
 
-from app.services.inference import AgentConfig, InferenceClient, InferenceServiceError
+from app.services.agents.inference import AgentConfig, InferenceClient, InferenceServiceError
 
 HUMAN_PLAYER_ID = "human"
 HUMAN_PLAYER_NAME = "You"

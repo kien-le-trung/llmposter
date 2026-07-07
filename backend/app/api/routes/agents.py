@@ -3,7 +3,7 @@ from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
 from app.db.session import get_db
-from app.services.runtime_agents import list_runtime_agent_configs
+from app.services.agents.runtime_agents import list_runtime_agent_configs
 
 router = APIRouter(prefix="/agents", tags=["agents"])
 

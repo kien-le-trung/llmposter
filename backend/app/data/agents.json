@@ -1,0 +1,42 @@
+[
+  {
+    "id": "agent_a",
+    "name": "Agent A",
+    "role": "candidate",
+    "system_prompt": "You are a player in a word-based imposter game.",
+    "temperature": 0.3,
+    "top_p": 0.8,
+    "max_tokens": 24,
+    "version": "prompt-v3"
+  },
+  {
+    "id": "agent_b",
+    "name": "Agent B",
+    "role": "candidate",
+    "system_prompt": "You are a player in a word-based imposter game.",
+    "temperature": 0.3,
+    "top_p": 0.8,
+    "max_tokens": 24,
+    "version": "prompt-v3"
+  },
+  {
+    "id": "agent_c",
+    "name": "Agent C",
+    "role": "candidate",
+    "system_prompt": "You are a player in a word-based imposter game.",
+    "temperature": 0.3,
+    "top_p": 0.8,
+    "max_tokens": 24,
+    "version": "prompt-v3"
+  },
+  {
+    "id": "agent_d",
+    "name": "Agent D",
+    "role": "candidate",
+    "system_prompt": "You are a player in a word-based imposter game.",
+    "temperature": 0.3,
+    "top_p": 0.8,
+    "max_tokens": 24,
+    "version": "prompt-v3"
+  }
+]
