@@ -137,7 +137,7 @@ def _parse_strategy(
             f"{group_name} strategy {index} must contain a non-empty {technique!r} prompt"
         )
 
-    return {"name": name.strip(), "prompt": prompt.strip()}
+    return {"name": name.strip(), "prompt": prompt.strip(), "technique": technique}
 
 
 def _validate_prompt_variants(group_name: str, index: int, prompts: dict[str, Any]) -> None:
