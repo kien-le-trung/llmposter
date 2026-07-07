@@ -5,7 +5,7 @@
   },
   {
     "word": "day",
-    "hint": "amount"
+    "hint": "sunlight"
   },
   {
     "word": "life",
@@ -13,7 +13,7 @@
   },
   {
     "word": "family",
-    "hint": "organization"
+    "hint": "relatives"
   },
   {
     "word": "might",
@@ -21,15 +21,15 @@
   },
   {
     "word": "money",
-    "hint": "standard"
+    "hint": "currency"
   },
   {
     "word": "days",
-    "hint": "life"
+    "hint": "calendar"
   },
   {
     "word": "night",
-    "hint": "god"
+    "hint": "darkness"
   },
   {
     "word": "god",
@@ -41,11 +41,11 @@
   },
   {
     "word": "system",
-    "hint": "instrumentation"
+    "hint": "network"
   },
   {
     "word": "person",
-    "hint": "cause"
+    "hint": "individual"
   },
   {
     "word": "music",
@@ -65,11 +65,11 @@
   },
   {
     "word": "law",
-    "hint": "accumulation"
+    "hint": "court"
   },
   {
     "word": "car",
-    "hint": "vehicle"
+    "hint": "highway"
   },
   {
     "word": "president",
@@ -129,11 +129,11 @@
   },
   {
     "word": "friend",
-    "hint": "christian"
+    "hint": "companion"
   },
   {
     "word": "idea",
-    "hint": "noesis"
+    "hint": "thought"
   },
   {
     "word": "series",
@@ -153,7 +153,7 @@
   },
   {
     "word": "heart",
-    "hint": "intuition"
+    "hint": "pulse"
   },
   {
     "word": "child",
@@ -165,7 +165,7 @@
   },
   {
     "word": "media",
-    "hint": "instrumentation"
+    "hint": "broadcast"
   },
   {
     "word": "art",
@@ -173,7 +173,7 @@
   },
   {
     "word": "education",
-    "hint": "noesis"
+    "hint": "learning"
   },
   {
     "word": "son",
@@ -185,7 +185,7 @@
   },
   {
     "word": "college",
-    "hint": "body"
+    "hint": "campus"
   },
   {
     "word": "example",
@@ -213,7 +213,7 @@
   },
   {
     "word": "town",
-    "hint": "architect"
+    "hint": "community"
   },
   {
     "word": "department",
@@ -233,7 +233,7 @@
   },
   {
     "word": "eyes",
-    "hint": "opinion"
+    "hint": "vision"
   },
   {
     "word": "period",
@@ -269,7 +269,7 @@
   },
   {
     "word": "policy",
-    "hint": "programme"
+    "hint": "rule"
   },
   {
     "word": "society",
@@ -293,11 +293,11 @@
   },
   {
     "word": "production",
-    "hint": "presentation"
+    "hint": "manufacturing"
   },
   {
     "word": "management",
-    "hint": "establishment"
+    "hint": "leadership"
   },
   {
     "word": "england",
@@ -309,7 +309,7 @@
   },
   {
     "word": "science",
-    "hint": "bailiwick"
+    "hint": "experiment"
   },
   {
     "word": "attention",
@@ -321,7 +321,7 @@
   },
   {
     "word": "football",
-    "hint": "sport"
+    "hint": "touchdown"
   },
   {
     "word": "property",
@@ -333,7 +333,7 @@
   },
   {
     "word": "hell",
-    "hint": "imagination"
+    "hint": "underworld"
   },
   {
     "word": "language",
@@ -369,7 +369,7 @@
   },
   {
     "word": "hospital",
-    "hint": "edifice"
+    "hint": "doctor"
   },
   {
     "word": "loss",
@@ -381,7 +381,7 @@
   },
   {
     "word": "army",
-    "hint": "agency"
+    "hint": "soldiers"
   },
   {
     "word": "australia",
@@ -389,11 +389,11 @@
   },
   {
     "word": "goal",
-    "hint": "noesis"
+    "hint": "objective"
   },
   {
     "word": "sea",
-    "hint": "water"
+    "hint": "coast"
   },
   {
     "word": "sir",
@@ -401,11 +401,11 @@
   },
   {
     "word": "success",
-    "hint": "occurrence"
+    "hint": "achievement"
   },
   {
     "word": "ways",
-    "hint": "construction"
+    "hint": "methods"
   },
   {
     "word": "truth",
@@ -417,7 +417,7 @@
   },
   {
     "word": "george",
-    "hint": "martyr"
+    "hint": "name"
   },
   {
     "word": "india",
@@ -433,7 +433,7 @@
   },
   {
     "word": "paul",
-    "hint": "feminist"
+    "hint": "apostle"
   },
   {
     "word": "response",
@@ -449,7 +449,7 @@
   },
   {
     "word": "century",
-    "hint": "integer"
+    "hint": "hundred"
   },
   {
     "word": "peace",
@@ -469,11 +469,11 @@
   },
   {
     "word": "committee",
-    "hint": "ngo"
+    "hint": "panel"
   },
   {
     "word": "conference",
-    "hint": "assemblage"
+    "hint": "meeting"
   },
   {
     "word": "difference",
@@ -493,15 +493,15 @@
   },
   {
     "word": "ass",
-    "hint": "piece"
+    "hint": "donkey"
   },
   {
     "word": "california",
-    "hint": "province"
+    "hint": "state"
   },
   {
     "word": "despite",
-    "hint": "dislike"
+    "hint": "although"
   },
   {
     "word": "region",
@@ -513,7 +513,7 @@
   },
   {
     "word": "jesus",
-    "hint": "theme"
+    "hint": "messiah"
   },
   {
     "word": "sale",
@@ -529,7 +529,7 @@
   },
   {
     "word": "computer",
-    "hint": "machine"
+    "hint": "processor"
   },
   {
     "word": "construction",
@@ -573,7 +573,7 @@
   },
   {
     "word": "collection",
-    "hint": "publication"
+    "hint": "gathering"
   },
   {
     "word": "friday",
@@ -581,7 +581,7 @@
   },
   {
     "word": "dad",
-    "hint": "begetter"
+    "hint": "father"
   },
   {
     "word": "hotel",
@@ -593,11 +593,11 @@
   },
   {
     "word": "leader",
-    "hint": "theme"
+    "hint": "captain"
   },
   {
     "word": "nobody",
-    "hint": "commoner"
+    "hint": "anonymous"
   },
   {
     "word": "product",
@@ -717,7 +717,7 @@
   },
   {
     "word": "texas",
-    "hint": "wild"
+    "hint": "state"
   },
   {
     "word": "advice",
@@ -737,7 +737,7 @@
   },
   {
     "word": "peter",
-    "hint": "johndoe"
+    "hint": "apostle"
   },
   {
     "word": "teacher",
@@ -749,15 +749,15 @@
   },
   {
     "word": "agency",
-    "hint": "fbi"
+    "hint": "bureau"
   },
   {
     "word": "camera",
-    "hint": "lens"
+    "hint": "photography"
   },
   {
     "word": "cell",
-    "hint": "prison"
+    "hint": "biology"
   },
   {
     "word": "economy",
@@ -769,7 +769,7 @@
   },
   {
     "word": "hall",
-    "hint": "entry"
+    "hint": "corridor"
   },
   {
     "word": "mission",
@@ -793,11 +793,11 @@
   },
   {
     "word": "coffee",
-    "hint": "bean"
+    "hint": "caffeine"
   },
   {
     "word": "division",
-    "hint": "math"
+    "hint": "split"
   },
   {
     "word": "freedom",
@@ -805,11 +805,11 @@
   },
   {
     "word": "library",
-    "hint": "books"
+    "hint": "shelves"
   },
   {
     "word": "location",
-    "hint": "city"
+    "hint": "place"
   },
   {
     "word": "protection",
@@ -821,15 +821,15 @@
   },
   {
     "word": "speech",
-    "hint": "dialogue"
+    "hint": "address"
   },
   {
     "word": "airport",
-    "hint": "gate"
+    "hint": "runway"
   },
   {
     "word": "engine",
-    "hint": "gear"
+    "hint": "motor"
   },
   {
     "word": "investment",
@@ -861,11 +861,11 @@
   },
   {
     "word": "tom",
-    "hint": "cat"
+    "hint": "name"
   },
   {
     "word": "arms",
-    "hint": "wings"
+    "hint": "limbs"
   },
   {
     "word": "estate",
@@ -877,7 +877,7 @@
   },
   {
     "word": "generation",
-    "hint": "evolution"
+    "hint": "offspring"
   },
   {
     "word": "louis",
@@ -917,7 +917,7 @@
   },
   {
     "word": "artist",
-    "hint": "painting"
+    "hint": "creator"
   },
   {
     "word": "edition",
@@ -945,7 +945,7 @@
   },
   {
     "word": "remains",
-    "hint": "grave"
+    "hint": "leftovers"
   },
   {
     "word": "senate",
@@ -969,11 +969,11 @@
   },
   {
     "word": "christ",
-    "hint": "baptism"
+    "hint": "savior"
   },
   {
     "word": "television",
-    "hint": "screen"
+    "hint": "broadcast"
   },
   {
     "word": "usa",
@@ -997,7 +997,7 @@
   },
   {
     "word": "charles",
-    "hint": "king"
+    "hint": "name"
   },
   {
     "word": "concept",
@@ -1005,7 +1005,7 @@
   },
   {
     "word": "inc",
-    "hint": "rise"
+    "hint": "company"
   },
   {
     "word": "israel",
@@ -1025,11 +1025,11 @@
   },
   {
     "word": "software",
-    "hint": "code"
+    "hint": "program"
   },
   {
     "word": "apple",
-    "hint": "fruit"
+    "hint": "orchard"
   },
   {
     "word": "birthday",
@@ -1053,7 +1053,7 @@
   },
   {
     "word": "volume",
-    "hint": "loud"
+    "hint": "size"
   },
   {
     "word": "beauty",
@@ -1065,7 +1065,7 @@
   },
   {
     "word": "driver",
-    "hint": "pilot"
+    "hint": "vehicle"
   },
   {
     "word": "investigation",
@@ -1077,7 +1077,7 @@
   },
   {
     "word": "variety",
-    "hint": "accumulation"
+    "hint": "diversity"
   },
   {
     "word": "violence",
@@ -1089,7 +1089,7 @@
   },
   {
     "word": "henry",
-    "hint": "king"
+    "hint": "name"
   },
   {
     "word": "injury",
@@ -1101,7 +1101,7 @@
   },
   {
     "word": "martin",
-    "hint": "john"
+    "hint": "name"
   },
   {
     "word": "parliament",
@@ -1129,7 +1129,7 @@
   },
   {
     "word": "mountain",
-    "hint": "peak"
+    "hint": "summit"
   },
   {
     "word": "presence",
@@ -1145,7 +1145,7 @@
   },
   {
     "word": "victory",
-    "hint": "defeat"
+    "hint": "triumph"
   },
   {
     "word": "afternoon",
@@ -1161,7 +1161,7 @@
   },
   {
     "word": "emergency",
-    "hint": "calm"
+    "hint": "urgent"
   },
   {
     "word": "failure",
@@ -1173,7 +1173,7 @@
   },
   {
     "word": "hello",
-    "hint": "goodbye"
+    "hint": "greeting"
   },
   {
     "word": "johnson",
@@ -1181,7 +1181,7 @@
   },
   {
     "word": "prince",
-    "hint": "king"
+    "hint": "royalty"
   },
   {
     "word": "scott",
@@ -1225,7 +1225,7 @@
   },
   {
     "word": "vice",
-    "hint": "corruption"
+    "hint": "deputy"
   },
   {
     "word": "arts",
@@ -1233,7 +1233,7 @@
   },
   {
     "word": "beer",
-    "hint": "lager"
+    "hint": "brewery"
   },
   {
     "word": "dick",
@@ -1249,7 +1249,7 @@
   },
   {
     "word": "ocean",
-    "hint": "wave"
+    "hint": "tide"
   },
   {
     "word": "appearance",
@@ -1261,7 +1261,7 @@
   },
   {
     "word": "behavior",
-    "hint": "theme"
+    "hint": "conduct"
   },
   {
     "word": "ben",
@@ -1301,7 +1301,7 @@
   },
   {
     "word": "restaurant",
-    "hint": "eat"
+    "hint": "menu"
   },
   {
     "word": "scotland",
@@ -1337,7 +1337,7 @@
   },
   {
     "word": "platform",
-    "hint": "stage"
+    "hint": "foundation"
   },
   {
     "word": "squad",
@@ -1361,7 +1361,7 @@
   },
   {
     "word": "jersey",
-    "hint": "sport"
+    "hint": "shirt"
   },
   {
     "word": "leg",
@@ -1405,7 +1405,7 @@
   },
   {
     "word": "kitchen",
-    "hint": "pan"
+    "hint": "cooking"
   },
   {
     "word": "korea",
@@ -1413,7 +1413,7 @@
   },
   {
     "word": "acts",
-    "hint": "theater"
+    "hint": "actions"
   },
   {
     "word": "aircraft",
@@ -1465,7 +1465,7 @@
   },
   {
     "word": "mode",
-    "hint": "transport"
+    "hint": "setting"
   },
   {
     "word": "stadium",
@@ -1533,11 +1533,11 @@
   },
   {
     "word": "assembly",
-    "hint": "machine"
+    "hint": "gathering"
   },
   {
     "word": "combination",
-    "hint": "lock"
+    "hint": "mixture"
   },
   {
     "word": "customer",
@@ -1601,7 +1601,7 @@
   },
   {
     "word": "resolution",
-    "hint": "newyear"
+    "hint": "decision"
   },
   {
     "word": "spain",
@@ -1617,7 +1617,7 @@
   },
   {
     "word": "attitude",
-    "hint": "confidence"
+    "hint": "mindset"
   },
   {
     "word": "brazil",
@@ -1625,7 +1625,7 @@
   },
   {
     "word": "definition",
-    "hint": "dictionary"
+    "hint": "meaning"
   },
   {
     "word": "guest",
@@ -1665,7 +1665,7 @@
   },
   {
     "word": "andrew",
-    "hint": "john"
+    "hint": "name"
   },
   {
     "word": "category",
@@ -1805,11 +1805,11 @@
   },
   {
     "word": "baseball",
-    "hint": "sport"
+    "hint": "diamond"
   },
   {
     "word": "bathroom",
-    "hint": "toilet"
+    "hint": "sink"
   },
   {
     "word": "bible",
@@ -1817,7 +1817,7 @@
   },
   {
     "word": "championship",
-    "hint": "win"
+    "hint": "finals"
   },
   {
     "word": "client",
@@ -1837,7 +1837,7 @@
   },
   {
     "word": "weapon",
-    "hint": "gun"
+    "hint": "combat"
   },
   {
     "word": "anniversary",
@@ -1873,7 +1873,7 @@
   },
   {
     "word": "battery",
-    "hint": "electric"
+    "hint": "charge"
   },
   {
     "word": "breath",
@@ -1901,7 +1901,7 @@
   },
   {
     "word": "joseph",
-    "hint": "jewel"
+    "hint": "name"
   },
   {
     "word": "singer",
@@ -1909,7 +1909,7 @@
   },
   {
     "word": "theatre",
-    "hint": "actor"
+    "hint": "stage"
   },
   {
     "word": "therapy",
@@ -1929,7 +1929,7 @@
   },
   {
     "word": "comparison",
-    "hint": "same"
+    "hint": "contrast"
   },
   {
     "word": "defence",
@@ -1945,7 +1945,7 @@
   },
   {
     "word": "semi",
-    "hint": "car"
+    "hint": "partial"
   },
   {
     "word": "wealth",
@@ -1965,7 +1965,7 @@
   },
   {
     "word": "employee",
-    "hint": "work"
+    "hint": "worker"
   },
   {
     "word": "miller",
@@ -1973,7 +1973,7 @@
   },
   {
     "word": "neighborhood",
-    "hint": "home"
+    "hint": "community"
   },
   {
     "word": "permission",
@@ -1985,7 +1985,7 @@
   },
   {
     "word": "stephen",
-    "hint": "john"
+    "hint": "name"
   },
   {
     "word": "tradition",
