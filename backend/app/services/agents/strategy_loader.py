@@ -11,6 +11,40 @@ STRATEGIES_PATH = Path(__file__).resolve().parents[2] / "prompts" / "strategies.
 PROMPT_TECHNIQUES = ("zero_shot", "few_shot", "reasoning_guided", "meta")
 DEFAULT_PROMPT_TECHNIQUE = "few_shot"
 
+IMPOSTER_STRATEGY_WEIGHTS_BY_PREVIOUS_CLUE_COUNT: dict[int, dict[str, int]] = {
+    0: {
+        "Abstraction": 50,
+        "Adjacent association": 50,
+    },
+    1: {
+        "Abstraction": 40,
+        "Adjacent association": 40,
+        "Ride previous clues": 10,
+        "Contextual guess": 10,
+    },
+    2: {
+        "Abstraction": 25,
+        "Adjacent association": 25,
+        "Ride previous clues": 20,
+        "Contextual guess": 20,
+        "Cluster matching": 10,
+    },
+    3: {
+        "Abstraction": 10,
+        "Adjacent association": 10,
+        "Ride previous clues": 30,
+        "Contextual guess": 30,
+        "Cluster matching": 20,
+    },
+    4: {
+        "Abstraction": 5,
+        "Adjacent association": 5,
+        "Ride previous clues": 25,
+        "Contextual guess": 25,
+        "Cluster matching": 40,
+    },
+}
+
 
 def normalize_prompt_technique(technique: str | None) -> str:
     if technique is None:
@@ -43,12 +77,41 @@ def load_strategy_group(
     )
 
 
-def assign_non_imposter_clue_strategy(technique: str | None = None,) -> dict[str, str]:
+def assign_non_imposter_clue_strategy(technique: str | None = None) -> dict[str, str]:
     return random.choice(load_strategy_group("non_imposter", technique))
 
 
-def assign_imposter_clue_strategy(technique: str | None = None) -> dict[str, str]:
-    return random.choice(load_strategy_group("imposter", technique))
+def assign_imposter_clue_strategy(
+    technique: str | None = None,
+    previous_clue_count: int = 0,
+) -> dict[str, str]:
+    strategies = load_strategy_group("imposter", technique)
+    strategy_weights = _imposter_strategy_weights_for_previous_clues(previous_clue_count)
+    return _weighted_strategy_choice(strategies, strategy_weights)
+
+
+def _imposter_strategy_weights_for_previous_clues(previous_clue_count: int) -> dict[str, int]:
+    normalized_count = max(0, min(previous_clue_count, 4))
+    return IMPOSTER_STRATEGY_WEIGHTS_BY_PREVIOUS_CLUE_COUNT[normalized_count]
+
+
+def _weighted_strategy_choice(
+    strategies: tuple[dict[str, str], ...],
+    strategy_weights: dict[str, int],
+) -> dict[str, str]:
+    weighted_strategies = [
+        (strategy, strategy_weights[strategy["name"]])
+        for strategy in strategies
+        if strategy["name"] in strategy_weights and strategy_weights[strategy["name"]] > 0
+    ]
+    if not weighted_strategies:
+        return random.choice(strategies)
+
+    return random.choices(
+        [strategy for strategy, _weight in weighted_strategies],
+        weights=[weight for _strategy, weight in weighted_strategies],
+        k=1,
+    )[0]
 
 
 def _parse_strategy(
