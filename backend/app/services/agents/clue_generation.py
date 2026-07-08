@@ -17,10 +17,11 @@ def build_instruction_clue_user_prompt(
         ) + "\n"
 
     if secret_word is None:
-        strategy = assign_imposter_clue_strategy(
-            strategy.get("technique") if strategy else None,
-            previous_clue_count=len(previous_clues),
-        )
+        if strategy is None:
+            strategy = assign_imposter_clue_strategy(
+                None,
+                previous_clue_count=len(previous_clues),
+            )
         strategy_prompt = strategy["prompt"]
         return (
             "You are the imposter. You do not know the secret word.\n"
@@ -37,6 +38,7 @@ def build_instruction_clue_user_prompt(
         f"Word: {secret_word}\n"
         f"{previous_clue_block}"
         "Output requirements:\n"
+        "- Do not use the word itself.\n"
         "- Return JSON with exactly this shape: {\"clue\":\"your phrase\"}\n"
     )
 

@@ -49,11 +49,7 @@ class InferenceServiceError(Exception):
 class InferenceClient:
     def __init__(self, settings) -> None:
         self.settings = settings
-        self.llm_config = (
-            settings.load_llm_config()
-            if hasattr(settings, "load_llm_config")
-            else settings.llm_config
-        )
+        self.llm_config = settings.llm_config
 
     async def embed(self, texts: list[str]) -> EmbeddingResult:
         if self.settings.inference_mode == "fake":

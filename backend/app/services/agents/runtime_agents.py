@@ -4,7 +4,7 @@ from pathlib import Path
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
-from app.core.config import settings
+from app.core.config import Settings
 from app.services.agents.agent_config_store import get_active_agent_config, list_active_agent_configs
 from app.services.agents.inference import AgentConfig
 
@@ -25,7 +25,7 @@ def get_static_agent_config(agent_id: str) -> AgentConfig | None:
     )
 
 
-def list_runtime_agent_configs(db: Session) -> list[AgentConfig]:
+def list_runtime_agent_configs(db: Session, settings: Settings) -> list[AgentConfig]:
     if settings.agent_config_source != "database":
         return list_static_agent_configs()
 
@@ -37,7 +37,11 @@ def list_runtime_agent_configs(db: Session) -> list[AgentConfig]:
     return agents or list_static_agent_configs()
 
 
-def get_runtime_agent_config(db: Session, agent_id: str) -> AgentConfig | None:
+def get_runtime_agent_config(
+    db: Session,
+    agent_id: str,
+    settings: Settings,
+) -> AgentConfig | None:
     if settings.agent_config_source != "database":
         return get_static_agent_config(agent_id)
 

@@ -5,8 +5,6 @@ import random
 from pathlib import Path
 from typing import Any
 
-from app.core.config import settings
-
 STRATEGIES_PATH = Path(__file__).resolve().parents[2] / "prompts" / "strategies.json"
 PROMPT_TECHNIQUES = ("zero_shot", "few_shot", "reasoning_guided", "meta")
 DEFAULT_PROMPT_TECHNIQUE = "few_shot"
@@ -39,9 +37,9 @@ IMPOSTER_STRATEGY_WEIGHTS_BY_PREVIOUS_CLUE_COUNT: dict[int, dict[str, int]] = {
     4: {
         "Abstraction": 5,
         "Adjacent association": 5,
-        "Ride previous clues": 30,
-        "Contextual guess": 30,
-        "Cluster matching": 30,
+        "Ride previous clues": 25,
+        "Contextual guess": 25,
+        "Cluster matching": 40,
     },
 }
 
@@ -69,12 +67,24 @@ def load_strategy_group(
     if not isinstance(raw_group, list):
         raise ValueError(f"strategies.json must contain a {group_name!r} list")
 
-    technique = normalize_prompt_technique(technique or settings.clue_prompt_technique)
+    technique = normalize_prompt_technique(technique)
 
     return tuple(
         _parse_strategy(group_name, index, strategy, technique)
         for index, strategy in enumerate(raw_group)
     )
+
+
+def load_non_imposter_clue_strategies(
+    technique: str | None = None,
+) -> tuple[dict[str, str], ...]:
+    return _without_technique(load_strategy_group("non_imposter", technique))
+
+
+def load_imposter_clue_strategies(
+    technique: str | None = None,
+) -> tuple[dict[str, str], ...]:
+    return _without_technique(load_strategy_group("imposter", technique))
 
 
 def assign_non_imposter_clue_strategy(technique: str | None = None) -> dict[str, str]:
@@ -86,8 +96,21 @@ def assign_imposter_clue_strategy(
     previous_clue_count: int = 0,
 ) -> dict[str, str]:
     strategies = load_strategy_group("imposter", technique)
-    strategy_weights = IMPOSTER_STRATEGY_WEIGHTS_BY_PREVIOUS_CLUE_COUNT[max(0, min(previous_clue_count, 4))]
+    strategy_weights = _imposter_strategy_weights_for_previous_clues(previous_clue_count)
     return _weighted_strategy_choice(strategies, strategy_weights)
+
+
+def _imposter_strategy_weights_for_previous_clues(previous_clue_count: int) -> dict[str, int]:
+    return IMPOSTER_STRATEGY_WEIGHTS_BY_PREVIOUS_CLUE_COUNT[
+        max(0, min(previous_clue_count, 4))
+    ]
+
+
+def _without_technique(strategies: tuple[dict[str, str], ...]) -> tuple[dict[str, str], ...]:
+    return tuple(
+        {"name": strategy["name"], "prompt": strategy["prompt"]}
+        for strategy in strategies
+    )
 
 
 def _weighted_strategy_choice(

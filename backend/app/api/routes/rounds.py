@@ -8,7 +8,7 @@ from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
-from app.core.config import settings
+from app.core.config import Settings, get_app_settings
 from app.db.session import get_db
 from app.services.agents.clue_generation import (
     build_instruction_batched_clue_user_prompt,
@@ -143,6 +143,7 @@ def to_round_response(round_state: RoundState) -> RoundResponse:
 async def advance_clue_generation(
     round_state: RoundState,
     agents: list[AgentConfig],
+    settings: Settings,
     stop_after_first_agent: bool = False,
 ) -> None:
     agents_by_id = {agent.id: agent for agent in agents}
@@ -169,6 +170,7 @@ async def advance_clue_generation(
                     round_state,
                     segment[0],
                     opening_turn.responses,
+                    settings,
                 )
                 opening_turn.responses.append(response)
                 round_state.current_player_index += 1
@@ -179,6 +181,7 @@ async def advance_clue_generation(
                 round_state,
                 segment,
                 opening_turn.responses,
+                settings,
             )
             opening_turn.responses.extend(responses)
             round_state.current_player_index += len(segment)
@@ -188,13 +191,17 @@ async def advance_clue_generation(
     round_state.status = "ready_to_vote"
 
 
-async def continue_clue_generation(round_id: str, agents: list[AgentConfig]) -> None:
+async def continue_clue_generation(
+    round_id: str,
+    agents: list[AgentConfig],
+    settings: Settings,
+) -> None:
     round_state = ROUNDS.get(round_id)
     if round_state is None:
         return
 
     try:
-        await advance_clue_generation(round_state, agents)
+        await advance_clue_generation(round_state, agents, settings)
     except HTTPException:
         round_state.status = "generation_failed"
 
@@ -244,6 +251,7 @@ async def generate_agent_segment(
     round_state: RoundState,
     agents: list[AgentConfig],
     previous_responses: list[AgentTurnResponse],
+    settings: Settings,
 ) -> list[AgentTurnResponse]:
     if not agents:
         return []
@@ -258,6 +266,7 @@ async def generate_agent_segment(
             round_state,
             first_agent,
             working_previous_responses,
+            settings,
         )
         generated_by_agent_id[first_agent.id] = first_response
         working_previous_responses.append(first_response)
@@ -272,6 +281,7 @@ async def generate_agent_segment(
             round_state,
             remaining_non_imposters,
             working_previous_responses,
+            settings,
         )
         for response in non_imposter_responses:
             generated_by_agent_id[response.agent_id] = response
@@ -290,6 +300,7 @@ async def generate_agent_segment(
             round_state,
             imposter_agent,
             working_previous_responses,
+            settings,
         )
         generated_by_agent_id[imposter_agent.id] = imposter_response
 
@@ -304,6 +315,7 @@ async def generate_agent_clue(
     round_state: RoundState,
     agent: AgentConfig,
     previous_responses: list[AgentTurnResponse],
+    settings: Settings,
 ) -> AgentTurnResponse:
     client = InferenceClient(settings=settings)
     agent_is_imposter = agent.id == round_state.imposter_player_id
@@ -342,6 +354,7 @@ async def generate_non_imposter_agent_batch(
     round_state: RoundState,
     agents: list[AgentConfig],
     previous_responses: list[AgentTurnResponse],
+    settings: Settings,
 ) -> list[AgentTurnResponse]:
     player_names = [agent.name for agent in agents]
     client = InferenceClient(settings=settings)
@@ -422,7 +435,10 @@ def get_player_names_by_id_from_round(round_state: RoundState) -> dict[str, str]
     return names_by_id
 
 
-def select_round_word(payload: CreateRoundRequest | None) -> tuple[str, str]:
+def select_round_word(
+    payload: CreateRoundRequest | None,
+    settings: Settings,
+) -> tuple[str, str]:
     if settings.word_selection_mode == "fixed":
         secret_word = payload.secret_word if payload and payload.secret_word else settings.fixed_secret_word
         imposter_hint = payload.imposter_hint if payload and payload.imposter_hint else settings.fixed_imposter_hint
@@ -436,9 +452,10 @@ def select_round_word(payload: CreateRoundRequest | None) -> tuple[str, str]:
 async def create_round(
     background_tasks: BackgroundTasks,
     payload: CreateRoundRequest | None = None,
+    settings: Settings = Depends(get_app_settings),
     db: Session = Depends(get_db),
 ) -> RoundResponse:
-    agents = list_runtime_agent_configs(db)
+    agents = list_runtime_agent_configs(db, settings)
     if not agents:
         raise HTTPException(status_code=500, detail="No agents configured")
 
@@ -449,7 +466,7 @@ async def create_round(
         HUMAN_PLAYER_ID: HUMAN_PLAYER_NAME,
         **{agent.id: agent.name for agent in agents},
     }
-    secret_word, imposter_hint = select_round_word(payload)
+    secret_word, imposter_hint = select_round_word(payload, settings)
     prompt_technique = (
         payload.prompt_technique.strip()
         if payload is not None and payload.prompt_technique is not None
@@ -481,10 +498,11 @@ async def create_round(
     await advance_clue_generation(
         round_state,
         agents,
+        settings,
         stop_after_first_agent=True,
     )
     if round_state.status == "generating_clues":
-        background_tasks.add_task(continue_clue_generation, round_state.id, agents)
+        background_tasks.add_task(continue_clue_generation, round_state.id, agents, settings)
     return to_round_response(round_state)
 
 
@@ -502,6 +520,7 @@ async def submit_clue(
     round_id: str,
     payload: SubmitClueRequest,
     db: Session = Depends(get_db),
+    settings: Settings = Depends(get_app_settings),
 ) -> RoundResponse:
     round_state = ROUNDS.get(round_id)
     if round_state is None:
@@ -519,8 +538,8 @@ async def submit_clue(
         raise HTTPException(status_code=422, detail="Human clue cannot be blank")
 
     round_state.human_clue = human_clue
-    agents = list_runtime_agent_configs(db)
-    await advance_clue_generation(round_state, agents)
+    agents = list_runtime_agent_configs(db, settings)
+    await advance_clue_generation(round_state, agents, settings)
 
     return to_round_response(round_state)
 
@@ -530,18 +549,19 @@ async def vote(
     round_id: str,
     payload: VoteRequest,
     db: Session = Depends(get_db),
+    settings: Settings = Depends(get_app_settings),
 ) -> VoteResponse:
     round_state = ROUNDS.get(round_id)
     if round_state is None:
         raise HTTPException(status_code=404, detail="Unknown round")
 
-    voted_agent = get_runtime_agent_config(db, payload.agent_id)
+    voted_agent = get_runtime_agent_config(db, payload.agent_id, settings)
     if voted_agent is None:
         raise HTTPException(status_code=404, detail="Unknown agent")
     if round_state.status != "ready_to_vote":
         raise HTTPException(status_code=409, detail="Round is not ready for voting")
 
-    agents = list_runtime_agent_configs(db)
+    agents = list_runtime_agent_configs(db, settings)
     try:
         return await submit_round_vote(
             round_state,

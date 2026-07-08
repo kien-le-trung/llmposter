@@ -16,7 +16,7 @@ def test_health_check() -> None:
 def test_default_llm_config_uses_openrouter() -> None:
     settings = Settings(_env_file=None)
 
-    llm_config = settings.load_llm_config()
+    llm_config = settings.llm_config
     assert llm_config.provider == "openrouter"
     assert llm_config.model == "openrouter/free"
 

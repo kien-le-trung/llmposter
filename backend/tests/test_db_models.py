@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 
 from app.db.models import AgentConfigModel
 from app.db.session import Base
+from app.core.config import Settings
 from app.services.agents.runtime_agents import get_runtime_agent_config, list_runtime_agent_configs
 
 
@@ -35,9 +36,8 @@ def test_agent_config_model_can_persist() -> None:
 
 
 def test_runtime_agent_configs_read_from_database(monkeypatch) -> None:
-    from app.services.agents import runtime_agents
-
-    monkeypatch.setattr(runtime_agents.settings, "agent_config_source", "database")
+    settings = Settings(_env_file=None)
+    settings.agent_config_source = "database"
     engine = create_engine("sqlite:///:memory:")
     Base.metadata.create_all(bind=engine)
 
@@ -56,8 +56,8 @@ def test_runtime_agent_configs_read_from_database(monkeypatch) -> None:
         )
         db.commit()
 
-        agents = list_runtime_agent_configs(db)
-        agent = get_runtime_agent_config(db, "agent_db")
+        agents = list_runtime_agent_configs(db, settings)
+        agent = get_runtime_agent_config(db, "agent_db", settings)
 
     assert [agent.id for agent in agents] == ["agent_db"]
     assert agent is not None

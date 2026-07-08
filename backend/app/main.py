@@ -2,12 +2,15 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.routes import admin, agents, health, rounds
-from app.core.config import settings
+from app.core.config import Settings, get_settings
 from app.services.metrics import finish_request_trace, start_request_trace
 
 
-def create_app() -> FastAPI:
-    app = FastAPI(title=settings.app_name)
+def create_app(app_settings: Settings | None = None) -> FastAPI:
+    active_settings = app_settings if app_settings is not None else get_settings()
+    
+    app = FastAPI(title=active_settings.app_name)
+    app.state.settings = active_settings
 
     @app.middleware("http")
     async def record_request_metrics(request, call_next):
@@ -22,8 +25,8 @@ def create_app() -> FastAPI:
 
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=settings.cors_origins,
-        allow_origin_regex=settings.backend_cors_origin_regex,
+        allow_origins=active_settings.cors_origins,
+        allow_origin_regex=active_settings.backend_cors_origin_regex,
         allow_credentials=True,
         allow_methods=["*"],
         allow_headers=["*"],
