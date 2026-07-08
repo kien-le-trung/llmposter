@@ -1,0 +1,16 @@
+{
+  "mode": "batched",
+  "prompt_technique": "few_shot",
+  "repetitions": 1,
+  "case_count": 10,
+  "round_count": 10,
+  "success_rate": 1.0,
+  "generation_failed_rate": 0.0,
+  "timeout_rate": 0.0,
+  "average_latency_ms": 3989.852049993351,
+  "median_latency_ms": 4112.320399959572,
+  "p95_latency_ms": 4699.6186000760645,
+  "average_create_latency_ms": 1016.0644699935801,
+  "average_continuation_latency_ms": 1326.5940899844281,
+  "average_generated_agent_clue_count": 4.0
+}

@@ -46,11 +46,6 @@ experiments/voting_benchmarking/results/*.csv
 experiments/voting_benchmarking/results/*.md
 experiments/voting_benchmarking/mlflow.db
 !experiments/voting_benchmarking/results/.gitkeep
-experiments/batching_benchmarking/results/*.jsonl
-experiments/batching_benchmarking/results/*.json
-experiments/batching_benchmarking/results/*.csv
-experiments/batching_benchmarking/results/*.md
-!experiments/batching_benchmarking/results/.gitkeep
 mlruns/
 
 # OS / editor
