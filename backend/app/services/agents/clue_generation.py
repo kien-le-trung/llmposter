@@ -1,5 +1,7 @@
 import re
 
+from app.services.agents.strategy_loader import assign_imposter_clue_strategy
+
 
 def build_instruction_clue_user_prompt(
     secret_word: str | None,
@@ -15,6 +17,10 @@ def build_instruction_clue_user_prompt(
         ) + "\n"
 
     if secret_word is None:
+        strategy = assign_imposter_clue_strategy(
+            strategy.get("technique") if strategy else None,
+            previous_clue_count=len(previous_clues),
+        )
         strategy_prompt = strategy["prompt"]
         return (
             "You are the imposter. You do not know the secret word.\n"
@@ -41,7 +47,6 @@ def build_instruction_batched_clue_user_prompt(
     strategies_by_player_name: dict[str, dict[str, str]] | None = None,
     previous_clues: list[tuple[str, str]] | None = None,
 ) -> str:
-    
     if not previous_clues:
         previous_clue_block = "Previous clues: none\n"
     else:
@@ -104,7 +109,7 @@ def clean_clue_response(
 ) -> str:
     clue = _first_output_line(response_text)
     clue = re.sub(r"^(clue|answer|output)\s*:\s*", "", clue, flags=re.IGNORECASE)
-    clue = clue.strip().strip("\"'` .,!?:;")
+    clue = clue.strip().strip("\"'` .,!?;:")
 
     words = re.findall(r"[A-Za-z0-9][A-Za-z0-9'-]*", clue)
     if len(words) > 5:
