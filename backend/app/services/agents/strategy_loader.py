@@ -39,9 +39,9 @@ IMPOSTER_STRATEGY_WEIGHTS_BY_PREVIOUS_CLUE_COUNT: dict[int, dict[str, int]] = {
     4: {
         "Abstraction": 5,
         "Adjacent association": 5,
-        "Ride previous clues": 25,
-        "Contextual guess": 25,
-        "Cluster matching": 40,
+        "Ride previous clues": 30,
+        "Contextual guess": 30,
+        "Cluster matching": 30,
     },
 }
 
@@ -86,13 +86,8 @@ def assign_imposter_clue_strategy(
     previous_clue_count: int = 0,
 ) -> dict[str, str]:
     strategies = load_strategy_group("imposter", technique)
-    strategy_weights = _imposter_strategy_weights_for_previous_clues(previous_clue_count)
+    strategy_weights = IMPOSTER_STRATEGY_WEIGHTS_BY_PREVIOUS_CLUE_COUNT[max(0, min(previous_clue_count, 4))]
     return _weighted_strategy_choice(strategies, strategy_weights)
-
-
-def _imposter_strategy_weights_for_previous_clues(previous_clue_count: int) -> dict[str, int]:
-    normalized_count = max(0, min(previous_clue_count, 4))
-    return IMPOSTER_STRATEGY_WEIGHTS_BY_PREVIOUS_CLUE_COUNT[normalized_count]
 
 
 def _weighted_strategy_choice(
