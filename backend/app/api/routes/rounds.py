@@ -277,15 +277,28 @@ async def generate_agent_segment(
         if agent.id != round_state.imposter_player_id and agent.id not in generated_by_agent_id
     ]
     if remaining_non_imposters:
-        non_imposter_responses = await generate_non_imposter_agent_batch(
-            round_state,
-            remaining_non_imposters,
-            working_previous_responses,
-            settings,
-        )
+        if settings.batch_prompting:
+            non_imposter_responses = await generate_non_imposter_agent_batch(
+                round_state,
+                remaining_non_imposters,
+                working_previous_responses,
+                settings,
+            )
+        else:
+            non_imposter_responses = []
+            for agent in remaining_non_imposters:
+                response = await generate_agent_clue(
+                    round_state,
+                    agent,
+                    working_previous_responses,
+                    settings,
+                )
+                non_imposter_responses.append(response)
+                working_previous_responses.append(response)
         for response in non_imposter_responses:
             generated_by_agent_id[response.agent_id] = response
-        working_previous_responses.extend(non_imposter_responses)
+        if settings.batch_prompting:
+            working_previous_responses.extend(non_imposter_responses)
 
     imposter_agent = next(
         (

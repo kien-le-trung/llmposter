@@ -66,6 +66,7 @@ class Settings(BaseSettings):
     word_selection_mode: str = Field(default="random")
     fixed_secret_word: str = Field(default="satellite")
     fixed_imposter_hint: str = Field(default="orbit")
+    batch_prompting: bool = True
 
     model_config = SettingsConfigDict(
         env_file=BACKEND_ENV_FILE,

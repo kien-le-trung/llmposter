@@ -1,13 +1,13 @@
 {
   "llm_config": {
-    "name": "cpu_model",
+    "name": "cpu_model_unbatched",
     "provider": "ollama",
     "chat_url": "http://localhost:11434/v1/chat/completions",
     "model": "qwen2.5:1.5b",
     "api_key_env": null,
     "min_max_tokens": 128,
     "structured_max_tokens": 512,
-    "notes": "CPU-friendly local Ollama model config."
+    "notes": "CPU-friendly local Ollama model config with per-agent clue prompting."
   },
   "embedding_model_server_url": "http://localhost:11434",
   "embedding_model_name": "nomic-embed-text",
@@ -15,5 +15,5 @@
   "agent_config_source": "static",
   "clue_prompt_technique": "few_shot",
   "word_selection_mode": "random",
-  "batch_prompting": true
+  "batch_prompting": false
 }

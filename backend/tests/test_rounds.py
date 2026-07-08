@@ -234,6 +234,35 @@ def test_opening_clues_generate_first_agent_then_batch_remaining_non_imposters(m
     ]
 
 
+def test_unbatched_prompting_generates_remaining_non_imposters_individually(monkeypatch) -> None:
+    prompts: list[str] = []
+    agents = list_agent_configs()
+
+    async def record_prompt(self, request):
+        prompts.append(request.prompt)
+        return InferenceResult(text=f'{{"clue":"clue {len(prompts)}"}}', inference_mode="fake")
+
+    monkeypatch.setattr(rounds.InferenceClient, "generate", record_prompt)
+    monkeypatch.setattr(rounds, "choice", lambda player_ids: rounds.HUMAN_PLAYER_ID)
+    set_playing_order(monkeypatch, [agents[0].id, agents[1].id, rounds.HUMAN_PLAYER_ID])
+    client = build_test_client(batch_prompting=False)
+
+    response = client.post("/rounds", json={"secret_word": "satellite"})
+
+    assert response.status_code == 201
+    body = response.json()
+    assert body["status"] == "generating_clues"
+    assert len(prompts) == 2
+    assert all('"clues"' not in prompt for prompt in prompts)
+    assert [response["agent_response"] for response in body["turns"][0]["responses"]] == [
+        "clue 1",
+    ]
+    assert [response.agent_response for response in rounds.ROUNDS[body["id"]].turns[0].responses] == [
+        "clue 1",
+        "clue 2",
+    ]
+
+
 def test_submit_human_clue_resumes_and_batches_remaining_non_imposters(monkeypatch) -> None:
     prompts: list[str] = []
     agents = list_agent_configs()

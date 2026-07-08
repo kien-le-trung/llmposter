@@ -1,13 +1,13 @@
 {
   "llm_config": {
-    "name": "cpu_model",
-    "provider": "ollama",
-    "chat_url": "http://localhost:11434/v1/chat/completions",
-    "model": "qwen2.5:1.5b",
+    "name": "qwen7b_batched",
+    "provider": "openai_compatible",
+    "chat_url": "http://localhost:8888/v1/chat/completions",
+    "model": "Qwen/Qwen2.5-7B-Instruct",
     "api_key_env": null,
     "min_max_tokens": 128,
     "structured_max_tokens": 512,
-    "notes": "CPU-friendly local Ollama model config."
+    "notes": "Self-hosted Qwen 7B endpoint with batched non-imposter prompting."
   },
   "embedding_model_server_url": "http://localhost:11434",
   "embedding_model_name": "nomic-embed-text",

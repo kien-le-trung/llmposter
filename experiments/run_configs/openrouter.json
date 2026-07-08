@@ -14,5 +14,6 @@
   "inference_mode": "remote",
   "agent_config_source": "static",
   "clue_prompt_technique": "few_shot",
-  "word_selection_mode": "random"
+  "word_selection_mode": "random",
+  "batch_prompting": true
 }

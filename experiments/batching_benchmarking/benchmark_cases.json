@@ -1,0 +1,12 @@
+[
+  {"secret_word": "family", "imposter_hint": "organization", "human_clue": "close circle"},
+  {"secret_word": "money", "imposter_hint": "standard", "human_clue": "paper value"},
+  {"secret_word": "music", "imposter_hint": "sound", "human_clue": "rhythm notes"},
+  {"secret_word": "country", "imposter_hint": "territory", "human_clue": "bordered land"},
+  {"secret_word": "car", "imposter_hint": "vehicle", "human_clue": "four wheels"},
+  {"secret_word": "story", "imposter_hint": "message", "human_clue": "plot twist"},
+  {"secret_word": "health", "imposter_hint": "welfare", "human_clue": "doctor visit"},
+  {"secret_word": "news", "imposter_hint": "information", "human_clue": "morning headline"},
+  {"secret_word": "video", "imposter_hint": "telecom", "human_clue": "moving screen"},
+  {"secret_word": "food", "imposter_hint": "matter", "human_clue": "dinner plate"}
+]
