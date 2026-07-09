@@ -27,8 +27,8 @@ class VoteCountResponse(BaseModel):
 
 
 class VoteResponse(BaseModel):
-    voted_agent_id: str
-    voted_agent_name: str
+    voted_agent_id: str | None
+    voted_agent_name: str | None
     secret_word: str
     imposter_was: str
     agent_votes: list[AgentVoteResponse]
@@ -46,7 +46,7 @@ class VotingStateError(Exception):
 async def submit_round_vote(
     round_state: Any,
     agents: list[AgentConfig],
-    voted_agent: AgentConfig,
+    voted_agent: AgentConfig | None,
     human_clue: str | None,
     settings: Any,
 ) -> VoteResponse:
@@ -57,12 +57,12 @@ async def submit_round_vote(
         human_clue,
     )
     vote_counts, group_voted_player_id = _tally_round_votes(
-        voted_agent.id,
+        voted_agent.id if voted_agent is not None else None,
         agent_votes,
         agents,
     )
 
-    round_state.voted_agent_id = voted_agent.id
+    round_state.voted_agent_id = voted_agent.id if voted_agent is not None else None
     round_state.status = "complete"
 
     imposter_agent = next(
@@ -79,8 +79,8 @@ async def submit_round_vote(
     imposter_won = group_voted_player_id != round_state.imposter_player_id
 
     return VoteResponse(
-        voted_agent_id=voted_agent.id,
-        voted_agent_name=voted_agent.name,
+        voted_agent_id=voted_agent.id if voted_agent is not None else None,
+        voted_agent_name=voted_agent.name if voted_agent is not None else None,
         secret_word=round_state.secret_word,
         imposter_was=imposter_was,
         agent_votes=agent_votes,
@@ -106,11 +106,12 @@ async def _build_embedding_agent_votes(
     phrase_by_player_id = {
         response.agent_id: response.agent_response for response in opening_turn.responses
     }
-    resolved_human_clue = human_clue or round_state.human_clue
-    if resolved_human_clue is None:
-        raise VotingStateError("Human clue has not been submitted")
+    if HUMAN_PLAYER_ID in round_state.playing_order:
+        resolved_human_clue = human_clue or round_state.human_clue
+        if resolved_human_clue is None:
+            raise VotingStateError("Human clue has not been submitted")
 
-    phrase_by_player_id[HUMAN_PLAYER_ID] = resolved_human_clue
+        phrase_by_player_id[HUMAN_PLAYER_ID] = resolved_human_clue
 
     embeddings_by_player_id = await _get_or_create_round_embeddings(
         round_state.id,
@@ -252,12 +253,14 @@ def _resolve_vote_target(vote_text: str, agents: list[AgentConfig]) -> str | Non
 
 
 def _tally_round_votes(
-    human_voted_agent_id: str,
+    human_voted_agent_id: str | None,
     agent_votes: list[AgentVoteResponse],
     agents: list[AgentConfig],
 ) -> tuple[list[VoteCountResponse], str | None]:
     player_names_by_id = _get_player_names_by_id(agents)
-    vote_counter: Counter[str] = Counter([human_voted_agent_id])
+    vote_counter: Counter[str] = Counter()
+    if human_voted_agent_id is not None:
+        vote_counter[human_voted_agent_id] += 1
 
     for agent_vote in agent_votes:
         target_id = _resolve_vote_target(agent_vote.voted_for, agents)

@@ -3,10 +3,12 @@ from __future__ import annotations
 import argparse
 import asyncio
 import json
+import os
 import sys
 from datetime import UTC, datetime
 from math import sqrt
 from pathlib import Path
+from types import SimpleNamespace
 
 import mlflow
 
@@ -58,6 +60,17 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help="Fail the run if semantic feature extraction fails.",
     )
+    parser.add_argument(
+        "--show-progress",
+        action="store_true",
+        help="Print per-run progress while collecting rounds and semantic features.",
+    )
+    parser.add_argument(
+        "--progress-every",
+        type=int,
+        default=1,
+        help="Print progress every N completed rounds or semantic batches.",
+    )
     return parser.parse_args()
 
 
@@ -86,6 +99,8 @@ async def main() -> None:
             timeout_seconds=args.timeout_seconds,
             compute_semantic_features=not args.skip_semantic_features,
             require_semantic_features=args.require_semantic_features,
+            show_progress=args.show_progress,
+            progress_every=args.progress_every,
         )
         await _run_technique_benchmark(
             client=client,
@@ -112,8 +127,19 @@ async def _run_technique_benchmark(
     clue_records: list[ClueRecord] = []
     vote_records: list[VoteRecord] = []
 
-    for _ in range(config.repetitions):
-        for case in cases:
+    total_rounds = config.repetitions * len(cases)
+    completed_round_count = 0
+    for repetition_index in range(config.repetitions):
+        for case_index, case in enumerate(cases):
+            if config.show_progress:
+                print(
+                    "Starting round "
+                    f"{completed_round_count + 1}/{total_rounds} "
+                    f"(technique={config.technique}, "
+                    f"repetition={repetition_index + 1}/{config.repetitions}, "
+                    f"case={case_index + 1}/{len(cases)}, "
+                    f"secret_word={case.secret_word!r})"
+                )
             round_record, case_clues, vote_record = await client.run_case(
                 case,
                 config.technique,
@@ -123,6 +149,15 @@ async def _run_technique_benchmark(
             clue_records.extend(case_clues)
             if vote_record is not None:
                 vote_records.append(vote_record)
+            completed_round_count += 1
+            if _should_report_progress(config, completed_round_count, total_rounds):
+                status = "ok" if round_record.success else "failed"
+                print(
+                    "Completed round "
+                    f"{completed_round_count}/{total_rounds} "
+                    f"(status={status}, latency_ms={round_record.latency_ms:.1f}, "
+                    f"round_id={round_record.round_id})"
+                )
 
     semantic_features = await _build_semantic_features(
         config,
@@ -168,7 +203,7 @@ async def _build_semantic_features(
         return []
 
     try:
-        return await _compute_semantic_features(clues)
+        return await _compute_semantic_features(clues, config)
     except Exception as exc:
         if config.require_semantic_features:
             raise
@@ -176,23 +211,33 @@ async def _build_semantic_features(
         return []
 
 
-async def _compute_semantic_features(clues: list[ClueRecord]) -> list[SemanticFeatureRecord]:
+async def _compute_semantic_features(
+    clues: list[ClueRecord],
+    config: BenchmarkConfig,
+) -> list[SemanticFeatureRecord]:
     backend_path = Path(__file__).resolve().parents[2] / "backend"
     if str(backend_path) not in sys.path:
         sys.path.insert(0, str(backend_path))
 
-    from app.core.config import settings  # noqa: PLC0415
     from app.services.agents.inference import InferenceClient  # noqa: PLC0415
 
     records: list[SemanticFeatureRecord] = []
+    settings = _load_embedding_settings(backend_path)
     client = InferenceClient(settings=settings)
     clues_by_round: dict[str, list[ClueRecord]] = {}
     for clue in clues:
         clues_by_round.setdefault(clue.round_id, []).append(clue)
 
-    for round_clues in clues_by_round.values():
+    total_rounds = len(clues_by_round)
+    for round_index, round_clues in enumerate(clues_by_round.values(), start=1):
         if not round_clues:
             continue
+        if _should_report_progress(config, round_index, total_rounds):
+            print(
+                "Embedding semantic batch "
+                f"{round_index}/{total_rounds} "
+                f"(round_id={round_clues[0].round_id}, clues={len(round_clues)})"
+            )
 
         first_clue = round_clues[0]
         texts = [
@@ -285,6 +330,16 @@ async def _compute_semantic_features(clues: list[ClueRecord]) -> list[SemanticFe
     return records
 
 
+def _should_report_progress(
+    config: BenchmarkConfig,
+    completed_count: int,
+    total_count: int,
+) -> bool:
+    if not config.show_progress:
+        return False
+    return completed_count == total_count or completed_count % config.progress_every == 0
+
+
 def _centroid(vectors: list[list[float]]) -> list[float]:
     dimension = len(vectors[0])
     return [
@@ -319,6 +374,65 @@ def _load_cases(path: Path) -> list[BenchmarkCase]:
     return [BenchmarkCase.model_validate(case) for case in raw_cases]
 
 
+def _load_embedding_settings(backend_path: Path) -> SimpleNamespace:
+    root_path = backend_path.parent
+    return SimpleNamespace(
+        embedding_model_server_url=_get_setting_value(
+            "EMBEDDING_MODEL_SERVER_URL",
+            "http://localhost:11434",
+            backend_path,
+            root_path,
+        ),
+        embedding_model_name=_get_setting_value(
+            "EMBEDDING_MODEL_NAME",
+            "nomic-embed-text",
+            backend_path,
+            root_path,
+        ),
+        inference_mode=_get_setting_value(
+            "INFERENCE_MODE",
+            "remote",
+            backend_path,
+            root_path,
+        ),
+        llm_config=None,
+    )
+
+
+def _get_setting_value(
+    name: str,
+    default: str,
+    backend_path: Path,
+    root_path: Path,
+) -> str:
+    value = os.getenv(name)
+    if value is not None:
+        return value
+
+    for env_path in (backend_path / ".env", root_path / ".env"):
+        value = _read_env_file_value(env_path, name)
+        if value is not None:
+            return value
+
+    return default
+
+
+def _read_env_file_value(env_path: Path, name: str) -> str | None:
+    if not env_path.exists():
+        return None
+
+    for line in env_path.read_text(encoding="utf-8").splitlines():
+        stripped = line.strip()
+        if not stripped or stripped.startswith("#") or "=" not in stripped:
+            continue
+
+        key, value = stripped.split("=", 1)
+        if key.strip() == name:
+            return value.strip().strip("\"'")
+
+    return None
+
+
 def _write_jsonl(path: Path, rows: list[dict]) -> None:
     path.write_text(
         "".join(json.dumps(row, ensure_ascii=False) + "\n" for row in rows),
@@ -340,6 +454,8 @@ def _log_mlflow_run(
         mlflow.log_param("backend_url", config.backend_url)
         mlflow.log_param("compute_semantic_features", config.compute_semantic_features)
         mlflow.log_param("require_semantic_features", config.require_semantic_features)
+        mlflow.log_param("show_progress", config.show_progress)
+        mlflow.log_param("progress_every", config.progress_every)
 
         for metric_name, metric_value in summary.items():
             if isinstance(metric_value, (int, float)):

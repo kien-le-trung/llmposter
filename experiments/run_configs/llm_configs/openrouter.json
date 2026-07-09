@@ -1,0 +1,12 @@
+{
+  "llm_config": {
+    "name": "OpenRouter",
+    "provider": "openrouter",
+    "chat_url": "https://openrouter.ai/api/v1/chat/completions",
+    "model": "openrouter/free",
+    "api_key_env": "OPENROUTER_API_KEY",
+    "min_max_tokens": 10000,
+    "structured_max_tokens": 10000,
+    "notes": "Remote OpenRouter config. Requires OPENROUTER_API_KEY."
+  }
+}

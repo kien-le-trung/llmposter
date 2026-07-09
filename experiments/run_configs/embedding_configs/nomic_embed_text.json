@@ -1,0 +1,4 @@
+{
+  "embedding_model_server_url": "http://localhost:11434",
+  "embedding_model_name": "nomic-embed-text"
+}

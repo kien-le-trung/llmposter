@@ -1,0 +1,18 @@
+{
+  "llm_config": {
+    "name": "self_hosted_LLM_qwen",
+    "provider": "openai_compatible",
+    "chat_url": "http://localhost:8888/v1/chat/completions",
+    "model": "Qwen/Qwen2.5-3B-Instruct",
+    "api_key_env": null,
+    "min_max_tokens": 128,
+    "structured_max_tokens": 512,
+    "notes": "Self-hosted OpenAI-compatible Qwen endpoint."
+  },
+  "embedding_model_server_url": "http://localhost:11434",
+  "embedding_model_name": "nomic-embed-text",
+  "inference_mode": "remote",
+  "agent_config_source": "static",
+  "clue_prompt_technique": "few_shot",
+  "word_selection_mode": "random"
+}

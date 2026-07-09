@@ -1,0 +1,7 @@
+{
+  "eval_dataset": {
+    "name": "standard_benchmark",
+    "path": "experiments/datasets/standard_benchmark.json",
+    "description": "Full fixed word/hint/clue case set for benchmark runs."
+  }
+}

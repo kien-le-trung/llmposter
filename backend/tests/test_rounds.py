@@ -76,6 +76,23 @@ def test_create_round_selects_random_word_when_enabled(monkeypatch) -> None:
     assert rounds.ROUNDS[body["id"]].imposter_hint == "Trees"
 
 
+def test_create_round_payload_word_overrides_random_mode(monkeypatch) -> None:
+    agent_ids = [agent.id for agent in list_agent_configs()]
+    monkeypatch.setattr(rounds, "select_random_word", lambda: ("forest", "Trees and shade"))
+    set_playing_order(monkeypatch, [*agent_ids, rounds.HUMAN_PLAYER_ID])
+    client = build_test_client(word_selection_mode="random")
+
+    response = client.post(
+        "/rounds",
+        json={"secret_word": "satellite", "imposter_hint": "Space and signals"},
+    )
+
+    assert response.status_code == 201
+    body = response.json()
+    assert rounds.ROUNDS[body["id"]].secret_word == "satellite"
+    assert rounds.ROUNDS[body["id"]].imposter_hint == "Space"
+
+
 def test_create_round_hides_word_when_human_is_imposter(monkeypatch) -> None:
     agent_ids = [agent.id for agent in list_agent_configs()]
     monkeypatch.setattr(rounds, "choice", lambda player_ids: rounds.HUMAN_PLAYER_ID)
@@ -438,6 +455,52 @@ def test_group_vote_eliminates_imposter_when_human_vote_matches(monkeypatch) -> 
     assert body["imposter_won"] is False
     assert body["round_winner"] == "players"
     assert rounds.ROUNDS[round_id].status == "complete"
+
+
+def test_agent_only_round_votes_without_human_placeholder(monkeypatch) -> None:
+    agents = list_agent_configs()
+    imposter_agent = agents[0]
+
+    async def vote_for_imposter(round_state, agents, settings, human_clue):
+        return [
+            voting.AgentVoteResponse(
+                voter_agent_id=agent.id,
+                voter_agent_name=agent.name,
+                voted_for=imposter_agent.name,
+                inference_mode="embedding",
+            )
+            for agent in agents
+        ]
+
+    monkeypatch.setattr(rounds, "choice", lambda player_ids: imposter_agent.id)
+    monkeypatch.setattr(voting, "_build_embedding_agent_votes", vote_for_imposter)
+    set_playing_order(monkeypatch, [agent.id for agent in agents])
+    client = build_test_client()
+
+    create_response = client.post(
+        "/rounds",
+        json={"secret_word": "satellite", "include_human": False},
+    )
+    assert create_response.status_code == 201
+    round_id = create_response.json()["id"]
+    body = client.get(f"/rounds/{round_id}").json()
+    assert all(player["kind"] == "agent" for player in body["playing_order"])
+    assert body["status"] == "ready_to_vote"
+
+    response = client.post(f"/rounds/{round_id}/vote", json={})
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["voted_agent_id"] is None
+    assert body["group_voted_player_id"] == imposter_agent.id
+    assert body["vote_counts"] == [
+        {
+            "player_id": imposter_agent.id,
+            "player_name": imposter_agent.name,
+            "votes": len(agents),
+        }
+    ]
+    assert body["round_winner"] == "players"
 
 
 def test_embedding_votes_reuse_cached_agent_phrase_embeddings(monkeypatch) -> None:

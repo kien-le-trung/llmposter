@@ -1,13 +1,29 @@
 # Experiments
 
-This folder stores model experiment configuration for manual testing.
+This folder stores benchmark datasets, component configs, composed run configs,
+and experiment runners.
 
-These files are not wired into the app yet. For now, use them as reference configs
-when editing environment variables or when adding model-config loading later.
+## Layout
 
-## Model Configs
+- `datasets/`: fixed benchmark datasets.
+- `run_configs/`: full run configs and component configs.
+- `run_configs/llm_configs/`: LLM provider/model components.
+- `run_configs/embedding_configs/`: embedding model components.
+- `run_configs/eval_dataset_configs/`: dataset selection components.
+- `run_configs/prompt_configs/`: prompt technique components.
+- `run_configs/voting_algo_configs/`: voting algorithm components.
+- `src/runners/`: experiment runner and config composition scripts.
 
-- `model_configs/openrouter.json`: OpenRouter chat completions.
-- `model_configs/self_hosted_LLM_qwen.json`: OpenAI-compatible self-hosted Qwen endpoint.
-- `model_configs/cpu_model.json`: Local CPU-friendly Ollama model endpoint.
+## Runners
 
+Start the backend with a run config:
+
+```powershell
+python experiments/src/runners/run_backend.py --config qwen_7b
+```
+
+Compose a run config from components:
+
+```powershell
+python experiments/src/runners/compose_run_config.py --llm qwen_7b --embedding nomic_embed_text --prompt few_shot --eval-dataset standard_benchmark --voting-algo embedding_distance_v1
+```

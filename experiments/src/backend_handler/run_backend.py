@@ -6,10 +6,21 @@ import sys
 
 import uvicorn
 
-from run_config_loader import ensure_backend_import_path, load_run_settings, resolve_run_config_path
+try:
+    from run_config_loader import (
+        ensure_backend_import_path,
+        load_run_settings,
+        resolve_run_config_path,
+    )
+except ModuleNotFoundError:
+    from .run_config_loader import (
+        ensure_backend_import_path,
+        load_run_settings,
+        resolve_run_config_path,
+    )
 
 
-REPO_DIR = Path(__file__).resolve().parents[1]
+REPO_DIR = Path(__file__).resolve().parents[3]
 BACKEND_DIR = REPO_DIR / "backend"
 
 
@@ -20,7 +31,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--config",
         required=True,
-        help="Run config name or path, e.g. cpu_model or experiments/run_configs/cpu_model.json.",
+        help="Run config name or path, e.g. qwen_7b or experiments/run_configs/qwen_7b.json.",
     )
     parser.add_argument("--host", default="0.0.0.0")
     parser.add_argument("--port", type=int, default=8000)

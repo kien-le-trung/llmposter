@@ -82,6 +82,7 @@ class RoundState(BaseModel):
     current_player_index: int
     turns: list[TurnResponse]
     created_at: datetime
+    include_human: bool = True
     human_clue: str | None = None
     voted_agent_id: str | None = None
 
@@ -90,10 +91,11 @@ class CreateRoundRequest(BaseModel):
     secret_word: str | None = Field(default=None, min_length=1, max_length=80)
     imposter_hint: str | None = Field(default=None, min_length=1, max_length=160)
     prompt_technique: str | None = Field(default=None, min_length=1, max_length=80)
+    include_human: bool = True
 
 
 class VoteRequest(BaseModel):
-    agent_id: str
+    agent_id: str | None = None
     human_clue: str | None = Field(default=None, min_length=1, max_length=200)
 
 
@@ -439,6 +441,15 @@ def select_round_word(
     payload: CreateRoundRequest | None,
     settings: Settings,
 ) -> tuple[str, str]:
+    if payload is not None and payload.secret_word:
+        secret_word = payload.secret_word
+        imposter_hint = (
+            payload.imposter_hint
+            if payload.imposter_hint
+            else settings.fixed_imposter_hint
+        )
+        return secret_word, normalize_imposter_hint(imposter_hint)
+
     if settings.word_selection_mode == "fixed":
         secret_word = payload.secret_word if payload and payload.secret_word else settings.fixed_secret_word
         imposter_hint = payload.imposter_hint if payload and payload.imposter_hint else settings.fixed_imposter_hint
@@ -459,13 +470,15 @@ async def create_round(
     if not agents:
         raise HTTPException(status_code=500, detail="No agents configured")
 
-    player_ids = [HUMAN_PLAYER_ID, *[agent.id for agent in agents]]
+    include_human = payload.include_human if payload is not None else True
+    player_ids = [agent.id for agent in agents]
+    if include_human:
+        player_ids.insert(0, HUMAN_PLAYER_ID)
     playing_order = player_ids.copy()
     random.shuffle(playing_order)
-    player_names_by_id = {
-        HUMAN_PLAYER_ID: HUMAN_PLAYER_NAME,
-        **{agent.id: agent.name for agent in agents},
-    }
+    player_names_by_id = {agent.id: agent.name for agent in agents}
+    if include_human:
+        player_names_by_id[HUMAN_PLAYER_ID] = HUMAN_PLAYER_NAME
     secret_word, imposter_hint = select_round_word(payload, settings)
     prompt_technique = (
         payload.prompt_technique.strip()
@@ -493,6 +506,7 @@ async def create_round(
         current_player_index=0,
         turns=[],
         created_at=datetime.now(UTC),
+        include_human=include_human,
     )
     ROUNDS[round_state.id] = round_state
     await advance_clue_generation(
@@ -555,11 +569,20 @@ async def vote(
     if round_state is None:
         raise HTTPException(status_code=404, detail="Unknown round")
 
-    voted_agent = get_runtime_agent_config(db, payload.agent_id, settings)
-    if voted_agent is None:
+    voted_agent = (
+        get_runtime_agent_config(db, payload.agent_id, settings)
+        if payload.agent_id is not None
+        else None
+    )
+    if payload.agent_id is not None and voted_agent is None:
         raise HTTPException(status_code=404, detail="Unknown agent")
+
     if round_state.status != "ready_to_vote":
         raise HTTPException(status_code=409, detail="Round is not ready for voting")
+
+    round_has_human = HUMAN_PLAYER_ID in round_state.playing_order
+    if round_has_human and payload.agent_id is None:
+        raise HTTPException(status_code=422, detail="A human vote agent_id is required")
 
     agents = list_runtime_agent_configs(db, settings)
     try:

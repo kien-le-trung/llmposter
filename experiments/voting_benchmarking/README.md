@@ -10,12 +10,13 @@ embedding-based voting behavior.
 - Round metadata: word, hint, prompt technique, latency, status, playing order.
 - Label metadata: inferred imposter player id, name, and player kind.
 - Clues: clue text, player role, player position, inference mode, order features.
-- Votes: current backend voting result recorded as `embedding_distance_v1`.
+- Votes: current backend agent-only voting result recorded as `embedding_distance_v1`.
 - Semantic features: optional embedding-based clue/word/hint similarity metrics.
 
-The API currently exposes the true imposter as a name in the vote response, not
-as an id. This benchmark infers `imposter_player_id` by matching that name
-against the round's playing order, so player names should be unique.
+The benchmark creates agent-only rounds, so every clue is LLM-generated. The API
+currently exposes the true imposter as a name in the vote response, not as an
+id. This benchmark infers `imposter_player_id` by matching that name against the
+round's playing order, so player names should be unique.
 
 ## Running
 
@@ -32,6 +33,7 @@ Useful options:
 
 ```powershell
 python experiments/voting_benchmarking/benchmark_voting.py --technique all --repetitions 20
+python experiments/voting_benchmarking/benchmark_voting.py --show-progress --progress-every 5
 python experiments/voting_benchmarking/benchmark_voting.py --skip-semantic-features
 python experiments/voting_benchmarking/benchmark_voting.py --require-semantic-features
 ```
@@ -65,13 +67,14 @@ Primary detection metrics:
 
 - `agent_vote_detection_rate`: share of individual agent votes that hit the imposter.
 - `agent_only_group_detection_rate`: majority result among agent votes only.
-- `group_detection_rate`: backend group result including the placeholder human vote.
+- `group_detection_rate`: backend group result from agent votes only.
 - `random_chance_detection_rate`: average `1 / num_players` baseline.
 - `detection_lift_over_random`: agent-only group detection minus chance.
 
-For this first benchmark, prefer `agent_only_group_detection_rate` over
-`group_detection_rate`. The human vote is a required API input and is submitted
-with the `first_agent_placeholder` strategy, so group detection can be biased.
+For agent-only benchmark runs, `agent_only_group_detection_rate` and
+`group_detection_rate` are both computed from LLM-generated clues and agent
+votes only. Tied group votes are excluded from `agent_only_group_detection_rate`
+and recorded as null group decisions in the backend vote artifact.
 
 Semantic features help separate game difficulty from voting quality:
 

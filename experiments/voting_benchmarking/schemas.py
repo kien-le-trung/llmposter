@@ -6,7 +6,7 @@ from pydantic import BaseModel, Field
 class BenchmarkCase(BaseModel):
     secret_word: str = Field(min_length=1)
     imposter_hint: str = Field(min_length=1)
-    human_clue: str = Field(min_length=1)
+    human_clue: str | None = Field(default=None, min_length=1)
 
 
 class BenchmarkConfig(BaseModel):
@@ -16,6 +16,8 @@ class BenchmarkConfig(BaseModel):
     timeout_seconds: float = Field(default=60.0, gt=0)
     compute_semantic_features: bool = True
     require_semantic_features: bool = False
+    show_progress: bool = False
+    progress_every: int = Field(default=1, ge=1)
 
 
 class PlayerRecord(BaseModel):
@@ -31,7 +33,7 @@ class RoundArtifactRecord(BaseModel):
     round_id: str | None
     secret_word: str
     imposter_hint: str
-    human_clue: str
+    human_clue: str | None = None
     status: str
     success: bool
     latency_ms: float

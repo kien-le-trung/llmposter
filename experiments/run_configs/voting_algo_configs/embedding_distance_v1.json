@@ -1,0 +1,7 @@
+{
+  "voting_algorithm": {
+    "name": "embedding_distance_v1",
+    "description": "Embedding-distance outlier voting over generated clues.",
+    "requires_embedding_model": true
+  }
+}

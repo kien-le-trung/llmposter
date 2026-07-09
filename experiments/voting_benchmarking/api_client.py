@@ -20,7 +20,7 @@ TERMINAL_STATUSES = {"ready_to_vote", "complete", "generation_failed"}
 HUMAN_PLAYER_ID = "human"
 HUMAN_PLAYER_NAME = "You"
 VOTING_ALGORITHM = "embedding_distance_v1"
-HUMAN_VOTE_STRATEGY = "first_agent_placeholder"
+HUMAN_VOTE_STRATEGY = "none"
 
 
 class VotingBenchmarkApiClient:
@@ -44,6 +44,7 @@ class VotingBenchmarkApiClient:
                         "secret_word": case.secret_word,
                         "imposter_hint": case.imposter_hint,
                         "prompt_technique": technique,
+                        "include_human": False,
                     },
                 )
                 create_response.raise_for_status()
@@ -56,7 +57,7 @@ class VotingBenchmarkApiClient:
                     case.human_clue,
                 )
 
-                vote_payload = await self._submit_placeholder_vote(client, round_payload)
+                vote_payload = await self._submit_agent_only_vote(client, round_payload)
 
             latency_ms = (time.perf_counter() - started) * 1000.0
             players = _extract_playing_order(round_payload)
@@ -81,7 +82,7 @@ class VotingBenchmarkApiClient:
             vote_record = _extract_vote_record(
                 vote_payload,
                 round_record,
-                _first_agent_player_id(players),
+                None,
             )
             return round_record, clue_records, vote_record
         except Exception as exc:
@@ -98,7 +99,7 @@ class VotingBenchmarkApiClient:
                     success=False,
                     latency_ms=latency_ms,
                     playing_order=[],
-                    error=str(exc),
+                    error=_format_exception(exc),
                 ),
                 [],
                 None,
@@ -108,7 +109,7 @@ class VotingBenchmarkApiClient:
         self,
         client: httpx.AsyncClient,
         round_id: str,
-        human_clue: str,
+        human_clue: str | None,
     ) -> dict[str, Any]:
         deadline = time.perf_counter() + self.timeout_seconds
         while time.perf_counter() < deadline:
@@ -118,6 +119,8 @@ class VotingBenchmarkApiClient:
             status = round_payload.get("status")
 
             if status == "awaiting_human_clue":
+                if human_clue is None:
+                    raise ValueError("Round unexpectedly requested a human clue")
                 clue_response = await client.post(
                     f"{self.backend_url}/rounds/{round_id}/clue",
                     json={"clue": human_clue},
@@ -133,19 +136,15 @@ class VotingBenchmarkApiClient:
 
         raise TimeoutError(f"Round {round_id} did not finish within {self.timeout_seconds}s")
 
-    async def _submit_placeholder_vote(
+    async def _submit_agent_only_vote(
         self,
         client: httpx.AsyncClient,
         round_payload: dict[str, Any],
     ) -> dict[str, Any]:
-        first_agent_id = _first_agent_player_id(_extract_playing_order(round_payload))
-        if first_agent_id is None:
-            raise ValueError("Round has no agent player to use for placeholder human vote")
-
         round_id = str(round_payload["id"])
         vote_response = await client.post(
             f"{self.backend_url}/rounds/{round_id}/vote",
-            json={"agent_id": first_agent_id},
+            json={},
         )
         vote_response.raise_for_status()
         return vote_response.json()
@@ -347,15 +346,19 @@ def _is_imposter(
     return player_id == round_record.imposter_player_id
 
 
-def _first_agent_player_id(players: list[PlayerRecord]) -> str | None:
-    for player in players:
-        if player.player_kind == "agent":
-            return player.player_id
-    return None
-
-
 def _player_kind(player_id: str | None, players: list[PlayerRecord]) -> str | None:
     for player in players:
         if player.player_id == player_id:
             return player.player_kind
     return None
+
+
+def _format_exception(exc: Exception) -> str:
+    if isinstance(exc, httpx.HTTPStatusError):
+        response_text = exc.response.text.strip()
+        detail = f": {response_text}" if response_text else ""
+        return (
+            f"HTTP {exc.response.status_code} from {exc.request.url}{detail}"
+        )
+
+    return str(exc)

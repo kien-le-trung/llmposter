@@ -1,0 +1,12 @@
+{
+  "llm_config": {
+    "name": "self_hosted_LLM_qwen",
+    "provider": "openai_compatible",
+    "chat_url": "http://localhost:8888/v1/chat/completions",
+    "model": "Qwen/Qwen2.5-3B-Instruct",
+    "api_key_env": null,
+    "min_max_tokens": 128,
+    "structured_max_tokens": 512,
+    "notes": "Self-hosted OpenAI-compatible Qwen endpoint."
+  }
+}
