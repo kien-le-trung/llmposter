@@ -1,0 +1,26 @@
+{
+  "total_cases": 5,
+  "successful_cases": 4,
+  "failed_cases": 1,
+  "success_rate": 0.8,
+  "average_latency_ms": 49824.614199995995,
+  "p50_latency_ms": 46814.813400036655,
+  "p95_latency_ms": 74113.12350002117,
+  "timeout_rate": 0.0,
+  "http_error_rate": 0.0,
+  "backend_generation_failed_rate": 0.0,
+  "error_counts_by_type": {
+    "Round 5cea5329-a481-4b92-a9a8-06add3d48946 did not finish within 60.0s": 1
+  },
+  "status_counts": {
+    "ready_to_vote": 4,
+    "error": 1
+  },
+  "generation_failed_rate": 0.0,
+  "duplicate_clue_rate": 0.0,
+  "secret_word_leak_rate": 0.0,
+  "empty_clue_rate": 0.0,
+  "average_clue_word_count": 2.3529411764705883,
+  "average_clues_per_round": 3.4,
+  "missing_clue_round_rate": 0.2
+}

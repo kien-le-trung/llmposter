@@ -1,0 +1,29 @@
+name: prompt_sweep
+base:
+  name: prompt_sweep_variant
+  experiment_type: prompt
+  backend:
+    host: 127.0.0.1
+    port: 8000
+    reload: false
+    startup_timeout_seconds: 30
+  components:
+    llm: openrouter
+    embedding: nomic_embed_text
+    prompt: few_shot
+    eval_dataset: standard_benchmark_short
+    voting_algo: embedding_distance_v1
+    inference_mode: remote
+    agent_config_source: static
+    word_selection_mode: random
+  run:
+    repetitions: 1
+    timeout_seconds: 60
+    submit_vote: false
+  tracking:
+    experiment_name: prompt_benchmarking
+    tracking_uri: sqlite:///experiments/prompt_benchmarking/mlflow.db
+    output_dir: experiments/prompt_benchmarking/results
+
+vary:
+  components.prompt: [zero_shot, few_shot, reasoning_guided, meta]

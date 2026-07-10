@@ -1,0 +1,57 @@
+{
+  "config": {
+    "name": "prompt_openrouter_few_shot",
+    "experiment_type": "prompt",
+    "backend": {
+      "host": "127.0.0.1",
+      "port": 8000,
+      "reload": false,
+      "startup_timeout_seconds": 30.0
+    },
+    "components": {
+      "llm": "openrouter",
+      "embedding": "nomic_embed_text",
+      "prompt": "few_shot",
+      "eval_dataset": "standard_benchmark_short",
+      "voting_algo": "embedding_distance_v1",
+      "inference_mode": "remote",
+      "agent_config_source": "static",
+      "word_selection_mode": "random"
+    },
+    "run": {
+      "repetitions": 1,
+      "timeout_seconds": 60.0,
+      "submit_vote": false
+    },
+    "tracking": {
+      "experiment_name": "prompt_benchmarking",
+      "tracking_uri": "sqlite:///experiments/prompt_benchmarking/mlflow.db",
+      "output_dir": "C:\\Users\\ltkie\\Documents\\Projects\\llmposter\\experiments\\output"
+    },
+    "source_path": "C:\\Users\\ltkie\\Documents\\Projects\\llmposter\\experiments\\src\\runner\\singles\\prompt_openrouter_few_shot.yaml",
+    "sweep_name": null,
+    "sweep_variant_index": null,
+    "sweep_values": null
+  },
+  "components": {
+    "llm": "openrouter",
+    "embedding": "nomic_embed_text",
+    "prompt": "few_shot",
+    "eval_dataset": "standard_benchmark_short",
+    "voting_algo": "embedding_distance_v1",
+    "inference_mode": "remote",
+    "agent_config_source": "static",
+    "word_selection_mode": "random"
+  },
+  "dataset": {
+    "name": "standard_benchmark_short",
+    "path": "C:\\Users\\ltkie\\Documents\\Projects\\llmposter\\experiments\\datasets\\standard_benchmark_short.json",
+    "description": "Short fixed word/hint/clue case set for quick benchmark runs."
+  },
+  "case_count": 5,
+  "repetitions": 1,
+  "backend_url": "http://127.0.0.1:8000",
+  "sweep_name": null,
+  "sweep_variant_index": null,
+  "sweep_values": null
+}

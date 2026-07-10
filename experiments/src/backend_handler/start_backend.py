@@ -3,10 +3,14 @@ from __future__ import annotations
 import argparse
 import json
 from pathlib import Path
+import sys
 from typing import Any
+
+import uvicorn
 
 
 REPO_DIR = Path(__file__).resolve().parents[3]
+BACKEND_DIR = REPO_DIR / "backend"
 EXPERIMENTS_DIR = REPO_DIR / "experiments"
 RUN_CONFIGS_DIR = EXPERIMENTS_DIR / "run_configs"
 
@@ -21,9 +25,13 @@ COMPONENT_DIRS = {
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="Compose an experiment run config from component configs."
+        description="Compose an experiment run config and start the backend with it."
     )
-    parser.add_argument("--llm", required=True, help="LLM component name or JSON path.")
+    parser.add_argument(
+        "--llm",
+        default="openrouter",
+        help="LLM component name or JSON path.",
+    )
     parser.add_argument(
         "--embedding",
         default="nomic_embed_text",
@@ -61,61 +69,72 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--output",
-        help="Optional output JSON path. Prints to stdout when omitted.",
+        help="Optional output JSON path for the composed config.",
+    )
+    parser.add_argument("--host", default="0.0.0.0")
+    parser.add_argument("--port", type=int, default=8000)
+    parser.add_argument(
+        "--reload",
+        action="store_true",
+        help="Enable uvicorn reload. Uses an import-string factory and re-composes the run config.",
     )
     return parser.parse_args()
 
 
 def main() -> None:
     args = parse_args()
-    config = compose_run_config(
-        llm=args.llm,
-        embedding=args.embedding,
-        prompt=args.prompt,
-        eval_dataset=args.eval_dataset,
-        voting_algo=args.voting_algo,
-        inference_mode=args.inference_mode,
-        agent_config_source=args.agent_config_source,
-        word_selection_mode=args.word_selection_mode,
-    )
-    rendered = json.dumps(config, indent=2)
+    config = compose_run_config(args)
+    write_output_config(config, args.output)
 
-    if args.output is None:
-        print(rendered)
+    ensure_backend_import_path()
+    print("Starting backend with composed run config")
+
+    if args.reload:
+        sys.path.insert(0, str(Path(__file__).resolve().parent))
+        uvicorn.run(
+            "start_backend:create_configured_app",
+            factory=True,
+            host=args.host,
+            port=args.port,
+            reload=True,
+            reload_dirs=[str(BACKEND_DIR), str(RUN_CONFIGS_DIR)],
+            app_dir=str(Path(__file__).resolve().parent),
+            env_file=None,
+        )
         return
 
-    output_path = Path(args.output)
-    output_path.parent.mkdir(parents=True, exist_ok=True)
-    output_path.write_text(rendered + "\n", encoding="utf-8")
+    from app.main import create_app  # noqa: PLC0415
+
+    app = create_app(build_settings(config))
+    uvicorn.run(app, host=args.host, port=args.port)
 
 
-def compose_run_config(
-    *,
-    llm: str,
-    embedding: str,
-    prompt: str,
-    eval_dataset: str,
-    voting_algo: str,
-    inference_mode: str = "remote",
-    agent_config_source: str = "static",
-    word_selection_mode: str = "random",
-) -> dict[str, Any]:
+def create_configured_app():
+    args = parse_args()
+    ensure_backend_import_path()
+
+    from app.main import create_app  # noqa: PLC0415
+
+    return create_app(build_settings(compose_run_config(args)))
+
+
+def compose_run_config(args: argparse.Namespace) -> dict[str, Any]:
     config: dict[str, Any] = {}
     component_specs = [
-        ("llm", llm),
-        ("embedding", embedding),
-        ("prompt", prompt),
-        ("eval_dataset", eval_dataset),
-        ("voting_algo", voting_algo),
+        ("llm", args.llm),
+        ("embedding", args.embedding),
+        ("prompt", args.prompt),
+        ("eval_dataset", args.eval_dataset),
+        ("voting_algo", args.voting_algo),
     ]
 
     for component_type, name_or_path in component_specs:
         component = load_component(component_type, name_or_path)
         _deep_merge(config, component)
 
-    config["inference_mode"] = inference_mode
-    config["agent_config_source"] = agent_config_source
-    config["word_selection_mode"] = word_selection_mode
+    config["inference_mode"] = args.inference_mode
+    config["agent_config_source"] = args.agent_config_source
+    config["word_selection_mode"] = args.word_selection_mode
     return config
 
 
@@ -153,6 +172,35 @@ def resolve_component_path(component_type: str, name_or_path: str) -> Path:
     raise FileNotFoundError(
         f"{component_type} component {name_or_path!r} not found. Searched: {searched}"
     )
+
+
+def write_output_config(config: dict[str, Any], output: str | None) -> None:
+    if output is None:
+        return
+    output_path = Path(output)
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    rendered = json.dumps(config, indent=2)
+    output_path.write_text(rendered + "\n", encoding="utf-8")
+
+
+def ensure_backend_import_path() -> None:
+    backend_path = str(BACKEND_DIR)
+    if backend_path not in sys.path:
+        sys.path.insert(0, backend_path)
+
+
+def build_settings(config: dict[str, Any]):
+    ensure_backend_import_path()
+
+    from app.core.config import Settings  # noqa: PLC0415
+
+    settings_data = dict(config)
+    for field_name, field in Settings.model_fields.items():
+        alias = field.alias
+        if alias and field_name in settings_data and alias not in settings_data:
+            settings_data[alias] = settings_data[field_name]
+
+    return Settings(**settings_data)
 
 
 def _deep_merge(target: dict[str, Any], source: dict[str, Any]) -> None:
