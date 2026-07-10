@@ -1,0 +1,32 @@
+{
+  "total_cases": 60,
+  "successful_cases": 60,
+  "failed_cases": 0,
+  "success_rate": 1.0,
+  "average_latency_ms": 3349.594703338031,
+  "p50_latency_ms": 3352.7509999694303,
+  "p95_latency_ms": 3862.2462999774143,
+  "timeout_rate": 0.0,
+  "http_error_rate": 0.0,
+  "backend_generation_failed_rate": 0.0,
+  "error_counts_by_type": {},
+  "status_counts": {
+    "ready_to_vote": 60
+  },
+  "generation_failed_rate": 0.0,
+  "duplicate_clue_rate": 0.0041841004184100415,
+  "secret_word_leak_rate": 0.041666666666666664,
+  "empty_clue_rate": 0.0,
+  "average_clue_word_count": 2.1083333333333334,
+  "average_clues_per_round": 4.0,
+  "missing_clue_round_rate": 0.0,
+  "vote_submission_success_rate": 0.0,
+  "group_detection_rate": 0.0,
+  "agent_vote_detection_rate": 0.0,
+  "agent_only_group_detection_rate": 0.0,
+  "random_chance_detection_rate": 0.25,
+  "detection_lift_over_random": -0.25,
+  "imposter_win_rate": 0.0,
+  "detection_rate_by_imposter_position": {},
+  "vote_tie_rate": 0.0
+}

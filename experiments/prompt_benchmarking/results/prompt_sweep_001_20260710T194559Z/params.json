@@ -1,0 +1,61 @@
+{
+  "config": {
+    "name": "prompt_sweep_001",
+    "experiment_type": "combined",
+    "backend": {
+      "host": "127.0.0.1",
+      "port": 8000,
+      "reload": false,
+      "startup_timeout_seconds": 30.0
+    },
+    "components": {
+      "llm": "qwen_7b",
+      "embedding": "nomic_embed_text",
+      "prompt": "zero_shot",
+      "eval_dataset": "standard_benchmark",
+      "voting_algo": "embedding_distance_v1",
+      "inference_mode": "remote",
+      "agent_config_source": "static",
+      "word_selection_mode": "random"
+    },
+    "run": {
+      "repetitions": 2,
+      "timeout_seconds": 60.0,
+      "submit_vote": false
+    },
+    "tracking": {
+      "experiment_name": "prompt_benchmarking",
+      "tracking_uri": "sqlite:///experiments/prompt_benchmarking/mlflow.db",
+      "output_dir": "C:\\Users\\ltkie\\Documents\\Projects\\llmposter\\experiments\\prompt_benchmarking\\results"
+    },
+    "source_path": "C:\\Users\\ltkie\\Documents\\Projects\\llmposter\\experiments\\src\\runner\\sweeps\\prompt_sweep.yaml",
+    "sweep_name": "prompt_sweep",
+    "sweep_variant_index": 0,
+    "sweep_values": {
+      "components.prompt": "zero_shot"
+    }
+  },
+  "components": {
+    "llm": "qwen_7b",
+    "embedding": "nomic_embed_text",
+    "prompt": "zero_shot",
+    "eval_dataset": "standard_benchmark",
+    "voting_algo": "embedding_distance_v1",
+    "inference_mode": "remote",
+    "agent_config_source": "static",
+    "word_selection_mode": "random"
+  },
+  "dataset": {
+    "name": "standard_benchmark",
+    "path": "C:\\Users\\ltkie\\Documents\\Projects\\llmposter\\experiments\\datasets\\standard_benchmark.json",
+    "description": "Full fixed word/hint/clue case set for benchmark runs."
+  },
+  "case_count": 30,
+  "repetitions": 2,
+  "backend_url": "http://127.0.0.1:8000",
+  "sweep_name": "prompt_sweep",
+  "sweep_variant_index": 0,
+  "sweep_values": {
+    "components.prompt": "zero_shot"
+  }
+}

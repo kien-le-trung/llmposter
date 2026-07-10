@@ -1,0 +1,7 @@
+{
+  "eval_dataset": {
+    "name": "word_bank",
+    "path": "experiments/datasets/word_bank.json",
+    "description": "Full word bank for evaluation runs."
+  }
+}

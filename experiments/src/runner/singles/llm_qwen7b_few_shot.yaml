@@ -1,0 +1,28 @@
+name: llm_qwen7b_few_shot
+experiment_type: prompt
+
+backend:
+  host: 127.0.0.1
+  port: 8000
+  reload: false
+  startup_timeout_seconds: 30
+
+components:
+  llm: qwen_7b
+  embedding: nomic_embed_text
+  prompt: few_shot
+  eval_dataset: word_bank
+  voting_algo: embedding_distance_v1
+  inference_mode: remote
+  agent_config_source: static
+  word_selection_mode: random
+
+run:
+  repetitions: 1
+  timeout_seconds: 60
+  submit_vote: true
+
+tracking:
+  experiment_name: prompt_benchmarking
+  tracking_uri: sqlite:///experiments/prompt_benchmarking/mlflow.db
+  output_dir: experiments/output

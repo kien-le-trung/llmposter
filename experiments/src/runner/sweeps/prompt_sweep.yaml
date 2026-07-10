@@ -1,23 +1,23 @@
 name: prompt_sweep
 base:
   name: prompt_sweep_variant
-  experiment_type: prompt
+  experiment_type: combined
   backend:
     host: 127.0.0.1
     port: 8000
     reload: false
     startup_timeout_seconds: 30
   components:
-    llm: openrouter
+    llm: qwen_7b
     embedding: nomic_embed_text
     prompt: few_shot
-    eval_dataset: standard_benchmark_short
+    eval_dataset: standard_benchmark
     voting_algo: embedding_distance_v1
     inference_mode: remote
     agent_config_source: static
     word_selection_mode: random
   run:
-    repetitions: 1
+    repetitions: 2
     timeout_seconds: 60
     submit_vote: false
   tracking:

@@ -1,0 +1,23 @@
+{
+  "total_cases": 500,
+  "successful_cases": 500,
+  "failed_cases": 0,
+  "success_rate": 1.0,
+  "average_latency_ms": 4231.924762999639,
+  "p50_latency_ms": 4306.827499996871,
+  "p95_latency_ms": 4926.444899989292,
+  "timeout_rate": 0.0,
+  "http_error_rate": 0.0,
+  "backend_generation_failed_rate": 0.0,
+  "error_counts_by_type": {},
+  "status_counts": {
+    "ready_to_vote": 500
+  },
+  "generation_failed_rate": 0.0,
+  "duplicate_clue_rate": 0.0035122930255895636,
+  "secret_word_leak_rate": 0.046,
+  "empty_clue_rate": 0.0,
+  "average_clue_word_count": 2.166,
+  "average_clues_per_round": 4.0,
+  "missing_clue_round_rate": 0.0
+}

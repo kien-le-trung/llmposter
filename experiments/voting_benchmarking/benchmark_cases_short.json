@@ -1,7 +1,0 @@
-[
-  {"secret_word": "family", "imposter_hint": "organization", "human_clue": "close circle"},
-  {"secret_word": "money", "imposter_hint": "standard", "human_clue": "paper value"},
-  {"secret_word": "music", "imposter_hint": "sound", "human_clue": "rhythm notes"},
-  {"secret_word": "country", "imposter_hint": "territory", "human_clue": "bordered land"},
-  {"secret_word": "car", "imposter_hint": "vehicle", "human_clue": "four wheels"}
-]
