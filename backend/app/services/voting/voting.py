@@ -1,43 +1,15 @@
 from collections import Counter
-from math import sqrt
 from typing import Any
-
-from pydantic import BaseModel
-
 from app.services.agents.inference import AgentConfig, InferenceClient, InferenceServiceError
+from app.services.voting.schemas import VotingFeatureInput, AgentVoteResponse, VoteCountResponse, VoteResponse
+from app.services.voting.predictor import VotingModelPredictor, get_voting_predictor
+from app.services.voting.features import VotingFeatureTransformer
 
 HUMAN_PLAYER_ID = "human"
 HUMAN_PLAYER_NAME = "You"
 
 ROUND_EMBEDDINGS: dict[str, dict[str, list[float]]] = {}
 EMBEDDING_CACHE: dict[tuple[str, str], list[float]] = {}
-
-
-class AgentVoteResponse(BaseModel):
-    voter_agent_id: str
-    voter_agent_name: str
-    voted_for: str
-    inference_mode: str
-
-
-class VoteCountResponse(BaseModel):
-    player_id: str
-    player_name: str
-    votes: int
-
-
-class VoteResponse(BaseModel):
-    voted_agent_id: str | None
-    voted_agent_name: str | None
-    secret_word: str
-    imposter_was: str
-    agent_votes: list[AgentVoteResponse]
-    vote_counts: list[VoteCountResponse]
-    group_voted_player_id: str | None
-    group_voted_player_name: str | None
-    imposter_won: bool
-    round_winner: str
-
 
 class VotingStateError(Exception):
     """Raised when the current round state cannot produce votes."""
@@ -50,7 +22,7 @@ async def submit_round_vote(
     human_clue: str | None,
     settings: Any,
 ) -> VoteResponse:
-    agent_votes = await _build_embedding_agent_votes(
+    agent_votes = await _build_agent_votes(
         round_state,
         agents,
         settings,
@@ -92,7 +64,7 @@ async def submit_round_vote(
     )
 
 
-async def _build_embedding_agent_votes(
+async def _build_agent_votes(
     round_state: Any,
     agents: list[AgentConfig],
     settings: Any,
@@ -106,6 +78,7 @@ async def _build_embedding_agent_votes(
     phrase_by_player_id = {
         response.agent_id: response.agent_response for response in opening_turn.responses
     }
+
     if HUMAN_PLAYER_ID in round_state.playing_order:
         resolved_human_clue = human_clue or round_state.human_clue
         if resolved_human_clue is None:
@@ -118,10 +91,33 @@ async def _build_embedding_agent_votes(
         phrase_by_player_id,
         settings,
     )
+    predictor = get_voting_predictor(settings.ml_voting_model_path)
 
     votes: list[AgentVoteResponse] = []
     for agent in agents:
-        target_id = _choose_embedding_vote_target(agent.id, embeddings_by_player_id)
+        eligible_player_ids = [
+            player_id
+            for player_id in round_state.playing_order
+            if player_id != agent.id
+        ]
+
+        eligible_embeddings = {
+            player_id: embeddings_by_player_id[player_id]
+            for player_id in eligible_player_ids
+        }
+
+        scores_by_player_id = _score_round_candidates(
+            round_id=round_state.id,
+            turn_id=opening_turn.id,
+            playing_order=eligible_player_ids,
+            embeddings_by_player_id=eligible_embeddings,
+            predictor=predictor,
+        )
+
+        target_id = max(
+            eligible_player_ids,
+            key=lambda player_id: scores_by_player_id[player_id],
+        )
         voted_for = (
             HUMAN_PLAYER_NAME
             if target_id == HUMAN_PLAYER_ID
@@ -132,10 +128,9 @@ async def _build_embedding_agent_votes(
                 voter_agent_id=agent.id,
                 voter_agent_name=agent.name,
                 voted_for=voted_for,
-                inference_mode="embedding",
+                inference_mode="ml_voting",
             )
         )
-
     return votes
 
 
@@ -188,49 +183,6 @@ async def _get_or_create_round_embeddings(
         if player_id in phrase_by_player_id
     }
 
-
-def _choose_embedding_vote_target(
-    voter_player_id: str,
-    embeddings_by_player_id: dict[str, list[float]],
-) -> str:
-    candidate_ids = [
-        player_id for player_id in embeddings_by_player_id if player_id != voter_player_id
-    ]
-    if not candidate_ids:
-        return HUMAN_PLAYER_ID
-
-    best_candidate_id = candidate_ids[0]
-    best_score = float("-inf")
-    for candidate_id in candidate_ids:
-        reference_ids = [
-            player_id for player_id in candidate_ids if player_id != candidate_id
-        ]
-        if not reference_ids:
-            score = 0.0
-        else:
-            score = sum(
-                _cosine_distance(
-                    embeddings_by_player_id[candidate_id],
-                    embeddings_by_player_id[reference_id],
-                )
-                for reference_id in reference_ids
-            ) / len(reference_ids)
-
-        if score > best_score:
-            best_score = score
-            best_candidate_id = candidate_id
-
-    return best_candidate_id
-
-
-def _cosine_distance(left: list[float], right: list[float]) -> float:
-    dot_product = sum(left_value * right_value for left_value, right_value in zip(left, right))
-    left_norm = sqrt(sum(value * value for value in left))
-    right_norm = sqrt(sum(value * value for value in right))
-    if left_norm == 0.0 or right_norm == 0.0:
-        return 1.0
-
-    return 1.0 - (dot_product / (left_norm * right_norm))
 
 
 def _normalize_embedding_text(text: str) -> str:
@@ -298,3 +250,51 @@ def _get_player_names_by_id(agents: list[AgentConfig]) -> dict[str, str]:
         HUMAN_PLAYER_ID: HUMAN_PLAYER_NAME,
         **{agent.id: agent.name for agent in agents},
     }
+
+
+def _build_voting_feature_inputs(
+    round_id: str,
+    turn_id: str,
+    playing_order: list[str],
+    embeddings_by_player_id: dict[str, list[float]],
+) -> list[VotingFeatureInput]:
+    feature_inputs: list[VotingFeatureInput] = []
+    for player in playing_order:
+        position = playing_order.index(player)
+        other_embeddings = [
+            embeddings_by_player_id[other_player]
+            for other_player in playing_order
+            if other_player != player
+        ]
+        previous_embeddings = [
+            embeddings_by_player_id[previous_player]
+            for previous_player in playing_order[:position]
+        ]
+        feature_inputs.append(
+            VotingFeatureInput(
+                round_id=round_id,
+                turn_id=turn_id,
+                candidate_turn_position=position,
+                candidate_embedding=embeddings_by_player_id[player],
+                other_embeddings=other_embeddings,
+                previous_embeddings=previous_embeddings,
+            )
+        )
+    return feature_inputs
+
+def _score_round_candidates(
+    *,
+    round_id: str,
+    turn_id: str,
+    playing_order: list[str],
+    embeddings_by_player_id: dict[str, list[float]],
+    predictor: VotingModelPredictor,
+) -> dict[str, float]:
+    feature_inputs = _build_voting_feature_inputs(
+        round_id=round_id,
+        turn_id=turn_id,
+        playing_order=playing_order,
+        embeddings_by_player_id=embeddings_by_player_id,
+    )
+    feature_matrix = VotingFeatureTransformer().transform(feature_inputs)
+    return predictor.score_candidates(playing_order, feature_matrix)

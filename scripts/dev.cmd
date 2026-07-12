@@ -27,7 +27,7 @@ if not exist "%FRONTEND_DIR%\node_modules" (
 )
 
 echo Starting backend dev server in a new window...
-start "LLMposter Backend" cmd /k "cd /d ""%BACKEND_DIR%"" && call venv\Scripts\activate.bat && set APP_ENV=development&& set BACKEND_CORS_ORIGINS=http://localhost:3000&& set BACKEND_CORS_ORIGIN_REGEX=https?://(localhost^|127\.0\.0\.1)(:\d+)?&& set DATABASE_URL=postgresql+psycopg://postgres:postgres@localhost:5432/llmposter&& set LLM_EXPERIMENT_CONFIG=experiments/model_configs/self_hosted_LLM_qwen.json&& set EMBEDDING_MODEL_SERVER_URL=http://localhost:11434&& set EMBEDDING_MODEL_NAME=nomic-embed-text&& set INFERENCE_MODE=remote&& set AGENT_CONFIG_SOURCE=database&& set WORD_SELECTION_MODE=random&& python -m uvicorn app.main:app --reload --host 0.0.0.0 --port 8000"
+start "LLMposter Backend" cmd /k "cd /d ""%BACKEND_DIR%"" && call venv\Scripts\activate.bat && set APP_ENV=development&& set BACKEND_CORS_ORIGINS=http://localhost:3000&& set BACKEND_CORS_ORIGIN_REGEX=https?://(localhost^|127\.0\.0\.1)(:\d+)?&& set DATABASE_URL=postgresql+psycopg://postgres:postgres@localhost:5432/llmposter&& set EMBEDDING_MODEL_SERVER_URL=http://localhost:11434&& set EMBEDDING_MODEL_NAME=nomic-embed-text&& set INFERENCE_MODE=remote&& set AGENT_CONFIG_SOURCE=database&& set WORD_SELECTION_MODE=random&& python -m uvicorn app.main:app --reload --host 0.0.0.0 --port 8000"
 
 echo Starting frontend dev server in a new window...
 start "LLMposter Frontend" cmd /k "cd /d ""%FRONTEND_DIR%"" && set NEXT_PUBLIC_API_BASE_URL=http://localhost:8000&& set INTERNAL_API_BASE_URL=http://localhost:8000&& npm.cmd run dev"

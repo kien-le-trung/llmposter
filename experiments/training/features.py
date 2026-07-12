@@ -32,6 +32,8 @@ INPUT_PATTERN = "voting_candidates_*.csv"
 INPUT_PREFIX = "voting_candidates_"
 OUTPUT_PREFIX = "voting_features_"
 
+FEATURE_SCHEMA_VERSION = 1
+FEATURE_BUILDER_NAME = "embedding_similarity_v1"
 FEATURE_COLUMNS = [
     "candidate_turn_position",
     "embedding_similarity_to_others_mean",

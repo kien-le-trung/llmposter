@@ -9,6 +9,8 @@ from typing import Any
 
 import joblib
 
+from experiments.training.features import FEATURE_BUILDER_NAME, FEATURE_SCHEMA_VERSION
+
 from .train import TrainingConfig, ModelConfig, TrainingResult, VotingModelTrainer, _resolve_dataset_paths
 
 
@@ -94,6 +96,9 @@ class ModelArtifactManager:
             "model_name": self.config.model_name,
             "created_at": datetime.now(UTC).isoformat(),
             "model_path": str(model_path),
+            "artifact_schema_version": 1,
+            "feature_schema_version": FEATURE_SCHEMA_VERSION,
+            "feature_builder": FEATURE_BUILDER_NAME,   
             "feature_columns": training_result.feature_columns,
             "dataset_paths": [str(path) for path in training_result.dataset_paths],
             "training_config": asdict(training_config),

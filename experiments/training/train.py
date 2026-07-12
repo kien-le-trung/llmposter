@@ -7,6 +7,7 @@ import json
 from pathlib import Path
 from typing import Any
 from sklearn.base import ClassifierMixin
+from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import GroupShuffleSplit
 from sklearn.pipeline import Pipeline
 from .evaluate import VotingModelEvaluator
@@ -37,6 +38,7 @@ class ModelConfig:
     name: str
     estimator: str
     parameters: dict[str, Any]
+    preprocessing: dict[str, Any]
 
 @dataclass(frozen=True)
 class TrainingConfig:
@@ -203,14 +205,14 @@ class VotingModelTrainer:
         return X, y, metadata
 
     def build_pipeline(self) -> Pipeline:
-        return Pipeline(
-            [
-                (
-                    "model",
-                    build_estimator(self.config.model)
-                )
-            ]
-        )
+        steps = []
+
+        if self.config.model.preprocessing.get("scale", False):
+            steps.append(("scaler", StandardScaler()))
+
+        steps.append(("model", build_estimator(self.config.model)))
+
+        return Pipeline(steps)
     
 def build_estimator(config: ModelConfig) -> ClassifierMixin:
     if config.estimator == "random_forest":

@@ -18,8 +18,8 @@ class LLMConfig(BaseModel):
     chat_url: str
     model: str
     api_key_env: str | None = None
-    min_max_tokens: int = 128
-    structured_max_tokens: int = 512
+    min_max_tokens: int = 10000
+    structured_max_tokens: int = 10000
     notes: str | None = None
 
 
@@ -29,8 +29,8 @@ DEFAULT_LLM_CONFIG = LLMConfig(
     chat_url="https://openrouter.ai/api/v1/chat/completions",
     model="openrouter/free",
     api_key_env="OPENROUTER_API_KEY",
-    min_max_tokens=128,
-    structured_max_tokens=512,
+    min_max_tokens=10000,
+    structured_max_tokens=10000,
 )
 
 
@@ -57,6 +57,18 @@ class Settings(BaseSettings):
         alias="EMBEDDING_MODEL_SERVER_URL",
     )
     agent_config_source: str = Field(default="static", alias="AGENT_CONFIG_SOURCE")
+    ml_voting_model_path: str = Field(
+        default=str(
+            BACKEND_DIR
+            / "app"
+            / "services"
+            / "voting"
+            / "models"
+            / "svm_rbf_balanced_20260712T172943Z"
+            / "model.joblib"
+        ),
+        alias="ML_VOTING_MODEL_PATH",
+    )
 
     # Experiment-tunable settings.
     llm_config: LLMConfig = DEFAULT_LLM_CONFIG

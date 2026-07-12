@@ -1,6 +1,9 @@
 {
   "name": "random_forest_balanced",
   "estimator": "random_forest",
+  "preprocessing": {
+    "scale": false
+  },
   "parameters": {
     "n_estimators": 300,
     "min_samples_leaf": 2,

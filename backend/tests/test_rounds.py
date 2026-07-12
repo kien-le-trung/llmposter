@@ -433,7 +433,7 @@ def test_group_vote_eliminates_imposter_when_human_vote_matches(monkeypatch) -> 
         ]
 
     monkeypatch.setattr(rounds, "choice", lambda player_ids: first_agent_id)
-    monkeypatch.setattr(voting, "_build_embedding_agent_votes", vote_for_first_agent)
+    monkeypatch.setattr(voting, "_build_agent_votes", vote_for_first_agent)
     set_playing_order(monkeypatch, [*agent_ids, rounds.HUMAN_PLAYER_ID])
     client = build_test_client()
     create_response = client.post("/rounds", json={"secret_word": "satellite"})
@@ -473,7 +473,7 @@ def test_agent_only_round_votes_without_human_placeholder(monkeypatch) -> None:
         ]
 
     monkeypatch.setattr(rounds, "choice", lambda player_ids: imposter_agent.id)
-    monkeypatch.setattr(voting, "_build_embedding_agent_votes", vote_for_imposter)
+    monkeypatch.setattr(voting, "_build_agent_votes", vote_for_imposter)
     set_playing_order(monkeypatch, [agent.id for agent in agents])
     client = build_test_client()
 
@@ -559,7 +559,7 @@ def test_group_vote_decides_round_outcome(monkeypatch) -> None:
         ]
 
     monkeypatch.setattr(rounds, "choice", lambda player_ids: imposter_agent.id)
-    monkeypatch.setattr(voting, "_build_embedding_agent_votes", vote_for_imposter)
+    monkeypatch.setattr(voting, "_build_agent_votes", vote_for_imposter)
     set_playing_order(monkeypatch, [*agent_ids, rounds.HUMAN_PLAYER_ID])
     client = build_test_client()
     create_response = client.post("/rounds", json={"secret_word": "satellite"})
@@ -599,7 +599,7 @@ def test_imposter_wins_when_group_votes_out_non_imposter(monkeypatch) -> None:
         ]
 
     monkeypatch.setattr(rounds, "choice", lambda player_ids: rounds.HUMAN_PLAYER_ID)
-    monkeypatch.setattr(voting, "_build_embedding_agent_votes", vote_for_first_agent)
+    monkeypatch.setattr(voting, "_build_agent_votes", vote_for_first_agent)
     set_playing_order(monkeypatch, [*agent_ids, rounds.HUMAN_PLAYER_ID])
     client = build_test_client()
     create_response = client.post("/rounds", json={"secret_word": "satellite"})

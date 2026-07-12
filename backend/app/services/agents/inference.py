@@ -196,13 +196,19 @@ class InferenceClient:
                     )
 
                 with measure_stage("structured_attempt", {"attempt": str(attempt + 1)}):
-                    result = await self.generate(
-                        InferenceRequest(
-                            prompt=retry_prompt,
-                            agent=request.agent,
-                            response_schema=response_schema,
+                    try:
+                        result = await self.generate(
+                            InferenceRequest(
+                                prompt=retry_prompt,
+                                agent=request.agent,
+                                response_schema=response_schema,
+                            )
                         )
-                    )
+                    except InferenceServiceError as exc:
+                        if "empty assistant content" not in str(exc):
+                            raise
+                        last_error = str(exc)
+                        continue
 
                 try:
                     with measure_stage("schema_validation", {"attempt": str(attempt + 1)}):

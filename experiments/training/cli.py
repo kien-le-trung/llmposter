@@ -20,6 +20,7 @@ from .features import (
     DEFAULT_EMBEDDING_CONFIG,
     DEFAULT_INPUT_DIR as DEFAULT_SCRAPED_DIR,
     DEFAULT_OUTPUT_DIR as DEFAULT_FEATURED_DIR,
+    FEATURE_COLUMNS,
     FeatureBuilder,
     OllamaEmbeddingClient,
     _load_embedding_config,
@@ -173,13 +174,7 @@ def _training_config_from_args(
     model_config: ModelConfig,
 ) -> TrainingConfig:
     return TrainingConfig(
-        feature_columns=[
-            "candidate_turn_position",
-            "embedding_similarity_to_others_mean",
-            "embedding_similarity_to_others_std",
-            "embedding_similarity_rank_low_to_high",
-            "embedding_similarity_to_previous_mean",
-        ],
+        feature_columns=FEATURE_COLUMNS,
         model=model_config,
         test_size=args.test_size,
         random_state=args.random_state,
@@ -292,7 +287,8 @@ def _load_model_config(path: Path) -> ModelConfig:
     return ModelConfig(
         name=str(payload["name"]),
         estimator=str(payload["estimator"]),
-        parameters=payload["parameters"]
+        parameters=payload["parameters"],
+        preprocessing=payload.get("preprocessing", {}),
     )
 
 if __name__ == "__main__":
