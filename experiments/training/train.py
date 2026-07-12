@@ -6,22 +6,11 @@ from dataclasses import dataclass
 import json
 from pathlib import Path
 from typing import Any
-
-try:
-    from sklearn.ensemble import RandomForestClassifier
-    from sklearn.model_selection import GroupShuffleSplit
-    from sklearn.pipeline import Pipeline
-except ImportError as exc:  # pragma: no cover - exercised only without sklearn.
-    raise ImportError(
-        "train.py requires scikit-learn. Install scikit-learn before training."
-    ) from exc
-
-try:
-    from .evaluate import VotingModelEvaluator
-    from .features import FEATURE_COLUMNS
-except ImportError:  # Allows direct execution: python experiments/training/train.py
-    from evaluate import VotingModelEvaluator
-    from features import FEATURE_COLUMNS
+from sklearn.base import ClassifierMixin
+from sklearn.model_selection import GroupShuffleSplit
+from sklearn.pipeline import Pipeline
+from .evaluate import VotingModelEvaluator
+from .features import FEATURE_COLUMNS
 
 
 TRAINING_DIR = Path(__file__).resolve().parent
@@ -43,17 +32,19 @@ METADATA_COLUMNS = [
     "all_clues_json",
 ]
 
+@dataclass(frozen=True)
+class ModelConfig:
+    name: str
+    estimator: str
+    parameters: dict[str, Any]
 
 @dataclass(frozen=True)
 class TrainingConfig:
     feature_columns: list[str]
+    model: ModelConfig
     label_column: str = LABEL_COLUMN
     test_size: float = 0.2
     random_state: int = 42
-    n_estimators: int = 300
-    min_samples_leaf: int = 2
-    class_weight: str | None = "balanced"
-
 
 @dataclass(frozen=True)
 class TrainingResult:
@@ -216,16 +207,23 @@ class VotingModelTrainer:
             [
                 (
                     "model",
-                    RandomForestClassifier(
-                        n_estimators=self.config.n_estimators,
-                        min_samples_leaf=self.config.min_samples_leaf,
-                        class_weight=self.config.class_weight,
-                        random_state=self.config.random_state,
-                        n_jobs=-1,
-                    ),
+                    build_estimator(self.config.model)
                 )
             ]
         )
+    
+def build_estimator(config: ModelConfig) -> ClassifierMixin:
+    if config.estimator == "random_forest":
+        from sklearn.ensemble import RandomForestClassifier
+        return RandomForestClassifier(**config.parameters)
+    elif config.estimator == "logistic_regression":
+        from sklearn.linear_model import LogisticRegression
+        return LogisticRegression(**config.parameters)
+    elif config.estimator == "svm":
+        from sklearn.svm import SVC
+        return SVC(**config.parameters)
+    
+    raise ValueError(f"Unsupported estimator: {config.estimator}")
 
 
 def parse_args() -> argparse.Namespace:

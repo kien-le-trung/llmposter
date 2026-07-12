@@ -1,0 +1,31 @@
+{
+  "dataset_version": "llm_qwen7b_few_shot_20260710T201518Z_20260711T005256Z",
+  "source_path": "C:\\Users\\ltkie\\Documents\\Projects\\llmposter\\experiments\\training\\datasets\\scraped\\voting_candidates_llm_qwen7b_few_shot_20260710T201518Z_20260711T005256Z.csv",
+  "output_path": "C:\\Users\\ltkie\\Documents\\Projects\\llmposter\\experiments\\training\\datasets\\featured\\voting_features_llm_qwen7b_few_shot_20260710T201518Z_20260711T005256Z.csv",
+  "row_count": 2000,
+  "embedding_model": "nomic-embed-text",
+  "embedding_base_url": "http://localhost:11434",
+  "feature_columns": [
+    "candidate_turn_position",
+    "embedding_similarity_to_others_mean",
+    "embedding_similarity_to_others_std",
+    "embedding_similarity_rank_low_to_high",
+    "embedding_similarity_to_previous_mean"
+  ],
+  "preserved_columns": [
+    "experiment_name",
+    "case_id",
+    "round_id",
+    "turn_id",
+    "secret_word",
+    "imposter_was",
+    "candidate_agent_id",
+    "candidate_clue",
+    "is_imposter",
+    "all_clues_json"
+  ],
+  "pipeline_steps": [
+    "voting_features"
+  ],
+  "created_at": "2026-07-11T02:01:13.513775+00:00"
+}

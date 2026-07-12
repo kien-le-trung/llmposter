@@ -1,0 +1,21 @@
+{
+  "dataset_version": "llm_qwen7b_few_shot_20260710T201518Z_20260711T005256Z",
+  "experiment_name": "llm_qwen7b_few_shot_20260710T201518Z",
+  "source_path": "C:\\Users\\ltkie\\Documents\\Projects\\llmposter\\experiments\\output\\llm_qwen7b_few_shot_20260710T201518Z\\raw_results.jsonl",
+  "row_count": 2000,
+  "fieldnames": [
+    "experiment_name",
+    "case_id",
+    "repetition_index",
+    "round_id",
+    "turn_id",
+    "turn_sequence",
+    "secret_word",
+    "imposter_was",
+    "candidate_agent_id",
+    "candidate_clue",
+    "is_imposter",
+    "all_clues_json"
+  ],
+  "created_at": "2026-07-11T00:52:56.790755+00:00"
+}

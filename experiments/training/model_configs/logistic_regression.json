@@ -1,0 +1,9 @@
+{
+  "name": "logistic_regression_balanced",
+  "estimator": "logistic_regression",
+  "parameters": {
+    "class_weight": "balanced",
+    "max_iter": 1000,
+    "random_state": 42
+  }
+}

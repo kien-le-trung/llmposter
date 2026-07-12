@@ -1,0 +1,72 @@
+{
+  "model_version": "svm_rbf_balanced_20260712T130841Z",
+  "model_name": "svm_rbf_balanced",
+  "created_at": "2026-07-12T13:08:41.510652+00:00",
+  "model_path": "C:\\Users\\ltkie\\Documents\\Projects\\llmposter\\experiments\\training\\trained_models\\svm_rbf_balanced_20260712T130841Z\\model.joblib",
+  "feature_columns": [
+    "candidate_turn_position",
+    "embedding_similarity_to_others_mean",
+    "embedding_similarity_to_others_std",
+    "embedding_similarity_rank_low_to_high",
+    "embedding_similarity_to_previous_mean"
+  ],
+  "dataset_paths": [
+    "C:\\Users\\ltkie\\Documents\\Projects\\llmposter\\experiments\\training\\datasets\\featured\\voting_features_llm_qwen7b_few_shot_20260710T201518Z_20260711T005256Z.csv"
+  ],
+  "training_config": {
+    "feature_columns": [
+      "candidate_turn_position",
+      "embedding_similarity_to_others_mean",
+      "embedding_similarity_to_others_std",
+      "embedding_similarity_rank_low_to_high",
+      "embedding_similarity_to_previous_mean"
+    ],
+    "model": {
+      "name": "svm_rbf_balanced",
+      "estimator": "svm",
+      "parameters": {
+        "C": 1.0,
+        "kernel": "rbf",
+        "gamma": "scale",
+        "class_weight": "balanced",
+        "probability": true,
+        "random_state": 42
+      }
+    },
+    "label_column": "is_imposter",
+    "test_size": 0.2,
+    "random_state": 42
+  },
+  "metrics": {
+    "row_count": 400,
+    "positive_rate": 0.25,
+    "accuracy": 0.515,
+    "balanced_accuracy": 0.47333333333333333,
+    "precision": 0.22674418604651161,
+    "recall": 0.39,
+    "f1": 0.2867647058823529,
+    "confusion_matrix": [
+      [
+        167,
+        133
+      ],
+      [
+        61,
+        39
+      ]
+    ],
+    "round_top1_accuracy": 0.24,
+    "feature_importances": {},
+    "roc_auc": 0.5000333333333333,
+    "train_row_count": 1600,
+    "test_row_count": 400,
+    "train_round_count": 400,
+    "test_round_count": 100,
+    "positive_rate_train": 0.25,
+    "positive_rate_test": 0.25
+  },
+  "train_row_count": 1600,
+  "test_row_count": 400,
+  "train_round_count": 400,
+  "test_round_count": 100
+}
