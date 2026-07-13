@@ -1,5 +1,6 @@
 import asyncio
 import json
+import random
 from dataclasses import dataclass
 from hashlib import sha256
 from typing import Any, Callable, TypeVar
@@ -10,6 +11,9 @@ from pydantic import BaseModel, ValidationError
 from app.services.metrics import measure_stage
 
 StructuredModel = TypeVar("StructuredModel", bound=BaseModel)
+
+RETRYABLE_STATUS_CODES = {429, 500, 502, 503, 504}
+DEFAULT_MAX_ATTEMPTS = 3
 
 
 @dataclass(frozen=True)
@@ -73,11 +77,40 @@ class InferenceClient:
                 inference_mode="fake",
             )
 
-        payload = {
-            "model": self.settings.embedding_model_name,
-            "input": texts,
-        }
+        api_key = self.settings.get_env_value("GEMINI_API_KEY")
+        if not api_key:
+            raise InferenceServiceError("GEMINI_API_KEY is not configured")
+
+        model_name = self.settings.embedding_model_name
         model_server_url = self.settings.embedding_model_server_url
+        if not model_server_url:
+            raise InferenceServiceError("EMBEDDING_MODEL_SERVER_URL is not configured")
+
+        headers = {
+            "Content-Type": "application/json",
+            "x-goog-api-key": api_key,
+        }
+
+        payload = {
+            "requests": [
+                {
+                    "model": f"models/{model_name}",
+                    "taskType": "SEMANTIC_SIMILARITY",
+                    "outputDimensionality": 768,
+                    "content": {
+                        "parts": [
+                            {"text": text},
+                        ],
+                    },
+                }
+                for text in texts
+            ],
+        }
+
+        embedding_url = (
+            f"{model_server_url.rstrip('/')}/models/"
+            f"{model_name}:batchEmbedContents"
+        )
 
         try:
             async with httpx.AsyncClient(timeout=20.0) as client:
@@ -86,23 +119,37 @@ class InferenceClient:
                     {"model": self.settings.embedding_model_name, "count": str(len(texts))},
                 ):
                     response = await client.post(
-                        f"{model_server_url}/api/embed",
+                        embedding_url,
+                        headers=headers,
                         json=payload,
                     )
                 response.raise_for_status()
                 with measure_stage("embedding_response_parse"):
                     data = response.json()
 
-            embeddings = data.get("embeddings")
-            if embeddings is None and "embedding" in data:
-                embeddings = [data["embedding"]]
-            if not isinstance(embeddings, list):
+            embedding_objects = data.get("embeddings")
+            if not isinstance(embedding_objects, list):
                 raise ValueError("missing embeddings")
 
+            embeddings = []
+            for embedding_object in embedding_objects:
+                if not isinstance(embedding_object, dict):
+                    raise TypeError("unexpected embedding object")
+
+                values = embedding_object.get("values")
+                if not isinstance(values, list):
+                    raise ValueError("missing embedding values")
+
+                embeddings.append([float(value) for value in values])
+
+            if len(embeddings) != len(texts):
+                raise ValueError("wrong number of embeddings")
+
             return EmbeddingResult(
-                embeddings=[list(map(float, embedding)) for embedding in embeddings],
-                inference_mode="remote",
+                embeddings=embeddings,
+                inference_mode="gemini",
             )
+
         except httpx.TimeoutException as exc:
             raise InferenceServiceError("Embedding model request timed out") from exc
         except httpx.RequestError as exc:
@@ -145,55 +192,119 @@ class InferenceClient:
             "max_tokens": self._resolve_max_tokens(request),
             "model": self.llm_config.model,
         }
-        try:
-            client = self._http_client
-            owns_client = client is None
-            if client is None:
-                owned_client = httpx.AsyncClient(timeout=20.0)
-                client = await owned_client.__aenter__()
-            try:
-                with measure_stage(
-                    "model_http",
-                    {"model": self.llm_config.model, "agent": request.agent.id},
-                ):
-                    async with self._semaphore:
-                        response = await client.post(
-                            url=self.llm_config.chat_url,
-                            headers=headers,
-                            json=payload,
-                        )
-                response.raise_for_status()
-                with measure_stage("model_response_parse"):
-                    data = response.json()
-            finally:
-                if owns_client:
-                    await owned_client.__aexit__(None, None, None)
 
-            choice = data["choices"][0]
-            text = choice["message"].get("content")
-            if not isinstance(text, str) or not text.strip():
-                finish_reason = choice.get("finish_reason", "unknown")
-                raise InferenceServiceError(
-                    "Model provider returned empty assistant content "
-                    f"(finish_reason={finish_reason})"
+        last_error: Exception | None = None
+        for attempt in range(1, DEFAULT_MAX_ATTEMPTS + 1):
+            retry_reason = "unknown"
+            try:
+                client = self._http_client
+                owns_client = client is None
+                if client is None:
+                    owned_client = httpx.AsyncClient(timeout=20.0)
+                    client = await owned_client.__aenter__()
+                try:
+                    with measure_stage(
+                        "model_http",
+                        {
+                            "model": self.llm_config.model,
+                            "agent": request.agent.id,
+                            "attempt": str(attempt),
+                        },
+                    ):
+                        async with self._semaphore:
+                            response = await client.post(
+                                url=self.llm_config.chat_url,
+                                headers=headers,
+                                json=payload,
+                            )
+                    response.raise_for_status()
+                    with measure_stage("model_response_parse"):
+                        data = response.json()
+                finally:
+                    if owns_client:
+                        await owned_client.__aexit__(None, None, None)
+
+                choice = data["choices"][0]
+                text = choice["message"].get("content")
+                if not isinstance(text, str) or not text.strip():
+                    finish_reason = choice.get("finish_reason", "unknown")
+                    raise InferenceServiceError(
+                        "Model provider returned empty assistant content "
+                        f"(finish_reason={finish_reason})"
+                    )
+                return InferenceResult(
+                    text=text,
+                    inference_mode=self.llm_config.provider,
                 )
-            return InferenceResult(text=text, inference_mode=self.llm_config.provider)
-        except httpx.TimeoutException as exc:
-            raise InferenceServiceError("Model provider request timed out") from exc
-        except httpx.RequestError as exc:
-            raise InferenceServiceError("Model provider is unavailable") from exc
-        except httpx.HTTPStatusError as exc:
-            response_text = exc.response.text.strip()
-            detail = f": {response_text}" if response_text else ""
+            except httpx.TimeoutException as exc:
+                last_error = exc
+                retry_reason = "timeout"
+            except httpx.RequestError as exc:
+                last_error = exc
+                retry_reason = "request_error"
+            except ValueError as exc:
+                last_error = exc
+                retry_reason = "invalid_json"
+            except KeyError as exc:
+                last_error = exc
+                retry_reason = "unexpected_response"
+            except IndexError as exc:
+                last_error = exc
+                retry_reason = "missing_choice"
+            except httpx.HTTPStatusError as exc:
+                if exc.response.status_code not in RETRYABLE_STATUS_CODES:
+                    # Permanent HTTP failure: fail immediately.
+                    response_text = exc.response.text.strip()
+                    detail = f": {response_text}" if response_text else ""
+                    raise InferenceServiceError(
+                        f"Model provider returned HTTP {exc.response.status_code}{detail}"
+                    ) from exc
+                last_error = exc
+                retry_reason = f"http_{exc.response.status_code}"
+
+            if attempt < DEFAULT_MAX_ATTEMPTS:
+                delay = _retry_delay(attempt)
+
+                # If there's Retry-After from remote server, prioritize it
+                if isinstance(last_error, httpx.HTTPStatusError):
+                    retry_after = _retry_after_seconds(last_error.response)
+                    if retry_after is not None:
+                        delay = retry_after
+
+                delay = min(delay, 10.0)
+                with measure_stage(
+                    "model_retry_backoff",
+                    {
+                        "model": self.llm_config.model,
+                        "agent": request.agent.id,
+                        "failed_attempt": str(attempt),
+                        "next_attempt": str(attempt + 1),
+                        "reason": retry_reason,
+                        "delay_seconds": f"{delay:.3f}",
+                    },
+                ):
+                    await asyncio.sleep(delay)
+
+        if isinstance(last_error, httpx.TimeoutException):
             raise InferenceServiceError(
-                f"Model provider returned HTTP {exc.response.status_code}{detail}"
-            ) from exc
-        except ValueError as exc:
-            raise InferenceServiceError("Model provider returned invalid JSON") from exc
-        except KeyError as exc:
-            raise InferenceServiceError("Model provider returned an unexpected response") from exc
-        except IndexError as exc:
-            raise InferenceServiceError("Model provider returned no choices") from exc
+                f"Model provider request timed out after {DEFAULT_MAX_ATTEMPTS} attempts"
+            ) from last_error
+
+        if isinstance(last_error, httpx.RequestError):
+            raise InferenceServiceError(
+                f"Model provider was unavailable after {DEFAULT_MAX_ATTEMPTS} attempts"
+            ) from last_error
+
+        if isinstance(last_error, httpx.HTTPStatusError):
+            raise InferenceServiceError(
+                f"Model provider returned HTTP "
+                f"{last_error.response.status_code} after {DEFAULT_MAX_ATTEMPTS} attempts"
+            ) from last_error
+
+        raise InferenceServiceError(
+            f"Model provider returned an invalid response after {DEFAULT_MAX_ATTEMPTS} attempts"
+        ) from last_error
+
 
     async def generate_structured(
         self,
@@ -306,6 +417,22 @@ class InferenceClient:
             self.llm_config.min_max_tokens,
             self.llm_config.structured_max_tokens,
         )
+
+def _retry_delay(attempt: int) -> float:
+    base_delay = 0.5 * (2 ** (attempt - 1))
+    jitter = random.uniform(0.0, 0.25)
+    return base_delay + jitter
+
+
+def _retry_after_seconds(response: httpx.Response) -> float | None:
+    value = response.headers.get("Retry-After")
+    if value is None:
+        return None
+
+    try:
+        return max(0.0, float(value))
+    except ValueError:
+        return None
 
 
 def _extract_json_object(text: str) -> str:

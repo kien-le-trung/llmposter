@@ -52,7 +52,7 @@ class PlayerResponse(BaseModel):
     name: str
     kind: str
 
-
+# viewed by frontend and backend
 class RoundResponse(BaseModel):
     id: str
     visible_word: str | None
@@ -66,7 +66,7 @@ class RoundResponse(BaseModel):
     turns: list[TurnResponse]
     created_at: datetime
 
-
+# viewed by backend only
 class RoundState(BaseModel):
     id: str
     secret_word: str
@@ -105,11 +105,13 @@ class ClueModelResponse(BaseModel):
     clue: str = Field(min_length=1)
 
 
+# in-memory round state; not persisted
 ROUNDS: dict[str, RoundState] = {}
+
 ACTIVE_GENERATION_ROUNDS: set[str] = set()
 
 
-def to_round_response(round_state: RoundState) -> RoundResponse:
+def round_state_to_round_response(round_state: RoundState) -> RoundResponse:
     human_is_imposter = round_state.imposter_player_id == HUMAN_PLAYER_ID
     player_names_by_id = get_player_names_by_id_from_round(round_state)
     current_player_id = round_state.playing_order[round_state.current_player_index] if round_state.current_player_index < len(round_state.playing_order) else None
@@ -219,7 +221,8 @@ async def _run_clue_generation(
 
             start_imposter_if_ready()
             try:
-                while tasks:
+                while tasks: # when there are still tasks to complete
+                    # return the first completed task(s), process it. This will be called multiple times
                     done, _ = await asyncio.wait(tasks, return_when=asyncio.FIRST_COMPLETED)
                     for task in done:
                         player_id = tasks.pop(task)
@@ -235,12 +238,13 @@ async def _run_clue_generation(
                     reveal_available_clues(state)
             except (InferenceServiceError, KeyError, ValueError):
                 for task in tasks:
-                    task.cancel()
+                    task.cancel() # send a cancellation request to all remaining tasks
                 await asyncio.gather(*tasks, return_exceptions=True)
                 state.status = "generation_failed"
                 return
 
         reveal_available_clues(state)
+
 
 async def generate_agent_clue(
     round_state: RoundState,
@@ -384,9 +388,18 @@ async def create_round(
         created_at=datetime.now(UTC),
         include_human=include_human,
     )
+    # Store the round state in memory
     ROUNDS[round_state.id] = round_state
-    background_tasks.add_task(continue_clue_generation, round_state.id, agents, settings)
-    return to_round_response(round_state)
+
+    # initialize background task
+    background_tasks.add_task(
+        continue_clue_generation, 
+        round_state.id, 
+        agents, 
+        settings
+    )
+    
+    return round_state_to_round_response(round_state)
 
 
 @router.get("/{round_id}", response_model=RoundResponse)
@@ -394,7 +407,7 @@ def get_round(round_id: str) -> RoundResponse:
     round_state = ROUNDS.get(round_id)
     if round_state is None:
         raise HTTPException(status_code=404, detail="Unknown round")
-    return to_round_response(round_state)
+    return round_state_to_round_response(round_state)
 
 
 @router.post("/{round_id}/clue", response_model=RoundResponse)
@@ -435,7 +448,7 @@ async def submit_clue(
     db.commit()
     agents = list_runtime_agent_configs(db, settings)
     background_tasks.add_task(continue_clue_generation, round_id, agents, settings)
-    return to_round_response(round_state)
+    return round_state_to_round_response(round_state)
 
 
 @router.post("/{round_id}/vote", response_model=VoteResponse)

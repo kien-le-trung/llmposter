@@ -30,7 +30,6 @@ export function GameConsole({ agents }: GameConsoleProps) {
   const [isCreatingRound, setIsCreatingRound] = useState(false);
   const [isSubmittingClue, setIsSubmittingClue] = useState(false);
   const [isVoting, setIsVoting] = useState(false);
-  const [revealedClueCount, setRevealedClueCount] = useState(0);
 
   const seats = useMemo<PlayerSeat[]>(
     () => [
@@ -50,12 +49,6 @@ export function GameConsole({ agents }: GameConsoleProps) {
         kind: player.kind,
       }))
     : seats;
-  const clueMessages = round?.turns[0]?.responses ?? [];
-
-  useEffect(() => {
-    setRevealedClueCount(0);
-  }, [round?.id]);
-
   useEffect(() => {
     if (!round || round.status !== "generating_clues") {
       return;
@@ -73,27 +66,13 @@ export function GameConsole({ agents }: GameConsoleProps) {
           setError(caught instanceof Error ? caught.message : "Could not refresh round");
         }
       }
-    }, 1000);
+    }, 250);
 
     return () => {
       isCancelled = true;
       window.clearTimeout(timeoutId);
     };
   }, [round]);
-
-  useEffect(() => {
-    if (!round || revealedClueCount >= clueMessages.length) {
-      return;
-    }
-
-    const timeoutId = window.setTimeout(() => {
-      setRevealedClueCount((currentCount) =>
-        Math.min(currentCount + 1, clueMessages.length),
-      );
-    }, 650);
-
-    return () => window.clearTimeout(timeoutId);
-  }, [clueMessages.length, revealedClueCount, round?.id]);
 
   async function handleCreateRound(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -227,7 +206,6 @@ export function GameConsole({ agents }: GameConsoleProps) {
                   <TurnCard
                     key={turn.id}
                     turn={turn}
-                    revealedCount={revealedClueCount}
                   />
                 ))
               ) : (
@@ -342,15 +320,7 @@ export function GameConsole({ agents }: GameConsoleProps) {
   );
 }
 
-function TurnCard({
-  turn,
-  revealedCount,
-}: {
-  turn: Turn;
-  revealedCount: number;
-}) {
-  const visibleResponses = turn.responses.slice(0, revealedCount);
-
+function TurnCard({ turn }: { turn: Turn }) {
   return (
     <li className="chat-panel">
       <div className="chat-heading">
@@ -358,7 +328,7 @@ function TurnCard({
         <p>{turn.user_prompt}</p>
       </div>
       <div className="chat-thread">
-        {visibleResponses.map((response, index) => (
+        {turn.responses.map((response, index) => (
           <div
             key={`${response.agent_id}-${index}`}
             className={`chat-message ${response.agent_id === "human" ? "human" : "agent"}`}
