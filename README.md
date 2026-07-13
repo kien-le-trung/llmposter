@@ -120,6 +120,12 @@ Initialize database tables and seed agent configs:
 docker compose exec backend python -c "from app.db.seed import init_database; init_database()"
 ```
 
+The MVP keeps active round state in backend memory; PostgreSQL stores only agent
+configuration plus standalone clue and vote history. After changing from the older
+database-backed round schema, recreate the development database with
+`docker compose down -v` before initializing it again. `create_all()` does not remove
+the obsolete `rounds` table or its foreign keys from an existing database.
+
 Pull the local chat and embedding models into the model container:
 
 ```powershell

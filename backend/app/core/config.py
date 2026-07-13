@@ -20,6 +20,7 @@ class LLMConfig(BaseModel):
     api_key_env: str | None = None
     min_max_tokens: int = 10000
     structured_max_tokens: int = 10000
+    max_concurrent_requests: int | None = Field(default=None, ge=1)
     notes: str | None = None
 
 

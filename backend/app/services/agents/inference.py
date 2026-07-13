@@ -1,3 +1,4 @@
+import asyncio
 import json
 from dataclasses import dataclass
 from hashlib import sha256
@@ -47,9 +48,23 @@ class InferenceServiceError(Exception):
 
 
 class InferenceClient:
-    def __init__(self, settings) -> None:
+    def __init__(self, settings, max_concurrent_requests: int | None = None) -> None:
         self.settings = settings
         self.llm_config = settings.llm_config
+        limit = max_concurrent_requests or self.llm_config.max_concurrent_requests
+        if limit is None:
+            limit = 1 if "localhost:8888" in self.llm_config.chat_url else 100
+        self._semaphore = asyncio.Semaphore(limit)
+        self._http_client: httpx.AsyncClient | None = None
+
+    async def __aenter__(self) -> "InferenceClient":
+        self._http_client = httpx.AsyncClient(timeout=20.0)
+        return self
+
+    async def __aexit__(self, *args: object) -> None:
+        if self._http_client is not None:
+            await self._http_client.aclose()
+            self._http_client = None
 
     async def embed(self, texts: list[str]) -> EmbeddingResult:
         if self.settings.inference_mode == "fake":
@@ -131,19 +146,28 @@ class InferenceClient:
             "model": self.llm_config.model,
         }
         try:
-            async with httpx.AsyncClient(timeout=20.0) as client:
+            client = self._http_client
+            owns_client = client is None
+            if client is None:
+                owned_client = httpx.AsyncClient(timeout=20.0)
+                client = await owned_client.__aenter__()
+            try:
                 with measure_stage(
                     "model_http",
                     {"model": self.llm_config.model, "agent": request.agent.id},
                 ):
-                    response = await client.post(
-                        url=self.llm_config.chat_url,
-                        headers=headers,
-                        json=payload,
-                    )
+                    async with self._semaphore:
+                        response = await client.post(
+                            url=self.llm_config.chat_url,
+                            headers=headers,
+                            json=payload,
+                        )
                 response.raise_for_status()
                 with measure_stage("model_response_parse"):
                     data = response.json()
+            finally:
+                if owns_client:
+                    await owned_client.__aexit__(None, None, None)
 
             choice = data["choices"][0]
             text = choice["message"].get("content")
