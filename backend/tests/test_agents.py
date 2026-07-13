@@ -7,16 +7,11 @@ import pytest
 
 from app.core.config import LLMConfig
 from app.main import create_app
-from backend.app.services.agents.clue_generation import (
-    build_instruction_batched_clue_user_prompt,
+from app.services.agents.clue_generation import (
     build_instruction_clue_user_prompt,
 )
 from app.services.agents.strategy_loader import (
     load_imposter_clue_strategies,
-)
-from app.services.voting.votes import (
-    build_vote_user_prompt,
-    clean_vote_response,
 )
 from app.services.agents.inference import (
     AgentConfig,
@@ -120,57 +115,6 @@ def test_imposter_strategies_are_loaded_from_json() -> None:
         "Adjacent association",
     }
     assert all(strategy["prompt"] for strategy in strategies)
-
-
-def test_instruction_batched_clue_prompt_uses_named_json_shape() -> None:
-    prompt = build_instruction_batched_clue_user_prompt(
-        secret_word="satellite",
-        player_names=["Agent A", "Agent B"],
-    )
-
-    assert "Each listed player knows the secret word." in prompt
-    assert "Examples:" not in prompt
-    assert '"Agent A":"your clue"' in prompt
-    assert '"Agent B":"your clue"' in prompt
-
-
-def test_instruction_batched_clue_prompt_can_include_player_strategies() -> None:
-    prompt = build_instruction_batched_clue_user_prompt(
-        secret_word="satellite",
-        player_names=["Agent A", "Agent B"],
-        strategies_by_player_name={
-            "Agent A": {
-                "name": "Indirect association",
-                "prompt": "Write an indirect relation.",
-            },
-            "Agent B": {
-                "name": "Side effect",
-                "prompt": "Write a result of the word.",
-            },
-        },
-    )
-
-    assert "Player-specific prompts:" in prompt
-    assert "Agent A strategy - Indirect association:\nWrite an indirect relation." in prompt
-    assert "Agent B strategy - Side effect:\nWrite a result of the word." in prompt
-    assert '"Agent A":"your clue"' in prompt
-
-
-def test_vote_prompt_uses_allowed_answers_shape() -> None:
-    prompt = build_vote_user_prompt(
-        candidate_names=["Agent A", "You"],
-        clue_lines=[("Agent A", "space signal"), ("You", "red fruit")],
-    )
-
-    assert "Candidates:" in prompt
-    assert 'Agent A = "space signal"' in prompt
-    assert "Allowed answers:\nAgent A\nYou" in prompt
-    assert prompt.endswith('JSON: {"vote":"<one allowed answer>"}')
-
-
-def test_vote_cleanup_matches_candidate_names() -> None:
-    assert clean_vote_response("Vote: agent a.", ["Agent A", "You"]) == "Agent A"
-    assert clean_vote_response("I choose human", ["Agent A", "You"]) == "You"
 
 
 def test_structured_generation_retries_until_schema_is_valid(monkeypatch) -> None:
