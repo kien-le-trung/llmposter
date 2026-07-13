@@ -1,7 +1,6 @@
 import joblib
 from pathlib import Path
 from functools import lru_cache
-from pathlib import Path
 
 class VotingModelPredictor:
     def __init__(self, model_path: Path):
