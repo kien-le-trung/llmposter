@@ -3,6 +3,7 @@ import pytest
 
 from app.api.routes import rounds
 from app.core.config import Settings
+from app.db.session import get_db
 from app.main import create_app
 from app.services.agents.inference import InferenceResult
 from app.services.agents.runtime_agents import list_static_agent_configs as list_agent_configs
@@ -29,6 +30,11 @@ class FakeSession:
         pass
 
 
+def get_fake_db():
+    with FakeSession() as db:
+        yield db
+
+
 @pytest.fixture(autouse=True)
 def use_fake_session(monkeypatch) -> None:
     monkeypatch.setattr(rounds, "SessionLocal", FakeSession)
@@ -48,7 +54,9 @@ def build_test_settings(**overrides) -> Settings:
 
 
 def build_test_client(**settings_overrides) -> TestClient:
-    return TestClient(create_app(build_test_settings(**settings_overrides)))
+    app = create_app(build_test_settings(**settings_overrides))
+    app.dependency_overrides[get_db] = get_fake_db
+    return TestClient(app)
 
 
 def set_playing_order(monkeypatch, player_ids: list[str]) -> None:
