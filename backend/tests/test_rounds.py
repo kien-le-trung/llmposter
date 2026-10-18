@@ -43,6 +43,7 @@ def use_fake_session(monkeypatch) -> None:
 def build_test_settings(**overrides) -> Settings:
     settings = Settings(_env_file=None)
     settings.inference_mode = "fake"
+    settings.discussion_enabled = False  # These tests exercise the legacy clue/ML-vote flow.
     settings.word_selection_mode = "fixed"
     settings.fixed_secret_word = "satellite"
     settings.fixed_imposter_hint = "orbit"

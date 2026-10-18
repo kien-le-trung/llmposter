@@ -1,0 +1,71 @@
+.screen {
+    flex-grow: 1;
+    align-items: center;
+    justify-content: center;
+    padding: 32px;
+    background-color: rgb(14, 18, 29);
+}
+
+.card {
+    width: 620px;
+    max-width: 90%;
+    padding: 40px;
+    border-radius: 16px;
+    background-color: rgb(28, 34, 49);
+}
+
+.eyebrow {
+    margin-bottom: 8px;
+    color: rgb(99, 196, 255);
+    font-size: 14px;
+    -unity-font-style: bold;
+    letter-spacing: 2px;
+}
+
+.title {
+    margin-bottom: 12px;
+    color: rgb(244, 247, 255);
+    font-size: 40px;
+    -unity-font-style: bold;
+}
+
+.body {
+    margin-bottom: 24px;
+    color: rgb(181, 190, 209);
+    font-size: 17px;
+    white-space: normal;
+}
+
+.concept-list {
+    margin-bottom: 24px;
+    padding: 18px;
+    border-radius: 10px;
+    background-color: rgb(20, 25, 38);
+}
+
+.concept {
+    margin-top: 4px;
+    margin-bottom: 4px;
+    color: rgb(207, 215, 232);
+    font-size: 15px;
+}
+
+.primary-button {
+    height: 44px;
+    margin-bottom: 12px;
+    border-width: 0;
+    border-radius: 8px;
+    background-color: rgb(68, 147, 255);
+    color: white;
+    font-size: 16px;
+    -unity-font-style: bold;
+}
+
+.primary-button:hover {
+    background-color: rgb(91, 164, 255);
+}
+
+.status {
+    color: rgb(129, 221, 166);
+    font-size: 14px;
+}

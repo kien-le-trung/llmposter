@@ -43,6 +43,11 @@ experiments/prompt_benchmarking/results/*.md
 experiments/voting_benchmarking/results/*.jsonl
 experiments/voting_benchmarking/results/*.json
 experiments/voting_benchmarking/results/*.csv
+
+# Local database exports may contain research participant data and credentials-adjacent metadata.
+data/raw/
+data/processed/
+experiments/notebooks/human_vs_machine/results/
 experiments/voting_benchmarking/results/*.md
 experiments/voting_benchmarking/mlflow.db
 !experiments/voting_benchmarking/results/.gitkeep
@@ -53,6 +58,16 @@ mlruns/
 Thumbs.db
 .idea/
 .vscode/
+
+# Unity generated files
+unity/[Ll]ibrary/
+unity/[Tt]emp/
+unity/[Oo]bj/
+unity/[Bb]uild/
+unity/[Bb]uilds/
+unity/[Ll]ogs/
+unity/[Uu]ser[Ss]ettings/
+unity/MemoryCaptures/
 
 # AI agent / assistant workspace
 .agent/

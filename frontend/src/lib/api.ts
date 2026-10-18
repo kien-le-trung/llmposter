@@ -44,6 +44,21 @@ export type Turn = {
   created_at: string;
 };
 
+export type Discussion = {
+  enabled: boolean;
+  deadline: string | null;
+  error: string | null;
+  messages: {
+    id: string;
+    player_id: string;
+    player_name: string;
+    text: string;
+    sequence: number;
+    inference_mode: string;
+    created_at: string;
+  }[];
+};
+
 export type Round = {
   id: string;
   visible_word: string | null;
@@ -53,6 +68,7 @@ export type Round = {
   playing_order: RoundPlayer[];
   current_player_id: string | null;
   current_player_name: string | null;
+  discussion: Discussion;
   turns: Turn[];
   created_at: string;
 };
@@ -94,7 +110,8 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
   });
 
   if (!response.ok) {
-    throw new Error(`API request failed: ${response.status}`);
+    const body = await response.json().catch(() => null);
+    throw new Error(typeof body?.detail === "string" ? body.detail : `API request failed: ${response.status}`);
   }
 
   return response.json() as Promise<T>;
@@ -130,5 +147,13 @@ export function voteRound(roundId: string, agentId: string) {
   return request<VoteResult>(`/rounds/${roundId}/vote`, {
     method: "POST",
     body: JSON.stringify({ agent_id: agentId }),
+  });
+}
+
+
+export function submitDiscussionComment(roundId: string, text: string) {
+  return request<Round>(`/rounds/${roundId}/discussion`, {
+    method: "POST",
+    body: JSON.stringify({ text }),
   });
 }

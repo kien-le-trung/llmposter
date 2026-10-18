@@ -12,6 +12,7 @@ from sqlalchemy.orm import Session
 from app.core.config import Settings, get_app_settings
 from app.db.models import ClueModel, VoteModel
 from app.db.session import SessionLocal, get_db
+from app.services.agents import discussion as chat
 from app.services.agents.clue_generation import build_instruction_clue_user_prompt, clean_clue_response
 from app.services.agents.strategy_loader import (
     PROMPT_TECHNIQUES,
@@ -60,6 +61,7 @@ class RoundResponse(BaseModel):
     user_role: str
     prompt_technique: str
     status: str
+    discussion: chat.DiscussionState
     playing_order: list[PlayerResponse]
     current_player_id: str | None
     current_player_name: str | None
@@ -80,6 +82,8 @@ class RoundState(BaseModel):
     turns: list[TurnResponse]
     created_at: datetime
     include_human: bool = True
+    discussion: chat.DiscussionState = Field(default_factory=chat.DiscussionState)
+    discussion_duration_seconds: int = 90
     human_clue: str | None = None
     voted_agent_id: str | None = None
     completed_clues: dict[str, AgentTurnResponse] = Field(default_factory=dict)
@@ -90,6 +94,7 @@ class CreateRoundRequest(BaseModel):
     imposter_hint: str | None = Field(default=None, min_length=1, max_length=160)
     prompt_technique: str | None = Field(default=None, min_length=1, max_length=80)
     include_human: bool = True
+    discussion_enabled: bool | None = None
 
 
 class VoteRequest(BaseModel):
@@ -112,6 +117,7 @@ ACTIVE_GENERATION_ROUNDS: set[str] = set()
 
 
 def round_state_to_round_response(round_state: RoundState) -> RoundResponse:
+    chat.expire_discussion(round_state)
     human_is_imposter = round_state.imposter_player_id == HUMAN_PLAYER_ID
     player_names_by_id = get_player_names_by_id_from_round(round_state)
     current_player_id = round_state.playing_order[round_state.current_player_index] if round_state.current_player_index < len(round_state.playing_order) else None
@@ -134,6 +140,7 @@ def round_state_to_round_response(round_state: RoundState) -> RoundResponse:
         current_player_name=(
             player_names_by_id.get(current_player_id) if current_player_id is not None else None
         ),
+        discussion=round_state.discussion,
         turns=round_state.turns,
         created_at=round_state.created_at,
     )
@@ -152,7 +159,10 @@ def reveal_available_clues(state: RoundState) -> None:
         if not any(response.agent_id == player_id for response in opening_turn.responses):
             opening_turn.responses.append(clue)
         state.current_player_index += 1
-    state.status = "ready_to_vote"
+    if state.discussion.enabled:
+        chat.open_discussion(state)
+    else:
+        state.status = "ready_to_vote"
 
 
 async def continue_clue_generation(
@@ -236,6 +246,7 @@ async def _run_clue_generation(
                     db.commit()
                     start_imposter_if_ready()
                     reveal_available_clues(state)
+                    chat.ensure_discussion_tasks(state, agents, settings)
             except (InferenceServiceError, KeyError, ValueError):
                 for task in tasks:
                     task.cancel() # send a cancellation request to all remaining tasks
@@ -348,6 +359,12 @@ async def create_round(
         raise HTTPException(status_code=500, detail="No agents configured")
 
     include_human = payload.include_human if payload is not None else True
+    discussion_enabled = (
+        payload.discussion_enabled if payload and payload.discussion_enabled is not None
+        else settings.discussion_enabled and include_human
+    )
+    if discussion_enabled and not include_human:
+        raise HTTPException(status_code=422, detail="Discussion requires a human player")
     player_ids = [agent.id for agent in agents]
     if include_human:
         player_ids.insert(0, HUMAN_PLAYER_ID)
@@ -387,6 +404,8 @@ async def create_round(
         turns=[],
         created_at=datetime.now(UTC),
         include_human=include_human,
+        discussion=chat.DiscussionState(enabled=discussion_enabled),
+        discussion_duration_seconds=settings.discussion_duration_seconds,
     )
     # Store the round state in memory
     ROUNDS[round_state.id] = round_state
@@ -403,7 +422,7 @@ async def create_round(
 
 
 @router.get("/{round_id}", response_model=RoundResponse)
-def get_round(round_id: str) -> RoundResponse:
+async def get_round(round_id: str) -> RoundResponse:
     round_state = ROUNDS.get(round_id)
     if round_state is None:
         raise HTTPException(status_code=404, detail="Unknown round")
@@ -422,6 +441,7 @@ async def submit_clue(
     if round_state is None:
         raise HTTPException(status_code=404, detail="Unknown round")
 
+    chat.expire_discussion(round_state)
     if round_state.status != "awaiting_human_clue":
         raise HTTPException(status_code=409, detail="Round is not waiting for a human clue")
 
@@ -447,6 +467,7 @@ async def submit_clue(
     reveal_available_clues(round_state)
     db.commit()
     agents = list_runtime_agent_configs(db, settings)
+    chat.ensure_discussion_tasks(round_state, agents, settings)
     background_tasks.add_task(continue_clue_generation, round_id, agents, settings)
     return round_state_to_round_response(round_state)
 
@@ -470,6 +491,7 @@ async def vote(
     if payload.agent_id is not None and voted_agent is None:
         raise HTTPException(status_code=404, detail="Unknown agent")
 
+    chat.expire_discussion(round_state)
     if round_state.status != "ready_to_vote":
         raise HTTPException(status_code=409, detail="Round is not ready for voting")
 
@@ -478,6 +500,10 @@ async def vote(
         raise HTTPException(status_code=422, detail="A human vote agent_id is required")
 
     agents = list_runtime_agent_configs(db, settings)
+    async with round_state.discussion._lock:
+        if round_state.discussion._voting or round_state.status != "ready_to_vote":
+            raise HTTPException(status_code=409, detail="Voting already in progress or complete")
+        round_state.discussion._voting = True
     try:
         result = await submit_round_vote(
             round_state,
@@ -519,3 +545,28 @@ async def vote(
         raise HTTPException(status_code=409, detail=str(exc)) from exc
     except InferenceServiceError as exc:
         raise HTTPException(status_code=503, detail=str(exc)) from exc
+    finally:
+        round_state.discussion._voting = False
+
+
+class SubmitDiscussionComment(BaseModel):
+    text: str = Field(min_length=1, max_length=500)
+
+
+@router.post("/{round_id}/discussion", response_model=RoundResponse)
+async def submit_discussion_comment(
+    round_id: str,
+    payload: SubmitDiscussionComment,
+    db: Session = Depends(get_db),
+) -> RoundResponse:
+    state = ROUNDS.get(round_id)
+    if state is None:
+        raise HTTPException(status_code=404, detail="Unknown round")
+    async with state.discussion._lock:
+        chat.expire_discussion(state)
+        if state.status != "discussion":
+            raise HTTPException(status_code=409, detail="Discussion is closed")
+        if not payload.text.strip():
+            raise HTTPException(status_code=422, detail="Comment cannot be blank")
+        chat.publish_comment(state, HUMAN_PLAYER_ID, payload.text.strip(), "human", db)
+    return round_state_to_round_response(state)

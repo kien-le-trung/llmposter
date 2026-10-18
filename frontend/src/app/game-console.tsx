@@ -1,12 +1,13 @@
 "use client";
 
-import { FormEvent, useEffect, useMemo, useState } from "react";
+import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import {
   Agent,
   Round,
   Turn,
   VoteResult,
   createRound,
+  submitDiscussionComment,
   getRound,
   submitRoundClue,
   voteRound,
@@ -30,6 +31,13 @@ export function GameConsole({ agents }: GameConsoleProps) {
   const [isCreatingRound, setIsCreatingRound] = useState(false);
   const [isSubmittingClue, setIsSubmittingClue] = useState(false);
   const [isVoting, setIsVoting] = useState(false);
+  const [commentDraft, setCommentDraft] = useState("");
+  const [discussionBusy, setDiscussionBusy] = useState(false);
+  const [now, setNow] = useState(() => Date.now());
+  const transcriptRef = useRef<HTMLOListElement>(null);
+  const followMessages = useRef(true);
+  const actionVersion = useRef(0);
+  const actionPending = useRef(false);
 
   const seats = useMemo<PlayerSeat[]>(
     () => [
@@ -50,33 +58,62 @@ export function GameConsole({ agents }: GameConsoleProps) {
       }))
     : seats;
   useEffect(() => {
-    if (!round || round.status !== "generating_clues") {
-      return;
-    }
+    const list = transcriptRef.current;
+    if (list && followMessages.current) list.scrollTop = list.scrollHeight;
+  }, [round?.discussion.messages.length]);
 
-    let isCancelled = false;
-    const timeoutId = window.setTimeout(async () => {
+  const roundId = round?.id;
+  const roundStatus = round?.status;
+  useEffect(() => {
+    if (!roundId || !["generating_clues", "discussion"].includes(roundStatus ?? "")) return;
+    let cancelled = false;
+    let fetching = false;
+    const interval = window.setInterval(async () => {
+      setNow(Date.now());
+      if (fetching || actionPending.current) return;
+      fetching = true;
+      const version = actionVersion.current;
       try {
-        const updatedRound = await getRound(round.id);
-        if (!isCancelled) {
-          setRound(updatedRound);
-        }
+        const updated = await getRound(roundId);
+        if (!cancelled && version === actionVersion.current) setRound(updated);
       } catch (caught) {
-        if (!isCancelled) {
-          setError(caught instanceof Error ? caught.message : "Could not refresh round");
-        }
+        if (!cancelled) setError(caught instanceof Error ? caught.message : "Could not refresh round");
+      } finally {
+        fetching = false;
       }
-    }, 250);
+    }, 500);
+    return () => { cancelled = true; window.clearInterval(interval); };
+  }, [roundId, roundStatus]);
 
-    return () => {
-      isCancelled = true;
-      window.clearTimeout(timeoutId);
-    };
-  }, [round]);
+  async function handleDiscussion() {
+    if (!round || actionPending.current) return;
+    const version = ++actionVersion.current;
+    actionPending.current = true;
+    setDiscussionBusy(true);
+    setError(null);
+    try {
+      const updated = await submitDiscussionComment(round.id, commentDraft.trim());
+      if (version === actionVersion.current) {
+        setRound(updated);
+        setCommentDraft("");
+      }
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : "Discussion action failed");
+    } finally {
+      actionVersion.current += 1;
+      actionPending.current = false;
+      setDiscussionBusy(false);
+    }
+  }
+
+  const remaining = round?.discussion.deadline
+    ? Math.max(0, Math.ceil((Date.parse(round.discussion.deadline) - now) / 1000)) : 0;
+  const discussionOpen = round?.status === "discussion" && remaining > 0;
 
   async function handleCreateRound(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
+    actionVersion.current += 1;
     setIsCreatingRound(true);
     setError(null);
 
@@ -84,6 +121,8 @@ export function GameConsole({ agents }: GameConsoleProps) {
       const createdRound = await createRound();
       setRound(createdRound);
       setHumanClueDraft("");
+      setCommentDraft("");
+      setNow(Date.now());
       setVoteResult(null);
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : "Could not start the round");
@@ -139,6 +178,9 @@ export function GameConsole({ agents }: GameConsoleProps) {
   }
 
   function resetRound() {
+    actionVersion.current += 1;
+    setCommentDraft("");
+    followMessages.current = true;
     setRound(null);
     setHumanClueDraft("");
     setVoteResult(null);
@@ -182,7 +224,7 @@ export function GameConsole({ agents }: GameConsoleProps) {
                 Five players sit at the table: you and four candidates. Most players
                 receive the same secret word. One player is the imposter and must
                 blend in without knowing it. Give a short clue, compare everyone
-                else's clues, then vote out the player you suspect.
+                else's clues, discuss freely, then vote out the player you suspect.
               </p>
             </div>
             <button type="submit" disabled={isCreatingRound}>
@@ -216,6 +258,36 @@ export function GameConsole({ agents }: GameConsoleProps) {
                 </li>
               )}
             </ol>
+
+            {round.discussion.enabled && round.discussion.deadline ? (
+              <section className="discussion-panel" aria-labelledby="discussion-heading">
+                <h2 id="discussion-heading">Discussion</h2>
+                <p role="timer">{round.status === "discussion" ? `${remaining}s remaining` : "Discussion closed"}</p>
+                <ol ref={transcriptRef} className="discussion-transcript" aria-live="polite" aria-label="Discussion comments"
+                  onScroll={(event) => {
+                    const list = event.currentTarget;
+                    followMessages.current = list.scrollHeight - list.scrollTop - list.clientHeight < 60;
+                  }}>
+                  {round.discussion.messages.map((message) => (
+                    <li key={message.id}><strong>{message.player_name}</strong><p>{message.text}</p></li>
+                  ))}
+                </ol>
+                {round.discussion.messages.length === 0 && <p>No comments yet.</p>}
+                {round.discussion.error && <p role="alert" className="error">{round.discussion.error}</p>}
+                {discussionOpen && (
+                  <form className="game-form" onSubmit={(event) => { event.preventDefault(); void handleDiscussion(); }}>
+                    <label className="field"><span>Your comment</span>
+                      <textarea maxLength={500} value={commentDraft} onChange={(event) => setCommentDraft(event.target.value)} />
+                    </label>
+                    <span>{commentDraft.length}/500</span>
+                    <div className="actions">
+                      <button type="submit" disabled={discussionBusy || !commentDraft.trim()}>Send</button>
+                    </div>
+                  </form>
+                )}
+                {!discussionOpen && commentDraft && <div><strong>Unsent draft</strong><p>{commentDraft}</p></div>}
+              </section>
+            ) : null}
 
             {round.status === "ready_to_vote" || round.status === "complete" ? (
               <section className="vote-panel">

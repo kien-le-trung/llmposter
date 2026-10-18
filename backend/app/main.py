@@ -1,15 +1,25 @@
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.routes import admin, agents, health, rounds
 from app.core.config import Settings, get_settings
+from app.services.agents.discussion import shutdown_tasks
 from app.services.metrics import finish_request_trace, start_request_trace
 
 
 def create_app(app_settings: Settings | None = None) -> FastAPI:
     active_settings = app_settings if app_settings is not None else get_settings()
     
-    app = FastAPI(title=active_settings.app_name)
+    @asynccontextmanager
+    async def lifespan(app):
+        try:
+            yield
+        finally:
+            await shutdown_tasks()
+
+    app = FastAPI(title=active_settings.app_name, lifespan=lifespan)
     app.state.settings = active_settings
 
     @app.middleware("http")

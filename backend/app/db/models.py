@@ -60,3 +60,17 @@ class VoteModel(Base):
     imposter_won: Mapped[bool | None] = mapped_column(Boolean)
     round_winner: Mapped[str | None] = mapped_column(String(16))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, server_default=func.now())
+
+
+class DiscussionMessageModel(Base):
+    __tablename__ = "discussion_messages"
+    __table_args__ = (UniqueConstraint("round_id", "sequence"),)
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    round_id: Mapped[str] = mapped_column(String(36), nullable=False, index=True)
+    player_id: Mapped[str] = mapped_column(String(64), nullable=False)
+    player_name: Mapped[str] = mapped_column(String(120), nullable=False)
+    text: Mapped[str] = mapped_column(Text, nullable=False)
+    sequence: Mapped[int] = mapped_column(Integer, nullable=False)
+    inference_mode: Mapped[str] = mapped_column(String(64), nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)

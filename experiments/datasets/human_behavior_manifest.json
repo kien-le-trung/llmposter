@@ -1,0 +1,40 @@
+{
+  "dataset_version": "20260805_151157",
+  "created_at": "2026-08-05T19:28:38.545167+00:00",
+  "source": {
+    "clues": {
+      "path": "data\\raw\\clues_20260805_151157.csv",
+      "sha256": "810733caa5a8ec393234325e44c3d487190c4d334a3fa7470586579390c349b8",
+      "bytes": 29473
+    },
+    "votes": {
+      "path": "data\\raw\\votes_20260805_151157.csv",
+      "sha256": "57c6fb4ed66a746a86276769acc936bd6ac83b3f5080b4ad8d8f4930294a8874",
+      "bytes": 26289
+    }
+  },
+  "outputs": {
+    "clues": "human_machine_clues.csv",
+    "voting": "human_voting_patterns.csv",
+    "rounds": "human_behavior_rounds.jsonl"
+  },
+  "counts": {
+    "clues": 198,
+    "human_clues": 32,
+    "machine_clues": 166,
+    "clue_rounds": 42,
+    "human_participation_rounds": 32,
+    "complete_voting_rounds": 29,
+    "human_machine_majority_agreements": 6,
+    "human_machine_majority_disagreements": 16,
+    "machine_majority_ties": 7,
+    "recorded_group_ties": 6
+  },
+  "limitations": [
+    "The database did not persist secret_word, imposter_hint, playing order, or explicit imposter identity.",
+    "Clue created_at order is not guaranteed to equal the order visible to players because machine clues may be generated concurrently.",
+    "The imposter identity is inferable only when the aggregate vote caught the imposter (imposter_won=false).",
+    "Human vote correctness is therefore unknown for rounds won by the imposter.",
+    "The recorded group tally includes the human vote; machine-majority fields are recomputed from machine votes only."
+  ]
+}

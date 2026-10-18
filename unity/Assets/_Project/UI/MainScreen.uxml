@@ -1,0 +1,21 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <ui:Style src="MainScreen.uss" />
+    <ui:VisualElement class="screen">
+        <ui:VisualElement class="card">
+            <ui:Label text="LLMPOSTER" class="eyebrow" />
+            <ui:Label text="Unity baseline" class="title" />
+            <ui:Label
+                text="A clean starting point for scenes, components, application lifetime, and UI events."
+                class="body"
+            />
+            <ui:VisualElement class="concept-list">
+                <ui:Label text="Bootstrap scene  •  persistent application root" class="concept" />
+                <ui:Label text="Main scene       •  scene-local presentation" class="concept" />
+                <ui:Label text="UI Document      •  visual tree and styles" class="concept" />
+                <ui:Label text="MonoBehaviour    •  lifecycle and event binding" class="concept" />
+            </ui:VisualElement>
+            <ui:Button name="verify-button" text="Verify UI event" class="primary-button" />
+            <ui:Label name="status-label" text="Ready." class="status" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

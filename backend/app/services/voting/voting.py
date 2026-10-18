@@ -1,6 +1,11 @@
+import asyncio
+
 from collections import Counter
 from typing import Any
-from app.services.agents.inference import AgentConfig, InferenceClient, InferenceServiceError
+from app.services.agents.inference import (
+    AgentConfig, InferenceClient, InferenceRequest, InferenceServiceError,
+)
+from app.services.agents.discussion import DiscussionVote, discussion_agent, player_context
 from app.services.voting.schemas import VotingFeatureInput, AgentVoteResponse, VoteCountResponse, VoteResponse
 from app.services.voting.predictor import VotingModelPredictor, get_voting_predictor
 from app.services.voting.features import VotingFeatureTransformer
@@ -70,6 +75,8 @@ async def _build_agent_votes(
     settings: Any,
     human_clue: str | None = None,
 ) -> list[AgentVoteResponse]:
+    if getattr(getattr(round_state, "discussion", None), "enabled", False):
+        return await _build_discussion_votes(round_state, agents, settings)
     if not round_state.turns:
         return []
 
@@ -298,3 +305,32 @@ def _score_round_candidates(
     )
     feature_matrix = VotingFeatureTransformer().transform(feature_inputs)
     return predictor.score_candidates(playing_order, feature_matrix)
+
+
+async def _build_discussion_votes(state, agents, settings):
+    async with InferenceClient(settings) as client:
+        async def vote(agent):
+            eligible = set(state.playing_order) - {agent.id}
+
+            def validate(result):
+                if result.target_id not in eligible:
+                    raise ValueError("Vote must target another participant")
+
+            decision, result = await client.generate_structured(InferenceRequest(
+                agent=discussion_agent(agent),
+                prompt=("Discussion has ended. Vote for another participant using the clues and "
+                        "public discussion. If you are the imposter, try to avoid being eliminated. "
+                        "Return only target_id. GAME_CONTEXT:\n" + player_context(state, agent.id)),
+            ), DiscussionVote, validate=validate)
+            return AgentVoteResponse(
+                voter_agent_id=agent.id, voter_agent_name=agent.name,
+                voted_for=state.player_names_by_id[decision.target_id],
+                inference_mode=result.inference_mode,
+            )
+
+        # Await every task before closing the shared HTTP client, including on failure.
+        results = await asyncio.gather(*(vote(agent) for agent in agents), return_exceptions=True)
+        for result in results:
+            if isinstance(result, BaseException):
+                raise InferenceServiceError("Discussion-aware voting failed; please retry") from result
+        return results

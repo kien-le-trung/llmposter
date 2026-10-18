@@ -34,6 +34,15 @@ DEFAULT_LLM_CONFIG = LLMConfig(
     structured_max_tokens=10000,
 )
 
+DEFAULT_GROK_CONFIG = LLMConfig(
+    name="Grok default",
+    provider="grok",
+    chat_url="https://api.x.ai/v1/chat/completions",
+    model="grok-4.7",
+    api_key_env="GROK_API_KEY",
+    max_concurrent_requests=4,
+)
+
 
 class Settings(BaseSettings):
     # Application metadata.
@@ -73,8 +82,11 @@ class Settings(BaseSettings):
 
     # Experiment-tunable settings.
     llm_config: LLMConfig = DEFAULT_LLM_CONFIG
+    grok_config: LLMConfig | None = DEFAULT_GROK_CONFIG
     embedding_model_name: str = Field(default="nomic-embed-text")
     inference_mode: str = Field(default="remote")
+    discussion_duration_seconds: int = Field(default=90, ge=1, le=600)
+    discussion_enabled: bool = True
     clue_prompt_technique: str = Field(default="few_shot")
     word_selection_mode: str = Field(default="random")
     fixed_secret_word: str = Field(default="satellite")

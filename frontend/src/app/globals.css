@@ -541,3 +541,15 @@ h2 {
     max-width: 100%;
   }
 }
+
+
+.discussion-panel {
+  padding: 1.25rem;
+  border: 1px solid var(--border, #ddd);
+  border-radius: 16px;
+  margin-block: 1rem;
+}
+.discussion-panel .actions { flex-wrap: wrap; }
+.discussion-transcript { padding-left: 1.5rem; max-height: 24rem; overflow-y: auto; overflow-anchor: none; }
+.discussion-transcript li { padding-block: .5rem; }
+.discussion-transcript p { white-space: pre-wrap; overflow-wrap: anywhere; }

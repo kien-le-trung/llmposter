@@ -1,0 +1,199 @@
+clue_id,round_id,player_id,player_name,clue,source,inference_mode,sequence,created_at,word_count,character_count,normalized_clue,round_has_human,round_clue_count
+d606b446-7b68-4fef-ab39-97dba576ff4d,20564311-a998-40b1-ae49-b33f853447ed,agent_a,Agent A,cobblestone streets,machine,openrouter,1,2026-07-14 11:56:42.446317+00,2,19,cobblestone streets,1,5
+15a6cc8a-11ea-42cc-8a7d-fa734b873be0,20564311-a998-40b1-ae49-b33f853447ed,agent_c,Agent C,crowded streets,machine,openrouter,1,2026-07-14 11:56:43.004896+00,2,15,crowded streets,1,5
+bd5b02d5-2271-4a14-8a03-4eda4e00cb93,20564311-a998-40b1-ae49-b33f853447ed,human,You,small city,human,,1,2026-07-14 11:56:50.878701+00,2,10,small city,1,5
+52cdb728-d23b-48fc-b892-c5f5aa5a6fa6,20564311-a998-40b1-ae49-b33f853447ed,agent_d,Agent D,city's smaller sibling,machine,openrouter,1,2026-07-14 11:56:56.087388+00,3,22,city's smaller sibling,1,5
+c31f3998-b59d-4ed8-9036-1d69ae908393,20564311-a998-40b1-ae49-b33f853447ed,agent_b,Agent B,meeting place,machine,openrouter,1,2026-07-14 11:56:58.119127+00,2,13,meeting place,1,5
+36cc1d79-8dee-49e3-b769-995ebdee5521,0970a868-f8ce-42c6-8b01-230a873e0b20,agent_d,Agent D,designated zone,machine,openrouter,1,2026-07-14 11:57:40.82642+00,2,15,designated zone,1,5
+1c8fb800-12fc-4e28-b8aa-d262d478035e,0970a868-f8ce-42c6-8b01-230a873e0b20,agent_c,Agent C,stock market floor,machine,openrouter,1,2026-07-14 11:57:41.064483+00,3,18,stock market floor,1,5
+61e79e5d-ab97-495a-96b7-e5965a62425f,0970a868-f8ce-42c6-8b01-230a873e0b20,agent_a,Agent A,Exxon,machine,openrouter,1,2026-07-14 11:57:47.638276+00,1,5,exxon,1,5
+29cac4cb-def1-4389-811a-f0b17aaf44a8,0970a868-f8ce-42c6-8b01-230a873e0b20,agent_b,Agent B,pie chart slice,machine,openrouter,1,2026-07-14 11:57:53.056162+00,3,15,pie chart slice,1,5
+f75fa61a-d15b-4f36-a841-dffbc783bb12,0970a868-f8ce-42c6-8b01-230a873e0b20,human,You,Restricted area,human,,1,2026-07-14 11:58:10.043991+00,2,15,restricted area,1,5
+b2760896-6760-4923-8111-78454fba6b9f,647b4878-f627-4620-be9a-776074ffc6bb,agent_c,Agent C,eternal salvation,machine,openrouter,1,2026-07-14 12:05:29.119028+00,2,17,eternal salvation,1,5
+fedef52a-cfdd-49fd-992a-ceabdc65cdaa,647b4878-f627-4620-be9a-776074ffc6bb,agent_b,Agent B,lamb vs lion,machine,openrouter,1,2026-07-14 12:05:30.361878+00,3,12,lamb vs lion,1,5
+44d32598-ecce-4691-82ff-187a7545f823,647b4878-f627-4620-be9a-776074ffc6bb,agent_d,Agent D,Bethlehem birthplace,machine,openrouter,1,2026-07-14 12:05:33.904113+00,2,20,bethlehem birthplace,1,5
+dcbc0808-a63b-4b69-bd13-51069aa25b27,647b4878-f627-4620-be9a-776074ffc6bb,agent_a,Agent A,crown of thorns,machine,openrouter,1,2026-07-14 12:05:37.014055+00,3,15,crown of thorns,1,5
+a5626524-77bf-40be-be25-34925bfc8e54,647b4878-f627-4620-be9a-776074ffc6bb,human,You,Christianity,human,,1,2026-07-14 12:05:47.581773+00,1,12,christianity,1,5
+397d31c7-59c0-4b92-87e2-7f284c58bd96,1a21037e-3dd2-4c70-a0dc-dfbbffbef46c,agent_b,Agent B,sleek surface mirror reflection,machine,openrouter,1,2026-07-14 12:09:44.176489+00,4,31,sleek surface mirror reflection,1,5
+952eab8d-80c6-407b-9e7e-7024e6336806,1a21037e-3dd2-4c70-a0dc-dfbbffbef46c,agent_c,Agent C,sprawling grounds,machine,openrouter,1,2026-07-14 12:09:44.685021+00,2,17,sprawling grounds,1,5
+ef7a8cd6-9945-4767-b9c6-596125890c2d,1a21037e-3dd2-4c70-a0dc-dfbbffbef46c,agent_d,Agent D,city skyline contrast,machine,openrouter,1,2026-07-14 12:09:51.192248+00,3,21,city skyline contrast,1,5
+0e059a34-0ff1-4a37-9bf2-cb4442a99250,1a21037e-3dd2-4c70-a0dc-dfbbffbef46c,agent_a,Agent A,manor house,machine,openrouter,1,2026-07-14 12:09:56.409709+00,2,11,manor house,1,5
+a5a82fec-0cec-4f19-bf2f-8938cc7fc4cb,1a21037e-3dd2-4c70-a0dc-dfbbffbef46c,human,You,Skyscrapers,human,,1,2026-07-14 12:10:17.92487+00,1,11,skyscrapers,1,5
+9a7fded8-26de-4711-8955-a384000305bf,8f271e3a-19b2-4855-b09c-dc637636329b,agent_a,Agent A,vast land diverse cultures,machine,openrouter,1,2026-07-14 12:18:42.693473+00,4,26,vast land diverse cultures,1,5
+36037644-f402-4ab9-ad07-d4e20772a46a,8f271e3a-19b2-4855-b09c-dc637636329b,agent_b,Agent B,savanna sunrise,machine,openrouter,1,2026-07-14 12:18:44.095785+00,2,15,savanna sunrise,1,5
+f383f93a-c450-4815-bdfd-c5dc7c7150da,8f271e3a-19b2-4855-b09c-dc637636329b,agent_d,Agent D,savanna jungle contrast,machine,openrouter,1,2026-07-14 12:18:45.868607+00,3,23,savanna jungle contrast,1,5
+64a2c3f0-afb3-4b02-8f2f-ce529492d9a4,8f271e3a-19b2-4855-b09c-dc637636329b,agent_c,Agent C,biodiversity hotspot,machine,openrouter,1,2026-07-14 12:18:49.517333+00,2,20,biodiversity hotspot,1,5
+2fb4b9dd-922e-4d09-afcc-7c262696388f,8f271e3a-19b2-4855-b09c-dc637636329b,human,You,shakira,human,,1,2026-07-14 12:19:13.082871+00,1,7,shakira,1,5
+5b6d03df-5d54-4b3d-b338-4e70af6f9d94,a4dc38db-dd9e-4b72-bdd6-26402e69a6c7,agent_c,Agent C,casting call,machine,openrouter,1,2026-07-14 12:38:45.003533+00,2,12,casting call,1,5
+92491a80-04bc-4e0a-9f6c-d43fb7873b12,a4dc38db-dd9e-4b72-bdd6-26402e69a6c7,agent_b,Agent B,blueprint,machine,openrouter,1,2026-07-14 12:38:45.263751+00,1,9,blueprint,1,5
+e7fc6579-b424-466e-b312-5b40826b8352,a4dc38db-dd9e-4b72-bdd6-26402e69a6c7,agent_a,Agent A,lead vs backup,machine,openrouter,1,2026-07-14 12:38:47.139253+00,3,14,lead vs backup,1,5
+a05883f1-7d23-4661-9e4c-761ca40befdd,a4dc38db-dd9e-4b72-bdd6-26402e69a6c7,agent_d,Agent D,scripted character lines,machine,openrouter,1,2026-07-14 12:38:48.480639+00,3,24,scripted character lines,1,5
+41a6e177-24c6-4ce2-a99d-0bcc00324bdb,a4dc38db-dd9e-4b72-bdd6-26402e69a6c7,human,You,mandatory tasks,human,,1,2026-07-14 12:38:56.9106+00,2,15,mandatory tasks,1,5
+d666fd52-d604-40e1-9cd5-b344d1ba6e57,15ad12c3-2098-4f2b-85ca-00d51dfeeceb,agent_c,Agent C,Chernobyl disaster,machine,openrouter,1,2026-07-14 12:53:56.187072+00,2,18,chernobyl disaster,1,5
+f0087182-6500-49e8-a838-5502f4922afd,15ad12c3-2098-4f2b-85ca-00d51dfeeceb,agent_d,Agent D,sudden chaos,machine,openrouter,1,2026-07-14 12:53:57.136586+00,2,12,sudden chaos,1,5
+a0bd4dc0-fc49-4edd-bd0d-a36bc9049e61,15ad12c3-2098-4f2b-85ca-00d51dfeeceb,agent_a,Agent A,unexpected event,machine,openrouter,1,2026-07-14 12:53:59.553275+00,2,16,unexpected event,1,5
+93c6fffe-7ae9-46d4-8a68-eccb76a01e09,15ad12c3-2098-4f2b-85ca-00d51dfeeceb,agent_b,Agent B,traffic jam,machine,openrouter,1,2026-07-14 12:53:59.79909+00,2,11,traffic jam,1,5
+1831defa-feb6-48f5-987e-672ec8ab97c3,15ad12c3-2098-4f2b-85ca-00d51dfeeceb,human,You,Misfortune,human,,1,2026-07-14 12:55:21.551409+00,1,10,misfortune,1,5
+7656ffe2-117f-4028-840f-22b930ac8fa3,c2b8140d-d951-4b40-85de-ad5cddab6559,agent_d,Agent D,rural farmland open fields,machine,openrouter,1,2026-07-14 13:43:39.694356+00,4,26,rural farmland open fields,1,5
+f68050f4-4787-403a-8f79-b3b6d3ecbfbe,c2b8140d-d951-4b40-85de-ad5cddab6559,agent_b,Agent B,Joe Biden,machine,openrouter,1,2026-07-14 13:43:42.397775+00,2,9,joe biden,1,5
+9e47ee88-aac3-4033-ad70-db3e390d2613,c2b8140d-d951-4b40-85de-ad5cddab6559,agent_a,Agent A,hollywood dream factory,machine,openrouter,1,2026-07-14 13:43:49.456774+00,3,23,hollywood dream factory,1,5
+d67f77c6-82e3-4c95-b4ea-7818bd9a763b,c2b8140d-d951-4b40-85de-ad5cddab6559,agent_c,Agent C,stars and stripes,machine,openrouter,1,2026-07-14 13:44:00.578715+00,3,17,stars and stripes,1,5
+65ef595a-cb0c-4cdb-b051-53f69ca396c1,c2b8140d-d951-4b40-85de-ad5cddab6559,human,You,eagle and freedom,human,,1,2026-07-14 13:44:13.146016+00,3,17,eagle and freedom,1,5
+2cec9286-c6ce-44af-8a61-775bfd8502e1,6ca82a3d-032c-4b81-989b-30252c6ad158,agent_b,Agent B,industry specialization,machine,openrouter,1,2026-07-14 13:51:30.619357+00,2,23,industry specialization,1,5
+d96d8cc6-29b2-4f90-a731-cff4f18fabd6,6ca82a3d-032c-4b81-989b-30252c6ad158,agent_c,Agent C,specific region,machine,openrouter,1,2026-07-14 13:51:45.650304+00,2,15,specific region,1,5
+343651a5-f44e-48dc-845b-acc19cd97761,6ca82a3d-032c-4b81-989b-30252c6ad158,agent_a,Agent A,industry segment,machine,openrouter,1,2026-07-14 13:51:54.457106+00,2,16,industry segment,1,5
+fdebfdd1-a937-4f0a-abd2-fdbaa39a48b4,6ca82a3d-032c-4b81-989b-30252c6ad158,agent_d,Agent D,whole circle,machine,openrouter,1,2026-07-14 13:51:55.061935+00,2,12,whole circle,1,5
+6b504bbf-2977-46db-bd49-c03927e8383c,6ca82a3d-032c-4b81-989b-30252c6ad158,human,You,part of a circle,human,,1,2026-07-14 13:52:04.705143+00,4,16,part of a circle,1,5
+e2ed7378-5584-4a9d-b57f-2117c43c663a,337a2e25-53b4-48f8-9402-5337235f11bb,agent_d,Agent D,faded ink,machine,openrouter,1,2026-07-14 18:46:05.339225+00,2,9,faded ink,0,3
+68530428-8ac2-4861-a3ae-ea2046decbee,337a2e25-53b4-48f8-9402-5337235f11bb,agent_b,Agent B,Jerry's,machine,openrouter,1,2026-07-14 18:46:18.893306+00,1,7,jerry's,0,3
+4a029981-ab12-494a-87df-34a5057e8975,65513e34-fb00-4f60-9a23-7b8eb283269c,agent_c,Agent C,first date dinner,machine,openrouter,1,2026-07-14 18:46:20.566483+00,3,17,first date dinner,1,5
+34c24ea0-8df9-4b0b-9943-0b2bfb0c88b9,65513e34-fb00-4f60-9a23-7b8eb283269c,agent_a,Agent A,handwritten love note,machine,openrouter,1,2026-07-14 18:46:23.092148+00,3,21,handwritten love note,1,5
+2767f802-43b6-4bb2-a1f1-f2e84713c5b1,65513e34-fb00-4f60-9a23-7b8eb283269c,agent_b,Agent B,matching couple necklaces,machine,openrouter,1,2026-07-14 18:46:23.355115+00,3,25,matching couple necklaces,1,5
+3976bf14-2ebe-445f-b58f-227f38f7acde,65513e34-fb00-4f60-9a23-7b8eb283269c,agent_d,Agent D,shared journey mutual trust,machine,openrouter,1,2026-07-14 18:46:30.939746+00,4,27,shared journey mutual trust,1,5
+5c4ce455-1aa8-4be9-9048-5ada157f49f0,337a2e25-53b4-48f8-9402-5337235f11bb,agent_c,Agent C,Poor Richard,machine,openrouter,1,2026-07-14 18:46:35.862483+00,2,12,poor richard,0,3
+de164394-1271-4421-9c83-7201c7d69d49,65513e34-fb00-4f60-9a23-7b8eb283269c,human,You,hormones connection knowledge,human,,1,2026-07-14 18:47:17.285111+00,3,29,hormones connection knowledge,1,5
+11a3f856-9d02-40ef-ac31-467436348076,5d9e5e7f-3df8-4cb1-baf0-3c503095d3b7,agent_b,Agent B,physical therapy sessions,machine,openrouter,1,2026-07-14 18:47:57.62439+00,3,25,physical therapy sessions,1,5
+4a8caafb-9a18-435d-9cdb-cb2ccac82c83,5d9e5e7f-3df8-4cb1-baf0-3c503095d3b7,agent_c,Agent C,relapse opposite,machine,openrouter,1,2026-07-14 18:48:00.546595+00,2,16,relapse opposite,1,5
+6310c6ba-e49a-4c3b-bfc3-e79844c2c1d9,5d9e5e7f-3df8-4cb1-baf0-3c503095d3b7,human,You,"fall, get up, play cool",human,,1,2026-07-14 18:48:17.029183+00,5,23,"fall, get up, play cool",1,5
+32bf6dce-41ca-4943-8e46-738deebfe471,5d9e5e7f-3df8-4cb1-baf0-3c503095d3b7,agent_a,Agent A,rising from ashes,machine,openrouter,1,2026-07-14 18:48:28.075439+00,3,17,rising from ashes,1,5
+3597a752-d56f-4eb0-bdcb-2b7ac4e0c077,5d9e5e7f-3df8-4cb1-baf0-3c503095d3b7,agent_d,Agent D,mending broken pieces,machine,openrouter,1,2026-07-14 18:48:36.12551+00,3,21,mending broken pieces,1,5
+c1fac0d1-1298-4ebd-948f-028e0e901484,407ced8d-e06d-426e-8cf3-83583120bf9b,agent_d,Agent D,Great Wall,machine,openrouter,1,2026-07-14 18:49:07.2979+00,2,10,great wall,1,5
+5607fb5f-16ee-4081-a3bf-bc37aed3013f,407ced8d-e06d-426e-8cf3-83583120bf9b,agent_a,Agent A,Peking duck feast,machine,openrouter,1,2026-07-14 18:49:18.982775+00,3,17,peking duck feast,1,5
+95a6b4bb-94ce-4cf8-8cf4-049bf7346fb8,407ced8d-e06d-426e-8cf3-83583120bf9b,agent_b,Agent B,fragile teacup,machine,openrouter,1,2026-07-14 18:49:26.074007+00,2,14,fragile teacup,1,5
+f8107dd3-6b7c-4449-9491-c891a91f4b0c,407ced8d-e06d-426e-8cf3-83583120bf9b,human,You,"Wall, Schezuan, Red, Communism",human,,1,2026-07-14 18:49:57.35601+00,4,30,"wall, schezuan, red, communism",1,5
+53b670e1-66ad-425b-8ad5-9d7615fa4d35,407ced8d-e06d-426e-8cf3-83583120bf9b,agent_c,Agent C,porcelain shards red flag and,machine,openrouter,1,2026-07-14 18:50:07.072912+00,5,29,porcelain shards red flag and,1,5
+d2eacc17-3871-4d1d-9f31-285363d9ba01,23e4f577-9c3f-48f5-92c7-936b0ec16d1e,agent_b,Agent B,grateful response,machine,openrouter,1,2026-07-14 18:50:40.156389+00,2,17,grateful response,1,5
+0b6943d8-9d15-40a7-b352-3b31dba8b525,23e4f577-9c3f-48f5-92c7-936b0ec16d1e,agent_a,Agent A,sincere nod,machine,openrouter,1,2026-07-14 18:50:40.429233+00,2,11,sincere nod,1,5
+c82fb5b5-fa65-47a0-8463-046bcdf66b9c,23e4f577-9c3f-48f5-92c7-936b0ec16d1e,agent_d,Agent D,receiving a gift,machine,openrouter,1,2026-07-14 18:50:47.075637+00,3,16,receiving a gift,1,5
+37ae2aaa-c15f-4c7a-a97f-3ae1c64dcf5f,23e4f577-9c3f-48f5-92c7-936b0ec16d1e,agent_c,Agent C,recognition moment,machine,openrouter,1,2026-07-14 18:50:48.682237+00,2,18,recognition moment,1,5
+976e9faf-a29c-4699-93df-a8c099e77b6c,23e4f577-9c3f-48f5-92c7-936b0ec16d1e,human,You,appreciation,human,,1,2026-07-14 18:51:00.498687+00,1,12,appreciation,1,5
+9ccbcb2c-1c2a-48dd-8a5b-41a8ea6cf8d0,23372544-6c20-432e-a3b2-138f9cb452d7,agent_a,Agent A,war opposite,machine,openrouter,1,2026-07-14 18:51:16.990565+00,2,12,war opposite,1,5
+1618b4d4-e328-4097-831c-05af298ef364,23372544-6c20-432e-a3b2-138f9cb452d7,agent_c,Agent C,quiet sunrise,machine,openrouter,1,2026-07-14 18:51:17.263314+00,2,13,quiet sunrise,1,5
+09d5b8d0-6cfc-4918-b090-b95c13e03124,23372544-6c20-432e-a3b2-138f9cb452d7,agent_b,Agent B,white dove,machine,openrouter,1,2026-07-14 18:51:18.197525+00,2,10,white dove,1,5
+49f119b5-9a31-4e04-a801-eb2f9e04c257,23372544-6c20-432e-a3b2-138f9cb452d7,agent_d,Agent D,arranged sequence,machine,openrouter,1,2026-07-14 18:51:18.479189+00,2,17,arranged sequence,1,5
+5ca6f577-50a6-43a7-8ec4-852289c10dd1,23372544-6c20-432e-a3b2-138f9cb452d7,human,You,love and unity,human,,1,2026-07-14 18:51:25.654358+00,3,14,love and unity,1,5
+bfdf2ff6-9ab8-4b03-a3bf-bdf75622d3b5,9f8fbc11-e944-463d-97e0-2d965fd3e356,agent_d,Agent D,melbourne rival,machine,openrouter,1,2026-07-14 19:31:45.636118+00,2,15,melbourne rival,0,3
+5e508e65-cf02-4b34-88bd-f823a2302441,9f8fbc11-e944-463d-97e0-2d965fd3e356,agent_a,Agent A,Melbourne rival,machine,openrouter,1,2026-07-14 19:31:46.870094+00,2,15,melbourne rival,0,3
+b456a426-9fc6-4fc6-90ac-6541ae7d2209,9f8fbc11-e944-463d-97e0-2d965fd3e356,agent_b,Agent B,famous opera house,machine,openrouter,1,2026-07-14 19:31:51.524724+00,3,18,famous opera house,0,3
+ef1b0b84-8fee-4d24-bc70-baf98c4272ab,f1aa309c-8617-49c7-990d-4b3496eaff50,agent_b,Agent B,Google Maps,machine,openrouter,1,2026-07-14 19:31:55.522265+00,2,11,google maps,1,5
+6520ef36-6982-4a70-af7e-2167aae75816,f1aa309c-8617-49c7-990d-4b3496eaff50,agent_c,Agent C,nowhere opposite,machine,openrouter,1,2026-07-14 19:31:57.333465+00,2,16,nowhere opposite,1,5
+f3f0d363-e209-41f5-8c21-11154a938b07,f1aa309c-8617-49c7-990d-4b3496eaff50,agent_d,Agent D,GPS coordinates,machine,openrouter,1,2026-07-14 19:32:00.6614+00,2,15,gps coordinates,1,5
+56660cb5-4a75-463e-81a1-85f31bd81d81,f1aa309c-8617-49c7-990d-4b3496eaff50,human,You,noun,human,,1,2026-07-14 19:32:44.036773+00,1,4,noun,1,5
+7f8fd317-107f-4bd4-bbf6-226a23c5bd85,f1aa309c-8617-49c7-990d-4b3496eaff50,agent_a,Agent A,city block,machine,openrouter,1,2026-07-14 19:32:49.045819+00,2,10,city block,1,5
+f63e3659-888a-4920-85d6-8cbf862ef23c,53c2305d-9276-4059-b0b5-29831aa511e0,agent_d,Agent D,breaking down data,machine,openrouter,1,2026-07-14 19:33:09.824393+00,3,18,breaking down data,1,5
+ce4474f3-447d-4383-a5b7-36616e6d68f6,53c2305d-9276-4059-b0b5-29831aa511e0,agent_c,Agent C,p-value threshold,machine,openrouter,1,2026-07-14 19:33:16.573011+00,2,17,p-value threshold,1,5
+61f8234b-e838-4593-a4bc-576ff9bcdf7a,53c2305d-9276-4059-b0b5-29831aa511e0,agent_b,Agent B,Sherlock Holmes,machine,openrouter,1,2026-07-14 19:33:24.238858+00,2,15,sherlock holmes,1,5
+fdd323e6-7754-4e74-a3c3-f4f93cda10b2,53c2305d-9276-4059-b0b5-29831aa511e0,agent_a,Agent A,crime scene,machine,openrouter,1,2026-07-14 19:33:35.398331+00,2,11,crime scene,1,5
+1ddcb13b-08c2-4164-adab-6ce68d767dbd,53c2305d-9276-4059-b0b5-29831aa511e0,human,You,detective,human,,1,2026-07-14 19:33:51.29632+00,1,9,detective,1,5
+b3afbfea-d8a6-4895-9376-4d2f4c0089c6,73a8cf73-c37f-48e8-86dd-eb44b392a499,agent_c,Agent C,Google hiring spree,machine,openrouter,1,2026-07-14 20:03:43.531881+00,3,19,google hiring spree,0,4
+b3bf2a36-2646-401d-b0be-98a12f7aae41,73a8cf73-c37f-48e8-86dd-eb44b392a499,agent_d,Agent D,nine-to-five,machine,openrouter,1,2026-07-14 20:03:52.23927+00,1,12,nine-to-five,0,4
+483aca76-c986-4e60-8135-6c940df3f46c,acfbec53-25c9-4f52-bc52-7a8e05a7870e,agent_a,Agent A,club roster,machine,openrouter,1,2026-07-14 20:04:09.319967+00,2,11,club roster,1,5
+9e3e94bd-9169-496d-8b1f-4a436130fadb,73a8cf73-c37f-48e8-86dd-eb44b392a499,agent_a,Agent A,office chair computer screen,machine,openrouter,1,2026-07-14 20:04:13.024727+00,4,28,office chair computer screen,0,4
+75992269-ebcb-47da-909d-e13ed6560c1c,acfbec53-25c9-4f52-bc52-7a8e05a7870e,agent_c,Agent C,group's core,machine,openrouter,1,2026-07-14 20:04:15.783527+00,2,12,group's core,1,5
+070f3454-05da-4053-978a-7ca09e24aaed,acfbec53-25c9-4f52-bc52-7a8e05a7870e,human,You,person,human,,1,2026-07-14 20:04:17.63051+00,1,6,person,1,5
+d130a996-14f3-4031-b990-f5764e1a15de,73a8cf73-c37f-48e8-86dd-eb44b392a499,agent_b,Agent B,water cooler gossip,machine,openrouter,1,2026-07-14 20:04:46.03981+00,3,19,water cooler gossip,0,4
+2abbf404-9d82-4c5d-a4e5-5f039a657f0a,73067eb3-5f7c-47f3-8bc5-4deb24baefe3,agent_a,Agent A,marching boots,machine,openrouter,1,2026-07-14 20:04:53.109325+00,2,14,marching boots,0,4
+6d073cab-9b14-4185-bd11-5afcf5ed1439,73067eb3-5f7c-47f3-8bc5-4deb24baefe3,agent_c,Agent C,camouflage uniform,machine,openrouter,1,2026-07-14 20:04:53.378951+00,2,18,camouflage uniform,0,4
+7df5ea64-dcf1-451f-9722-cea74ac6af0b,73067eb3-5f7c-47f3-8bc5-4deb24baefe3,agent_b,Agent B,boots marching in dust,machine,openrouter,1,2026-07-14 20:04:58.116296+00,4,22,boots marching in dust,0,4
+46b9da71-7282-4fd8-95c4-bc06d64f08f9,acfbec53-25c9-4f52-bc52-7a8e05a7870e,agent_b,Agent B,Shareholder,machine,openrouter,1,2026-07-14 20:05:09.151541+00,1,11,shareholder,1,5
+afecf0c8-03eb-4678-a86f-70a6b3ea1dca,acfbec53-25c9-4f52-bc52-7a8e05a7870e,agent_d,Agent D,team member,machine,openrouter,1,2026-07-14 20:05:16.481786+00,2,11,team member,1,5
+d2a152c5-f722-410c-ba5a-c5fda3548d8a,73067eb3-5f7c-47f3-8bc5-4deb24baefe3,agent_d,Agent D,battlefield dawn,machine,openrouter,1,2026-07-14 20:05:24.281723+00,2,16,battlefield dawn,0,4
+d431b1c1-7f09-4127-a2a6-fe57885302e8,54dc73cc-4820-4ab2-a29c-df49e8c1a43f,agent_a,Agent A,kitchen spice rack,machine,openrouter,1,2026-07-14 20:56:26.968728+00,3,18,kitchen spice rack,0,4
+79a1b5fb-c134-4eea-8b39-b7c6e9ed89aa,54dc73cc-4820-4ab2-a29c-df49e8c1a43f,agent_b,Agent B,blending components,machine,openrouter,1,2026-07-14 20:56:27.253944+00,2,19,blending components,0,4
+477e3244-42bb-480e-b634-f9389b8cabc0,54dc73cc-4820-4ab2-a29c-df49e8c1a43f,agent_d,Agent D,mixed elements,machine,openrouter,1,2026-07-14 20:56:31.16272+00,2,14,mixed elements,0,4
+10c4a9f0-b202-4355-8bc2-c3a76882ad0e,54dc73cc-4820-4ab2-a29c-df49e8c1a43f,agent_c,Agent C,opposite of separation,machine,openrouter,1,2026-07-14 20:56:36.4559+00,3,22,opposite of separation,0,4
+871df4f7-cafc-427f-a539-9a82efd9031c,4dcc7feb-7898-4181-92c5-bc37b95086a0,agent_c,Agent C,foundation,machine,openrouter,1,2026-07-15 03:54:47.54412+00,1,10,foundation,1,5
+3a3eb12f-e428-4ba1-804c-946de18b3a1d,4dcc7feb-7898-4181-92c5-bc37b95086a0,agent_b,Agent B,the cornerstone of a building,machine,openrouter,1,2026-07-15 03:54:51.092449+00,5,29,the cornerstone of a building,1,5
+6e0bc5c9-f41d-48e5-8872-eca57bdd1389,4dcc7feb-7898-4181-92c5-bc37b95086a0,agent_a,Agent A,foundation of truth,machine,openrouter,1,2026-07-15 03:54:51.519243+00,3,19,foundation of truth,1,5
+797a0cc6-4a8d-4ba9-8303-9e4524ac2f22,4dcc7feb-7898-4181-92c5-bc37b95086a0,agent_d,Agent D,grounds for decision,machine,openrouter,1,2026-07-15 03:55:03.718445+00,3,20,grounds for decision,1,5
+221d1b08-f4ca-4e55-93e3-dae260936cf1,4dcc7feb-7898-4181-92c5-bc37b95086a0,human,You,strength,human,,1,2026-07-15 03:55:23.132041+00,1,8,strength,1,5
+dccb7210-14d7-4187-a8b7-eec2c08dede4,bc2a8148-f51e-4ad6-ae74-27a22c5e160e,agent_d,Agent D,apple orange rival,machine,openrouter,1,2026-07-15 03:55:43.179422+00,3,18,apple orange rival,0,4
+52caa10e-cc88-4984-9ca0-5e453c7c266d,bc2a8148-f51e-4ad6-ae74-27a22c5e160e,agent_c,Agent C,x-shaped cross,machine,openrouter,1,2026-07-15 03:55:46.953504+00,2,14,x-shaped cross,0,4
+c36d8243-e0c4-4965-8b1a-defb869a290d,bc2a8148-f51e-4ad6-ae74-27a22c5e160e,agent_a,Agent A,common name rival,machine,openrouter,1,2026-07-15 03:56:05.943392+00,3,17,common name rival,0,4
+39746765-9adb-44dd-8001-e0f10d559196,e1ac7e4f-5794-43d6-ad5d-09b9e8c938ad,agent_a,Agent A,second workday grind,machine,openrouter,1,2026-07-15 03:56:07.047778+00,3,20,second workday grind,1,5
+fce4ee6d-a81b-464f-87e4-e9aa0d81aaea,e1ac7e4f-5794-43d6-ad5d-09b9e8c938ad,agent_d,Agent D,the weekly trivia night at,machine,openrouter,1,2026-07-15 03:56:10.158121+00,5,26,the weekly trivia night at,1,5
+510365cd-b70d-45c6-bc41-83e3373cf7a5,e1ac7e4f-5794-43d6-ad5d-09b9e8c938ad,agent_c,Agent C,week trivia night weekly trivia,machine,openrouter,1,2026-07-15 03:56:11.408084+00,5,31,week trivia night weekly trivia,1,5
+5793a475-f252-4be4-be4d-ec344823ccae,e1ac7e4f-5794-43d6-ad5d-09b9e8c938ad,agent_b,Agent B,taco special,machine,openrouter,1,2026-07-15 03:56:12.629032+00,2,12,taco special,1,5
+9801e17d-36d0-4fc3-8973-ae5acedbf509,bc2a8148-f51e-4ad6-ae74-27a22c5e160e,agent_b,Agent B,casual nickname,machine,openrouter,1,2026-07-15 03:56:18.234186+00,2,15,casual nickname,0,4
+427f1424-7395-4536-a54f-308294a8b3bf,e1ac7e4f-5794-43d6-ad5d-09b9e8c938ad,human,You,tacoooooo,human,,1,2026-07-15 03:56:26.9322+00,1,9,tacoooooo,1,5
+f017bea5-9781-4674-a31d-0a1c557d64be,496ae8c3-fd86-4246-909e-72b4b372a986,agent_c,Agent C,forge legacy,machine,openrouter,1,2026-07-15 03:57:45.10762+00,2,12,forge legacy,0,4
+4d37718b-c770-433b-b277-3f09d9533091,496ae8c3-fd86-4246-909e-72b4b372a986,agent_d,Agent D,metal clang,machine,openrouter,1,2026-07-15 03:57:49.148059+00,2,11,metal clang,0,4
+c3e9a4b2-e636-4673-9e0c-e9449ab086e8,496ae8c3-fd86-4246-909e-72b4b372a986,agent_a,Agent A,forge fire,machine,openrouter,1,2026-07-15 03:57:55.412266+00,2,10,forge fire,0,4
+badc8546-769c-4e59-a7f2-d23d07f470f2,cc4d77d5-4f4b-4cea-8bf7-f9ebc50b3a48,agent_c,Agent C,real estate office,machine,openrouter,1,2026-07-15 03:58:02.84161+00,3,18,real estate office,1,5
+47b88807-7223-4c47-84ef-37d963c6d8d4,cc4d77d5-4f4b-4cea-8bf7-f9ebc50b3a48,agent_d,Agent D,ownership rights,machine,openrouter,1,2026-07-15 03:58:12.716229+00,2,16,ownership rights,1,5
+5a0c6649-555a-4a96-a111-00e08e469176,cc4d77d5-4f4b-4cea-8bf7-f9ebc50b3a48,agent_b,Agent B,mortgage paperwork,machine,openrouter,1,2026-07-15 03:58:17.85978+00,2,18,mortgage paperwork,1,5
+c37ef747-d732-4708-85b6-be10fc4597ae,496ae8c3-fd86-4246-909e-72b4b372a986,agent_b,Agent B,forge bellows,machine,openrouter,1,2026-07-15 03:58:18.120233+00,2,13,forge bellows,0,4
+cca3c19e-8224-4012-b87b-8c21cf940869,cc4d77d5-4f4b-4cea-8bf7-f9ebc50b3a48,agent_a,Agent A,possession clue,machine,openrouter,1,2026-07-15 03:58:20.705008+00,2,15,possession clue,1,5
+7593b46d-8c6a-44c3-8009-34793ae0cdcc,fa325ffe-1e2a-461b-a9a1-f2bc04f86c9b,agent_c,Agent C,lottery draw,machine,openrouter,1,2026-07-15 03:58:21.949843+00,2,12,lottery draw,0,4
+4df32830-a169-44e7-b38b-e9488a080abc,fa325ffe-1e2a-461b-a9a1-f2bc04f86c9b,agent_d,Agent D,Restaurant menu,machine,openrouter,1,2026-07-15 03:58:35.396349+00,2,15,restaurant menu,0,4
+13e7a734-441b-41df-ab8e-8182adf5bc43,fa325ffe-1e2a-461b-a9a1-f2bc04f86c9b,agent_a,Agent A,filtered options,machine,openrouter,1,2026-07-15 03:58:37.237078+00,2,16,filtered options,0,4
+b932360c-44cd-4b52-91a4-56b6d1105aaf,79ce2409-b29b-4d36-8e6f-a7a8b6dba5f3,agent_c,Agent C,census taking,machine,openrouter,1,2026-07-15 03:58:38.053437+00,2,13,census taking,1,5
+9fea661e-8870-45a3-b19e-a7f4f4d29f44,fa325ffe-1e2a-461b-a9a1-f2bc04f86c9b,agent_b,Agent B,omission opposite,machine,openrouter,1,2026-07-15 03:58:38.312711+00,2,17,omission opposite,0,4
+aff28926-06a6-434d-ad98-2bfa538f97d8,79ce2409-b29b-4d36-8e6f-a7a8b6dba5f3,agent_d,Agent D,China's billions,machine,openrouter,1,2026-07-15 03:58:38.635011+00,2,16,china's billions,1,5
+27be6cbe-9f2e-4d18-ab0c-ac3b50b6a3ae,79ce2409-b29b-4d36-8e6f-a7a8b6dba5f3,human,You,Boom,human,,1,2026-07-15 03:58:49.672679+00,1,4,boom,1,5
+cc4afd71-cef0-4267-bfdf-ff26baba11b9,79ce2409-b29b-4d36-8e6f-a7a8b6dba5f3,agent_a,Agent A,census worker visits,machine,openrouter,1,2026-07-15 03:58:56.658438+00,3,20,census worker visits,1,5
+79384a25-8c0f-418b-b4ea-94d68261f75e,79ce2409-b29b-4d36-8e6f-a7a8b6dba5f3,agent_b,Agent B,voting booth,machine,openrouter,1,2026-07-15 03:59:00.103201+00,2,12,voting booth,1,5
+c67520ac-2808-4585-826f-47864932a529,cc4d77d5-4f4b-4cea-8bf7-f9ebc50b3a48,human,You,property,human,,1,2026-07-15 03:59:20.888608+00,1,8,property,1,5
+b38339a8-451e-405d-ab87-9e10354f11b3,c8fb1ca4-1548-440c-b014-098681e92a05,agent_c,Agent C,royal banquet hall,machine,openrouter,1,2026-07-15 04:01:55.748827+00,3,18,royal banquet hall,1,5
+6cd4cb9b-664b-4f56-99a0-1f1f0cabe3f6,c8fb1ca4-1548-440c-b014-098681e92a05,agent_d,Agent D,Purple Rain singer,machine,openrouter,1,2026-07-15 04:01:59.97697+00,3,18,purple rain singer,1,5
+48d866c2-9db6-4702-b299-f4fca8eba8c8,c8fb1ca4-1548-440c-b014-098681e92a05,agent_b,Agent B,royal lineage,machine,openrouter,1,2026-07-15 04:02:04.171778+00,2,13,royal lineage,1,5
+7c471799-5da4-4f3b-af16-ff47ba023220,c8fb1ca4-1548-440c-b014-098681e92a05,human,You,crown,human,,1,2026-07-15 04:02:25.609813+00,1,5,crown,1,5
+d2c04a7b-96a9-43ae-8c77-c07fdae81c53,c8fb1ca4-1548-440c-b014-098681e92a05,agent_a,Agent A,regal insignia,machine,openrouter,1,2026-07-15 04:03:05.637148+00,2,14,regal insignia,1,5
+a720286e-ce77-4a57-8d83-2c777308879f,a73d5fee-6e1b-4c70-b062-1bfcc8860645,agent_a,Agent A,home-cooked meals,machine,openrouter,1,2026-07-15 06:43:05.682169+00,2,17,home-cooked meals,1,5
+d22fae4b-f96c-451f-a08b-d9f434c8dd9f,a73d5fee-6e1b-4c70-b062-1bfcc8860645,agent_c,Agent C,shared traditions,machine,openrouter,1,2026-07-15 06:43:08.031259+00,2,17,shared traditions,1,5
+7381eea7-37d0-42fc-b67e-74d2217024f1,a73d5fee-6e1b-4c70-b062-1bfcc8860645,agent_b,Agent B,Sunday dinner tradition,machine,openrouter,1,2026-07-15 06:43:18.847093+00,3,23,sunday dinner tradition,1,5
+622da9f3-f922-4609-aa50-0bcc6ed2a864,a73d5fee-6e1b-4c70-b062-1bfcc8860645,human,You,A very close knit community,human,,1,2026-07-15 06:43:59.675021+00,5,27,a very close knit community,1,5
+579dbff9-476b-4e5b-92d7-fcca06553795,f4e893cd-e808-4bc4-995e-6556386c6b9c,agent_b,Agent B,day's opposite,machine,openrouter,1,2026-07-15 06:44:20.6313+00,2,14,day's opposite,1,5
+539e3025-2331-4f27-b77d-3e7aa0717f85,f4e893cd-e808-4bc4-995e-6556386c6b9c,agent_c,Agent C,crickets in the courtyard,machine,openrouter,1,2026-07-15 06:44:26.896664+00,4,25,crickets in the courtyard,1,5
+c3852185-7c43-491d-9ed3-f01f39cd7950,a73d5fee-6e1b-4c70-b062-1bfcc8860645,agent_d,Agent D,family heirlooms,machine,openrouter,1,2026-07-15 06:44:41.996812+00,2,16,family heirlooms,1,5
+c1447a63-b380-42b7-a33c-ae5d2104d82f,f4e893cd-e808-4bc4-995e-6556386c6b9c,agent_a,Agent A,Batman,machine,openrouter,1,2026-07-15 06:44:48.922925+00,1,6,batman,1,5
+87ab20a4-042e-45b7-87c3-8630d862b587,f4e893cd-e808-4bc4-995e-6556386c6b9c,human,You,Dark,human,,1,2026-07-15 06:45:11.033781+00,1,4,dark,1,5
+dc84b3a4-dd96-4429-85fc-c86771f7c78f,f4e893cd-e808-4bc4-995e-6556386c6b9c,agent_d,Agent D,starless sky,machine,openrouter,1,2026-07-15 06:45:43.531+00,2,12,starless sky,1,5
+2fdd295f-1ec7-47ed-851e-3fc71fd87f4c,8d34b49f-ce51-4733-a629-2ef5d65893aa,agent_b,Agent B,autonomy opposite,machine,openrouter,1,2026-07-15 06:46:22.640464+00,2,17,autonomy opposite,1,5
+b1b4081f-a670-4296-8b4c-529ceb1fbc0b,8d34b49f-ce51-4733-a629-2ef5d65893aa,agent_c,Agent C,July Fourth celebrations,machine,openrouter,1,2026-07-15 06:46:24.448087+00,3,24,july fourth celebrations,1,5
+2d399f26-4132-4344-af98-0ee18ab2f92e,8d34b49f-ce51-4733-a629-2ef5d65893aa,agent_d,Agent D,self-governed nation,machine,openrouter,1,2026-07-15 06:46:28.207722+00,2,20,self-governed nation,1,5
+3dfa3f58-8810-49e6-a6e7-707ab8ded907,8d34b49f-ce51-4733-a629-2ef5d65893aa,agent_a,Agent A,patriotic fireworks display,machine,openrouter,1,2026-07-15 06:46:38.576872+00,3,27,patriotic fireworks display,1,5
+86fc7792-5f05-425c-99d0-e27a16e7542c,8d34b49f-ce51-4733-a629-2ef5d65893aa,human,You,Fireworks celebration,human,,1,2026-07-15 06:47:30.940712+00,2,21,fireworks celebration,1,5
+d984bc4b-0a85-44cf-9187-5e6a1d16be15,fa316715-2ec8-4828-bfbb-c08f12c45888,agent_a,Agent A,Steve Jobs,machine,openrouter,1,2026-07-15 06:48:02.556764+00,2,10,steve jobs,1,5
+3b92248b-f01c-4e3c-8bde-47ff4347da09,fa316715-2ec8-4828-bfbb-c08f12c45888,agent_b,Agent B,crystal ball vs reality,machine,openrouter,1,2026-07-15 06:48:04.929986+00,4,23,crystal ball vs reality,1,5
+e79c4e00-e8b7-4cd5-833f-ff6024e3da0e,fa316715-2ec8-4828-bfbb-c08f12c45888,agent_d,Agent D,darkness opposite,machine,openrouter,1,2026-07-15 06:48:06.992292+00,2,17,darkness opposite,1,5
+009a79e7-265c-4d85-9f24-e1391fcb5694,fa316715-2ec8-4828-bfbb-c08f12c45888,agent_c,Agent C,visual perception,machine,openrouter,1,2026-07-15 06:48:07.314361+00,2,17,visual perception,1,5
+09664509-d37b-49e7-bd2d-41849667eb02,fa316715-2ec8-4828-bfbb-c08f12c45888,human,You,A potential idea for the better future,human,,1,2026-07-15 06:48:27.552882+00,7,38,a potential idea for the better future,1,5
+0cb53fc5-1304-4368-a528-1f9947927edd,19472f03-1a62-4432-a02f-6d62710f92d6,agent_d,Agent D,laid-back fellow,machine,openrouter,1,2026-07-15 16:11:32.587447+00,2,16,laid-back fellow,1,5
+17d6cd0f-4d24-4008-babe-ef295ea6faa0,19472f03-1a62-4432-a02f-6d62710f92d6,agent_c,Agent C,skate park greeting,machine,openrouter,1,2026-07-15 16:11:37.525407+00,3,19,skate park greeting,1,5
+f64eac45-ea7c-4dfa-af78-e1fff2a302ae,19472f03-1a62-4432-a02f-6d62710f92d6,agent_a,Agent A,casual hello gesture,machine,openrouter,1,2026-07-15 16:11:46.86147+00,3,20,casual hello gesture,1,5
+6d3f800a-e506-4c56-8119-de00416cab93,19472f03-1a62-4432-a02f-6d62710f92d6,human,You,surfer,human,,1,2026-07-15 16:13:13.790793+00,1,6,surfer,1,5
+62f922c1-7eb8-4380-9ff1-ded750a329f6,19472f03-1a62-4432-a02f-6d62710f92d6,agent_b,Agent B,casual companion,machine,openrouter,1,2026-07-15 16:13:30.334558+00,2,16,casual companion,1,5
+41eca8f3-25a5-4f0a-9245-69b8a9c18f91,a8fc3df0-92c3-4b29-a3d9-bbf265ed3488,agent_a,Agent A,emergency press briefing,machine,openrouter,1,2026-07-23 19:44:07.655511+00,3,24,emergency press briefing,1,5
+025d61a5-3552-462b-9b30-3172aa0250ce,a8fc3df0-92c3-4b29-a3d9-bbf265ed3488,agent_c,Agent C,rank condition position,machine,openrouter,1,2026-07-23 19:44:08.71957+00,3,23,rank condition position,1,5
+904feb68-73c2-42e9-9cd0-4f9db72d666d,a8fc3df0-92c3-4b29-a3d9-bbf265ed3488,agent_b,Agent B,status quo,machine,openrouter,1,2026-07-23 19:44:09.142797+00,2,10,status quo,1,5
+702e94f5-bfaa-41fd-8f0f-754bcd037a77,a8fc3df0-92c3-4b29-a3d9-bbf265ed3488,agent_d,Agent D,crisis mode,machine,openrouter,1,2026-07-23 19:44:18.001035+00,2,11,crisis mode,1,5
+83930d61-c838-426a-b41e-f136fbb37aa7,a8fc3df0-92c3-4b29-a3d9-bbf265ed3488,human,You,Multi outcome,human,,1,2026-07-23 19:45:23.976965+00,2,13,multi outcome,1,5
+d6bce246-349f-4750-a5c5-80f712d7a1a5,dfccb0ba-3dce-4b59-9b2c-8ec4ca766998,agent_d,Agent D,self-directed choice,machine,openrouter,1,2026-07-23 19:46:15.919853+00,2,20,self-directed choice,0,4
+22c2b217-b0ee-4ec4-9ddc-b994351360ac,dfccb0ba-3dce-4b59-9b2c-8ec4ca766998,agent_c,Agent C,office cubicle,machine,openrouter,1,2026-07-23 19:46:18.617048+00,2,14,office cubicle,0,4
+35403863-c65d-47d7-a486-373569b7dc9c,6924c836-107b-4c3b-a557-c7273ffb9bb1,agent_d,Agent D,Southern Alps view,machine,openrouter,1,2026-07-23 19:46:31.946961+00,3,18,southern alps view,0,4
+35f80179-629d-4826-bfe4-216ae4d38d89,6924c836-107b-4c3b-a557-c7273ffb9bb1,agent_c,Agent C,Hobbits' homeland,machine,openrouter,1,2026-07-23 19:46:34.958782+00,2,17,hobbits' homeland,0,4
+92586eb2-0e15-40cc-b2d9-b8430ec3932b,4f83f89e-d1da-4429-8a4f-f636ca5e4619,agent_c,Agent C,final answer,machine,openrouter,1,2026-07-23 19:46:41.005039+00,2,12,final answer,1,5
+dfd55299-3771-456a-8b90-f822b0fc9e7b,4f83f89e-d1da-4429-8a4f-f636ca5e4619,agent_b,Agent B,clearer image,machine,openrouter,1,2026-07-23 19:46:43.321508+00,2,13,clearer image,1,5
+956d6b86-fb99-4dd6-beb1-560bfe5483f6,6924c836-107b-4c3b-a557-c7273ffb9bb1,agent_b,Agent B,silver fern silhouette,machine,openrouter,1,2026-07-23 19:46:47.178075+00,3,22,silver fern silhouette,0,4
+56c92a56-badc-470d-a77c-39661a898b7f,6924c836-107b-4c3b-a557-c7273ffb9bb1,agent_a,Agent A,volcanic hot springs,machine,openrouter,1,2026-07-23 19:46:50.347099+00,3,20,volcanic hot springs,0,4
+ee1f770a-aec7-4bb1-a6c3-9577e2332084,4f83f89e-d1da-4429-8a4f-f636ca5e4619,agent_d,Agent D,toss a coin,machine,openrouter,1,2026-07-23 19:46:53.542563+00,3,11,toss a coin,1,5
+21e4fb55-f77c-4ace-8e75-15a48750907e,dfccb0ba-3dce-4b59-9b2c-8ec4ca766998,agent_a,Agent A,Ari Emanuel,machine,openrouter,1,2026-07-23 19:46:56.906687+00,2,11,ari emanuel,0,4
+97402908-fa4d-4713-afd0-f36907544300,4f83f89e-d1da-4429-8a4f-f636ca5e4619,agent_a,Agent A,conflict's end,machine,openrouter,1,2026-07-23 19:47:15.482069+00,2,14,conflict's end,1,5
+cd2126c6-90c5-4c5c-ae36-26fc3930462e,dfccb0ba-3dce-4b59-9b2c-8ec4ca766998,agent_b,Agent B,administrative office,machine,openrouter,1,2026-07-23 19:47:20.123068+00,2,21,administrative office,0,4
+48029f32-ee7c-402b-b65b-3f668368583e,4f83f89e-d1da-4429-8a4f-f636ca5e4619,human,You,Screen 19201080,human,,1,2026-07-23 19:47:39.346982+00,2,15,screen 19201080,1,5
+8fbde92f-d61e-4eaa-b549-1003dcad8293,a2a71a8b-1016-4e76-af3a-326b7caeb75d,agent_d,Agent D,White House briefing room,machine,openrouter,1,2026-07-29 19:00:33.220256+00,4,25,white house briefing room,1,5
+e1f05a93-7fd8-4ade-8089-3d2f971c35f5,a2a71a8b-1016-4e76-af3a-326b7caeb75d,agent_b,Agent B,Flag-adorned podium,machine,openrouter,1,2026-07-29 19:00:33.495052+00,2,19,flag-adorned podium,1,5
+ac7f36a8-6305-497d-aafc-b44958693af5,a2a71a8b-1016-4e76-af3a-326b7caeb75d,agent_a,Agent A,public figure,machine,openrouter,1,2026-07-29 19:01:03.767303+00,2,13,public figure,1,5
+1a80930e-a111-40fb-9050-64aa0874cee7,a2a71a8b-1016-4e76-af3a-326b7caeb75d,agent_c,Agent C,Cabinet meeting,machine,openrouter,1,2026-07-29 19:01:20.739757+00,2,15,cabinet meeting,1,5
+8d1f44ba-d1f9-4185-ac5b-f50f118ed62e,a2a71a8b-1016-4e76-af3a-326b7caeb75d,human,You,Head of a country,human,,1,2026-07-29 19:01:41.727225+00,4,17,head of a country,1,5
+19c83ba5-9b8e-4c12-a3e8-5acbaa036329,fadd2539-29a1-4646-8e6b-8ad823dab9cb,agent_c,Agent C,grand entrance,machine,openrouter,1,2026-07-29 19:02:29.550266+00,2,14,grand entrance,1,5
+726e1418-6be7-46b4-ad2f-f2a8216a5922,fadd2539-29a1-4646-8e6b-8ad823dab9cb,agent_a,Agent A,wedding reception,machine,openrouter,1,2026-07-29 19:02:54.136663+00,2,17,wedding reception,1,5
+c63b987b-24ea-4fa9-b3a3-1487de45b033,fadd2539-29a1-4646-8e6b-8ad823dab9cb,agent_b,Agent B,court opposite foyer,machine,openrouter,1,2026-07-29 19:03:04.105865+00,3,20,court opposite foyer,1,5
+4104e22c-b0d6-443d-9a4c-76a904812de5,fadd2539-29a1-4646-8e6b-8ad823dab9cb,agent_d,Agent D,famous auditorium,machine,openrouter,1,2026-07-29 19:03:19.161241+00,2,17,famous auditorium,1,5
+ff08b9c2-1bba-497d-ae22-604881d9f2a1,fadd2539-29a1-4646-8e6b-8ad823dab9cb,human,You,wedding and celebration,human,,1,2026-07-29 19:03:30.302483+00,3,23,wedding and celebration,1,5
+7ee27e96-403c-47f7-b9a9-4cf7f7c91400,3f1f7d3d-ceea-4fce-9ec8-58edc290585e,agent_a,Agent A,sacred vestments,machine,openrouter,1,2026-07-30 02:33:47.354029+00,2,16,sacred vestments,1,5
+2a7227b4-96d3-4091-9e1c-8b9990063d5c,3f1f7d3d-ceea-4fce-9ec8-58edc290585e,agent_d,Agent D,sacred service,machine,openrouter,1,2026-07-30 02:33:47.61293+00,2,14,sacred service,1,5
+8a2e16af-030a-4419-b7c7-1daf1e63be78,3f1f7d3d-ceea-4fce-9ec8-58edc290585e,agent_c,Agent C,cabinet meeting,machine,openrouter,1,2026-07-30 02:33:50.669103+00,2,15,cabinet meeting,1,5
+abfc17b8-f392-402f-b93f-ce6663d33d00,3f1f7d3d-ceea-4fce-9ec8-58edc290585e,agent_b,Agent B,government agency,machine,openrouter,1,2026-07-30 02:33:53.391069+00,2,17,government agency,1,5
+de814bef-485f-4e2f-bc07-31bd7e6c3960,3f1f7d3d-ceea-4fce-9ec8-58edc290585e,human,You,whitehouse,human,,1,2026-07-30 02:33:56.698803+00,1,10,whitehouse,1,5
