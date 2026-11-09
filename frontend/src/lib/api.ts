@@ -124,10 +124,10 @@ export function getAgents() {
   return request<Agent[]>("/agents");
 }
 
-export function createRound() {
+export function createRound(humanName: string) {
   return request<Round>("/rounds", {
     method: "POST",
-    body: JSON.stringify({}),
+    body: JSON.stringify({ human_name: humanName.trim() }),
   });
 }
 

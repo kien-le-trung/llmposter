@@ -216,8 +216,10 @@ benchmarked. See the [OpenRouter model listing](https://openrouter.ai/z-ai/glm-5
 
 ## Free-flow discussion
 
-The backend assigns a unique name to every participant, including the human,
-for each round. The browser displays these same names and marks the human's name
+Players enter their name before starting (1–40 characters, trimmed). The API accepts
+it as `human_name` on `POST /rounds`; older clients that omit it receive a generated
+name. The backend assigns unique names to the AI participants, avoiding the entered
+name. The browser displays these same names and marks the human's name
 with `(You)`. Clue, discussion, and voting prompts use that round roster, including
 each agent's own name; internal player IDs remain stable for structured references.
 

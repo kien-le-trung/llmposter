@@ -8,6 +8,7 @@ import {
 import { playerDisplayName } from "@/lib/player-names";
 
 export function GameConsole() {
+  const [humanName, setHumanName] = useState("");
   const [round, setRound] = useState<Round | null>(null);
   const [humanClueDraft, setHumanClueDraft] = useState("");
   const [voteResult, setVoteResult] = useState<VoteResult | null>(null);
@@ -83,11 +84,11 @@ export function GameConsole() {
 
   async function handleCreateRound(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (actionPending.current) return;
+    if (actionPending.current || !humanName.trim()) return;
     const version = beginAction();
     setIsCreatingRound(true);
     try {
-      const created = await createRound();
+      const created = await createRound(humanName);
       if (version !== actionVersion.current) return;
       followMessages.current = true;
       setRound(created);
@@ -186,7 +187,13 @@ export function GameConsole() {
         <h1 id="welcome-title"><span className="brand-accent">llm</span>poster</h1>
         <p className="welcome-description">One secret word. One imposter. Can you tell who is bluffing?</p>
         <form onSubmit={handleCreateRound} className="welcome-form">
-          <button type="submit" className="start-button" disabled={isCreatingRound}>
+          <label className="field">
+            <span>Your name</span>
+            <input name="humanName" autoComplete="nickname" required maxLength={40}
+              value={humanName} onChange={(event) => setHumanName(event.target.value)}
+              placeholder="What should the players call you?" disabled={isCreatingRound} />
+          </label>
+          <button type="submit" className="start-button" disabled={isCreatingRound || !humanName.trim()}>
             {isCreatingRound ? <><TypingDots /> Starting</> : <>Start <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M5 12h14M13 6l6 6-6 6" /></svg></>}
           </button>
           <p>Give a clue. Talk it out. Cast your vote.</p>

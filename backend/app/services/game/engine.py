@@ -302,6 +302,18 @@ async def create_round(
         )
         for index, player_id in enumerate(player_ids)
     }
+    if include_human and payload is not None and payload.human_name is not None:
+        player_names_by_id[HUMAN_PLAYER_ID] = payload.human_name
+        used_names = {payload.human_name.casefold()}
+        for agent in agents:
+            base = player_names_by_id[agent.id]
+            name = base
+            suffix = 2
+            while name.casefold() in used_names:
+                name = f"{base} {suffix}"
+                suffix += 1
+            player_names_by_id[agent.id] = name
+            used_names.add(name.casefold())
 
     secret_word, imposter_hint = select_round_word(payload, settings)
     prompt_technique = (

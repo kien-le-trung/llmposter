@@ -69,6 +69,34 @@ def set_playing_order(monkeypatch, player_ids: list[str]) -> None:
     monkeypatch.setattr(engine.random, "shuffle", use_order)
 
 
+@pytest.mark.parametrize("name", ["", "   ", "x" * 41])
+def test_create_round_rejects_invalid_human_name(name):
+    response = build_test_client().post("/rounds", json={"human_name": name})
+    assert response.status_code == 422
+    assert not game_state.ROUNDS
+
+
+def test_entered_name_reaches_round_roster_and_clue(monkeypatch):
+    monkeypatch.setattr(engine.random, "sample", lambda pool, count: list(pool))
+    monkeypatch.setattr(engine.random, "shuffle", lambda order: None)
+    monkeypatch.setattr(engine, "choice", lambda ids: "human")
+    client = build_test_client()
+    # Alex would otherwise be assigned to the first agent.
+    response = client.post("/rounds", json={"human_name": "  aLeX  "})
+    assert response.status_code == 201
+    body = response.json()
+    names = {p["id"]: p["name"] for p in body["playing_order"]}
+    assert names["human"] == "aLeX"
+    assert len({n.casefold() for n in names.values()}) == len(names)
+    round_id = body["id"]
+    assert game_state.ROUNDS[round_id].player_names_by_id == names
+    response = client.post(f"/rounds/{round_id}/clue", json={"clue": "orbiting object"})
+    assert response.status_code == 200
+    human = next(r for turn in response.json()["turns"] for r in turn["responses"]
+                 if r["agent_id"] == "human")
+    assert human["agent_name"] == "aLeX"
+
+
 def test_create_round_selects_random_word_when_enabled(monkeypatch) -> None:
     agent_ids = [agent.id for agent in list_agent_configs()]
     monkeypatch.setattr(engine, "select_random_word", lambda: ("forest", "Trees and shade"))

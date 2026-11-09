@@ -208,6 +208,7 @@ h2 {
   font-weight: 700;
 }
 
+.field input,
 .field select,
 .field textarea {
   background: var(--panel);

@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 from app.services.agents import discussion as chat
 
@@ -42,10 +42,16 @@ class RoundResponse(BaseModel):
 
 
 class CreateRoundRequest(BaseModel):
+    human_name: str | None = Field(default=None, min_length=1, max_length=40)
     secret_word: str | None = Field(default=None, min_length=1, max_length=80)
     imposter_hint: str | None = Field(default=None, min_length=1, max_length=160)
     prompt_technique: str | None = Field(default=None, min_length=1, max_length=80)
     include_human: bool = True
+
+    @field_validator("human_name", mode="before")
+    @classmethod
+    def trim_human_name(cls, value):
+        return value.strip() if isinstance(value, str) else value
 
 
 class VoteRequest(BaseModel):
