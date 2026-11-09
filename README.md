@@ -27,7 +27,10 @@ Docker Compose development:
 Copy-Item .env.docker.example .env.docker
 ```
 
-Do not commit real `.env` files.
+Set `DATABASE_URL` in `backend/.env`, `.env.docker`, and `.env` to your Neon
+connection string with the `postgresql+psycopg://` driver and `sslmode=require`.
+Compose uses `.env.docker`; the host backend uses `backend/.env`.
+Do not commit real `.env` files. The Compose stack does not run PostgreSQL locally.
 
 `AGENT_CONFIG_SOURCE=static` uses the built-in agent configs. `AGENT_CONFIG_SOURCE=database` reads active agent configs from PostgreSQL and falls back to static configs if needed.
 
@@ -38,7 +41,7 @@ Recommended daily workflow:
 ```text
 frontend local
 backend local
-db in Docker Compose
+PostgreSQL on Neon (no local database container)
 ```
 
 Start the live-editing environment:
@@ -47,7 +50,10 @@ Start the live-editing environment:
 scripts\dev.cmd
 ```
 
-This starts PostgreSQL through Docker Compose, then opens separate backend and frontend dev-server windows with autoreload enabled.
+This migrates the Neon database configured in `backend/.env`, then opens separate
+backend and frontend dev-server windows with autoreload enabled. Local development
+writes to that database; use a separate Neon development branch for isolation
+from production.
 
 Rounds use a random backend-selected noun by default. For repeatable testing, set:
 
@@ -57,17 +63,12 @@ FIXED_SECRET_WORD=satellite
 FIXED_IMPOSTER_HINT=Space, signals, or orbit
 ```
 
-Manual equivalent:
-
-```powershell
-docker compose up -d db
-```
-
-Run the backend locally:
+Run the backend locally (manual equivalent):
 
 ```powershell
 cd backend
 .\venv\Scripts\activate
+python -m alembic upgrade head
 python -m uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 ```
 
@@ -120,11 +121,10 @@ Initialize database tables and seed agent configs:
 docker compose exec backend python -c "from app.db.seed import init_database; init_database()"
 ```
 
-The MVP keeps active round state in backend memory; PostgreSQL stores only agent
-configuration plus standalone clue and vote history. After changing from the older
-database-backed round schema, recreate the development database with
-`docker compose down -v` before initializing it again. `create_all()` does not remove
-the obsolete `rounds` table or its foreign keys from an existing database.
+The MVP keeps active round state in backend memory; Neon stores agent
+configuration plus clue, vote, and discussion history. Initialization runs Alembic
+migrations before seeding. Preserve existing database data; incompatible legacy
+schemas require reconciliation rather than deleting tables or volumes.
 
 Chat and embedding inference use the providers configured in `backend/.env`
 (or `.env.docker` for Compose). The Compose stack does not include a model service.
@@ -137,10 +137,10 @@ Backend health:
 Invoke-RestMethod http://localhost:8000/health
 ```
 
-Database seed check:
+Database migration check:
 
 ```powershell
-docker compose exec db psql -U postgres -d llmposter -c "select count(*) from agent_configs;"
+docker compose exec backend python -m alembic current
 ```
 
 ## Local Service URLs
@@ -150,14 +150,14 @@ From the host machine:
 ```text
 frontend: http://localhost:3000
 backend:  http://localhost:8000
-postgres: localhost:5432
+postgres: Neon endpoint configured in DATABASE_URL
 ```
 
 Inside Docker Compose:
 
 ```text
 frontend -> backend: http://backend:8000
-backend -> db:       db:5432
+backend -> Neon:     endpoint configured in DATABASE_URL (TLS)
 ```
 
 Browser-side frontend code must use a host-reachable backend URL such as:
@@ -180,11 +180,8 @@ Stop containers but keep volumes:
 docker compose down
 ```
 
-Stop containers and delete database volumes:
-
-```powershell
-docker compose down -v
-```
+Neon data persists independently of Compose containers. Stopping Compose does
+not remove the database.
 
 Run backend tests locally:
 
@@ -266,8 +263,22 @@ include a `discussion` object. `POST /rounds/{id}/discussion` accepts
 server. The former action/player-ID parameters and raised-hand/floor fields
 have been removed. Existing discussion tables need no migration for free flow.
 
-Before starting the new backend against production, run Alembic migrations once
-from the deployed backend environment (using its production `DATABASE_URL`):
+The backend Docker image runs `python -m alembic upgrade head` before starting
+Uvicorn. Migration failures prevent the server from starting. Set the hosting
+service's `DATABASE_URL` to the production Neon connection string (using
+`postgresql+psycopg://` and retaining its SSL parameters). Alembic and the API use
+the same database setting; migrating the local Compose database does not update
+Neon. Keep production credentials in the hosting service's environment settings.
+
+If the host overrides the image's default command, use this start command from
+the container's `/app` working directory:
+
+```sh
+python -m alembic upgrade head && exec uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000}
+```
+
+For deployments outside Docker, run migrations from the deployed backend
+environment (using its production `DATABASE_URL`) before starting Uvicorn:
 
 ```sh
 cd backend
@@ -276,9 +287,10 @@ python -m alembic current
 ```
 
 For container deployments the working directory is already `/app`; omit `cd backend`.
-Use `python -m alembic upgrade head` as the hosting service's pre-deploy/release
-command. Run it once before starting workers, rather than in every worker.
-The backend image includes Alembic and the revision files.
+Alternatively, use `python -m alembic upgrade head` as the hosting service's
+pre-deploy/release command. The backend image includes Alembic and the revision
+files. Keep a single backend instance; simultaneous migration attempts are not
+coordinated, and active rounds already require a single process.
 
 The first revision adopts the existing agent, clue, and vote tables or creates them
 on an empty database. The next revision adds `discussion_messages`. Existing rows

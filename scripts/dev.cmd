@@ -7,13 +7,6 @@ set "FRONTEND_DIR=%ROOT%\frontend"
 
 cd /d "%ROOT%"
 
-echo Starting Docker dependencies: db...
-docker compose up -d db
-if errorlevel 1 (
-  echo Failed to start Docker dependencies.
-  exit /b 1
-)
-
 if not exist "%BACKEND_DIR%\venv\Scripts\activate.bat" (
   echo Missing backend virtual environment: %BACKEND_DIR%\venv
   echo Create it and install backend dependencies before running this script.
@@ -23,6 +16,13 @@ if not exist "%BACKEND_DIR%\venv\Scripts\activate.bat" (
 if not exist "%FRONTEND_DIR%\node_modules" (
   echo Missing frontend dependencies: %FRONTEND_DIR%\node_modules
   echo Run npm.cmd install from the frontend directory before running this script.
+  exit /b 1
+)
+
+echo Migrating the database configured in backend/.env...
+"%BACKEND_DIR%\venv\Scripts\python.exe" -m alembic -c "%BACKEND_DIR%\alembic.ini" upgrade head
+if errorlevel 1 (
+  echo Database migration failed. Check backend/.env DATABASE_URL and Neon connectivity.
   exit /b 1
 )
 
@@ -36,7 +36,6 @@ echo.
 echo Live editing environment started.
 echo Frontend: http://localhost:3000
 echo Backend:  http://localhost:8000
-echo Docker dependencies are running: db
+echo Database: Neon, configured through backend/.env
 echo.
 echo Stop backend/frontend by closing their terminal windows or pressing Ctrl+C in each.
-echo Stop Docker dependencies with: docker compose stop db
