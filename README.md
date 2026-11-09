@@ -216,6 +216,11 @@ benchmarked. See the [OpenRouter model listing](https://openrouter.ai/z-ai/glm-5
 
 ## Free-flow discussion
 
+The backend assigns a unique name to every participant, including the human,
+for each round. The browser displays these same names and marks the human's name
+with `(You)`. Clue, discussion, and voting prompts use that round roster, including
+each agent's own name; internal player IDs remain stable for structured references.
+
 All rounds follow clues -> discussion -> voting. Clues use a private LangGraph pipeline: prepare context -> select strategy -> build prompt -> generate clue -> normalize output. Voting uses structured LLM decisions from each player?s own knowledge and the full public transcript. Discussion lasts 90 seconds
 by default (`DISCUSSION_DURATION_SECONDS`, 1-600). Anyone can comment at any time;
 there are no raised hands, floor grants, or personalities. Human messages are

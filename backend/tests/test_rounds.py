@@ -375,7 +375,7 @@ def test_imposter_wins_when_group_votes_out_non_imposter(monkeypatch) -> None:
 
     assert response.status_code == 200
     body = response.json()
-    assert body["imposter_was"] == "Human"
+    assert body["imposter_was"] == game_state.ROUNDS[round_id].player_names_by_id["human"]
     assert len(body["agent_votes"]) == len(list_agent_configs())
     assert body["imposter_won"] is True
     assert body["round_winner"] == "imposter"

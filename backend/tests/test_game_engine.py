@@ -184,7 +184,8 @@ def test_round_names_are_unique_stable_and_independent_of_config(monkeypatch):
         monkeypatch.setattr(engine.random, "sample", lambda pool, count: list(pool))
         first = await engine.create_round(None, settings(), FakeSession(), schedule=lambda *args: None)
         names = state.ROUNDS[first.id].player_names_by_id.copy()
-        assert names["human"] == "Human"
+        assert names["human"] in engine.ROUND_PLAYER_NAMES
+        assert "Human" not in names.values()
         assert set(names) == {"human", *[a.id for a in agents]}
         assert len(set(names.values())) == len(names)
         assert all(names[a.id] != a.name for a in agents)
@@ -211,7 +212,7 @@ def test_round_names_flow_through_prompts_clues_discussion_votes_and_persistence
     async def run():
         agents = list_static_agent_configs()
         current = make_state(["human", *[a.id for a in agents]], agents[0].id)
-        current.player_names_by_id = {"human": "Human", **{
+        current.player_names_by_id = {"human": "Riley", **{
             a.id: f"RoundName{i}" for i, a in enumerate(agents)
         }}
         names = current.player_names_by_id
@@ -225,7 +226,14 @@ def test_round_names_flow_through_prompts_clues_discussion_votes_and_persistence
                 context = json.loads(request.prompt.split("GAME_CONTEXT:\n")[1])
                 assert context["your_name"] == names[context["your_id"]]
                 assert {p["id"]: p["name"] for p in context["players"]} == names
-                result = response_model(target_id="human")
+                assert all(c["player_name"] == names[c["player_id"]] for c in context["clues"])
+                if response_model.__name__ == "DebateDecision":
+                    assert context["new_messages"][0]["player_name"] == names["human"]
+                    assert "Your identity is your_name" in request.prompt
+                    result = response_model(comment="Riley, can you explain?", memory={})
+                else:
+                    assert context["discussion"][0]["player_name"] == names["human"]
+                    result = response_model(target_id="human")
             if validate:
                 validate(result)
             return result, InferenceResult(text="", inference_mode="fake")
@@ -236,7 +244,7 @@ def test_round_names_flow_through_prompts_clues_discussion_votes_and_persistence
             inference_mode="human",
         )
         clue = await engine.generate_agent_clue(current, agents[0], [previous], settings(), client=InferenceClient(settings()))
-        assert "Human: circles earth" in requests[0].prompt
+        assert "Riley: circles earth" in requests[0].prompt
         assert "stale" not in requests[0].prompt
         assert clue.agent_id == agents[0].id and clue.agent_name == names[agents[0].id]
         identity = json.loads(requests[0].prompt.splitlines()[1])
@@ -247,26 +255,32 @@ def test_round_names_flow_through_prompts_clues_discussion_votes_and_persistence
         current.discussion.deadline = datetime.now(UTC)
         db = FakeSession()
         discussion.publish_comment(current, "human", "Hello", "human", db)
-        assert current.discussion.messages[0].player_name == "Human"
-        assert db.saved[0].player_id == "human" and db.saved[0].player_name == "Human"
-        context = json.loads(debate_agent.capture_snapshot(
+        assert current.discussion.messages[0].player_name == "Riley"
+        assert db.saved[0].player_id == "human" and db.saved[0].player_name == "Riley"
+        # Historical response labels must not override the round roster in prompts.
+        clue.agent_name = "stale-agent-name"
+        current.discussion.messages[0].player_name = "stale-player-name"
+        snapshot = debate_agent.capture_snapshot(
             current, agents[0].id, "generation", debate_agent.AgentMemory(),
-        ).context_json)
+        )
+        context = json.loads(snapshot.context_json)
         assert context["your_name"] == names[agents[0].id]
         assert {p["id"]: p["name"] for p in context["players"]} == names
         assert context["clues"][0]["player_name"] == names[agents[0].id]
+        assert "stale" not in snapshot.context_json
+        await debate_agent.run_turn(snapshot, agents[0], InferenceClient(settings()))
         current.status = "ready_to_vote"
         monkeypatch.setattr(engine, "list_runtime_agent_configs", lambda *args: agents)
         monkeypatch.setattr(engine, "get_runtime_agent_config", lambda *args: agents[0])
         result = await engine.vote(current.id, schemas.VoteRequest(agent_id=agents[0].id), db, settings())
         assert result.imposter_was == names[agents[0].id]
         assert result.voted_agent_name == names[agents[0].id]
-        assert result.group_voted_player_name == "Human"
+        assert result.group_voted_player_name == "Riley"
         assert all(v.voted_for == "human" and v.voter_agent_name == names[v.voter_agent_id]
                    for v in result.agent_votes)
         agent_rows = [row for row in db.saved if getattr(row, "voter_id", None) in {a.id for a in agents}]
         assert len(agent_rows) == len(agents)
         assert all(row.voter_name == names[row.voter_id] and row.voted_for_id == "human"
-                   and row.voted_for_name == "Human" for row in agent_rows)
+                   and row.voted_for_name == "Riley" for row in agent_rows)
         assert all(count.player_name == names[count.player_id] for count in result.vote_counts)
     asyncio.run(run())

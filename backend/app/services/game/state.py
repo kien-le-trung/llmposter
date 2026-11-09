@@ -6,7 +6,6 @@ from app.services.agents import discussion as chat
 from app.services.game.schemas import AgentTurnResponse, TurnResponse
 
 HUMAN_PLAYER_ID = "human"
-HUMAN_PLAYER_NAME = "Human"
 
 
 class RoundState(BaseModel):

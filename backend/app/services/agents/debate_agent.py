@@ -75,7 +75,7 @@ def capture_snapshot(
 
     def public_message(message):
         return {"sequence": message.sequence, "player_id": message.player_id,
-                "player_name": message.player_name, "text": message.text}
+                "player_name": state.player_names_by_id[message.player_id], "text": message.text}
 
     context = {
         "your_id": agent_id,
@@ -86,7 +86,8 @@ def capture_snapshot(
         ),
         "players": [{"id": pid, "name": state.player_names_by_id[pid]}
                     for pid in state.playing_order],
-        "clues": [{"player_id": response.agent_id, "player_name": response.agent_name,
+        "clues": [{"player_id": response.agent_id,
+                   "player_name": state.player_names_by_id[response.agent_id],
                    "text": response.agent_response}
                   for turn in state.turns for response in turn.responses],
         "memory": memory.memory.model_dump(),
@@ -147,7 +148,9 @@ async def prepare_context(state: TurnState):
     prompt = (
         "Read only the supplied game knowledge. Update your compact private memory and decide "
         "whether to add one useful comment (one to three sentences, at most 500 characters). "
-        "Use participant names in public dialogue and stable player IDs in structured memory. "
+        "Your identity is your_name in the round roster. Speak as that participant. "
+        "Use only the roster's names in public dialogue, never internal IDs, configuration "
+        "names, or labels such as Human or AI. Stable player IDs are only for structured memory. "
         "Return comment: null for silence. Return the complete replacement memory, retaining important "
         "older evidence. Observations are attributed statements, not established facts; "
         "suspicions are your beliefs; questions are unresolved. Each entry names a player_id "

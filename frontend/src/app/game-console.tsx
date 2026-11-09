@@ -5,11 +5,10 @@ import {
   Round, VoteResult, createRound, submitDiscussionComment, getRound,
   submitRoundClue, voteRound,
 } from "@/lib/api";
-import { assignPlayerNames, playerDisplayName } from "@/lib/player-names";
+import { playerDisplayName } from "@/lib/player-names";
 
 export function GameConsole() {
   const [round, setRound] = useState<Round | null>(null);
-  const [aliases, setAliases] = useState<Record<string, string>>({});
   const [humanClueDraft, setHumanClueDraft] = useState("");
   const [voteResult, setVoteResult] = useState<VoteResult | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -90,7 +89,6 @@ export function GameConsole() {
     try {
       const created = await createRound();
       if (version !== actionVersion.current) return;
-      setAliases(assignPlayerNames(created.playing_order));
       followMessages.current = true;
       setRound(created);
       setHumanClueDraft("");
@@ -171,7 +169,6 @@ export function GameConsole() {
     actionPending.current = false;
     followMessages.current = true;
     setRound(null);
-    setAliases({});
     setHumanClueDraft("");
     setCommentDraft("");
     setVoteResult(null);
@@ -213,7 +210,7 @@ export function GameConsole() {
   }
 
   const displayName = (id: string | null, fallback: string) =>
-    playerDisplayName(round.playing_order, aliases, id, fallback);
+    playerDisplayName(round.playing_order, id, fallback);
   const identityTitle = (id: string | null, fallback: string) => {
     const original = round.playing_order.find((player) => player.id === id)?.name ?? fallback;
     return original === displayName(id, fallback) ? undefined : `Original name: ${original}`;

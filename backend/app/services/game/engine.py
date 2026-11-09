@@ -31,7 +31,7 @@ from app.services.game.schemas import (
     SubmitDiscussionComment,
 )
 from app.services.game.state import (
-    RoundState, ROUNDS, ACTIVE_GENERATION_ROUNDS, HUMAN_PLAYER_ID, HUMAN_PLAYER_NAME,
+    RoundState, ROUNDS, ACTIVE_GENERATION_ROUNDS, HUMAN_PLAYER_ID,
 )
 
 ROUND_PLAYER_NAMES = (
@@ -297,13 +297,11 @@ async def create_round(
 
     name_pool = random.sample(ROUND_PLAYER_NAMES, len(ROUND_PLAYER_NAMES))
     player_names_by_id = {
-        agent.id: name_pool[index % len(name_pool)] + (
+        player_id: name_pool[index % len(name_pool)] + (
             f" {index // len(name_pool) + 1}" if index >= len(name_pool) else ""
         )
-        for index, agent in enumerate(agents)
+        for index, player_id in enumerate(player_ids)
     }
-    if include_human:
-        player_names_by_id[HUMAN_PLAYER_ID] = HUMAN_PLAYER_NAME
 
     secret_word, imposter_hint = select_round_word(payload, settings)
     prompt_technique = (
@@ -389,14 +387,14 @@ async def submit_clue(
         raise GameError("invalid_input", "Human clue cannot be blank")
 
     human_response = AgentTurnResponse(
-        agent_id=HUMAN_PLAYER_ID, agent_name=HUMAN_PLAYER_NAME,
+        agent_id=HUMAN_PLAYER_ID, agent_name=round_state.player_names_by_id[HUMAN_PLAYER_ID],
         agent_response=human_clue, inference_mode="human",
     )
     round_state.human_clue = human_clue
     round_state.completed_clues[HUMAN_PLAYER_ID] = human_response
     db.add(ClueModel(
         id=str(uuid4()), round_id=round_id, player_id=HUMAN_PLAYER_ID,
-        player_name=HUMAN_PLAYER_NAME, clue=human_clue, inference_mode=None,
+        player_name=round_state.player_names_by_id[HUMAN_PLAYER_ID], clue=human_clue, inference_mode=None,
         sequence=1,
     ))
     reveal_available_clues(round_state)
@@ -450,7 +448,7 @@ async def vote(
         if HUMAN_PLAYER_ID in round_state.playing_order:
             db.add(VoteModel(
                 id=str(uuid4()), round_id=round_id, voter_id=HUMAN_PLAYER_ID,
-                voter_name=HUMAN_PLAYER_NAME, voted_for_id=result.voted_agent_id,
+                voter_name=names_by_id[HUMAN_PLAYER_ID], voted_for_id=result.voted_agent_id,
                 voted_for_name=result.voted_agent_name, raw_vote=None, inference_mode=None,
             ))
         for agent_vote in result.agent_votes:

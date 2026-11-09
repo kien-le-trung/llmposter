@@ -76,7 +76,11 @@ async def build_prompt(state: ClueState):
         "your_id": context.your_id, "your_name": context.your_name,
         "players": [{"id": pid, "name": name} for pid, name in context.players],
     })
-    return {"prompt": "Use round names in dialogue and IDs in structured references.\n" + identity + "\n" + build_instruction_clue_user_prompt(
+    return {"prompt": (
+        "Your identity is your_name in the round roster below. Use only these round names "
+        "for participants, never internal IDs or configuration names, in dialogue. "
+        "IDs are only for structured references.\n"
+    ) + identity + "\n" + build_instruction_clue_user_prompt(
         context.secret_word, context.imposter_hint, list(context.previous_clues), state["strategy"],
     )}
 
