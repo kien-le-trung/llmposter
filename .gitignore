@@ -86,3 +86,6 @@ END_SESSION.md
 
 # Headless latency benchmark artifacts and isolated test databases
 experiments/latency/results/
+experiments/artifacts/**/.diagnosis-*/
+experiments/artifacts/**/.test-tmp-*/
+experiments/artifacts/**/.pytest-tmp-*/

@@ -44,6 +44,7 @@ notebooks = [
 ]
 
 [tool.ruff]
+cache-dir = "../experiments/artifacts/backend/.ruff_cache"
 line-length = 100
 target-version = "py311"
 
@@ -52,4 +53,5 @@ target-version = "py311"
 select = ["E4", "E7", "E9", "F"]
 
 [tool.pytest.ini_options]
+cache_dir = "../experiments/artifacts/backend/.pytest_cache"
 testpaths = ["tests"]

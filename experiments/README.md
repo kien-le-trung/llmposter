@@ -5,6 +5,8 @@ and experiment runners.
 
 ## Layout
 
+- `artifacts/backend/`: retained backend diagnostic runs, latency pilots, test outputs, and tool caches.
+- `artifacts/root/`: pytest temporary folders and tool caches moved from the repository root.
 - `datasets/`: fixed benchmark datasets.
 - `run_configs/`: full run configs and component configs.
 - `run_configs/llm_configs/`: LLM provider/model components.
