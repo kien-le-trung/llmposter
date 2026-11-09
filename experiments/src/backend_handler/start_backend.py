@@ -49,7 +49,7 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--voting-algo",
-        default="embedding_distance_v1",
+        default="llm",
         help="Voting algorithm component name or JSON path.",
     )
     parser.add_argument(

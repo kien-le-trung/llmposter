@@ -83,3 +83,6 @@ SESSION_SUMMARY.md
 PROJECT_CONTEXT.md
 DECISIONS.md
 END_SESSION.md
+
+# Headless latency benchmark artifacts and isolated test databases
+experiments/latency/results/

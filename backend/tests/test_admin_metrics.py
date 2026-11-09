@@ -1,3 +1,4 @@
+import pytest
 from fastapi.testclient import TestClient
 
 from app.main import create_app
@@ -28,3 +29,14 @@ def test_admin_dashboard_returns_html() -> None:
 
     assert response.status_code == 200
     assert "LLMposter Metrics" in response.text
+
+
+@pytest.fixture(autouse=True)
+def application_lifespans(monkeypatch):
+    from contextlib import ExitStack
+    original = TestClient
+    with ExitStack() as stack:
+        def managed(*args, **kwargs):
+            return stack.enter_context(original(*args, **kwargs))
+        monkeypatch.setitem(globals(), "TestClient", managed)
+        yield

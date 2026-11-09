@@ -138,7 +138,8 @@ def test_run_single_experiment_orchestrates_dependencies(monkeypatch, tmp_path) 
 
     assert artifacts.output_dir == tmp_path
     assert len(tracked_calls) == 1
-    assert len(tracked_calls[0]["results"]) == 2
+    _, cases = load_dataset(config.components.eval_dataset)
+    assert len(tracked_calls[0]["results"]) == len(cases) * config.run.repetitions
     assert tracked_calls[0]["metrics"]["success_rate"] == 1.0
     assert tracked_calls[0]["params"]["backend_url"] == "http://127.0.0.1:8000"
 
@@ -158,14 +159,14 @@ def _single_config_dict(output_dir: str = "experiments/prompt_benchmarking/resul
             "embedding": "nomic_embed_text",
             "prompt": "few_shot",
             "eval_dataset": "standard_benchmark_short",
-            "voting_algo": "embedding_distance_v1",
+            "voting_algo": "llm",
             "inference_mode": "remote",
             "agent_config_source": "static",
             "word_selection_mode": "random",
         },
         "run": {
             "repetitions": 1,
-            "timeout_seconds": 60,
+            "timeout_seconds": 180,
             "submit_vote": False,
         },
         "tracking": {
@@ -227,3 +228,37 @@ def _result(case_id: str | None = "0", repetition_index: int | None = 0):
             ],
         },
     )
+
+
+def test_live_client_waits_through_discussion_before_explicit_vote(monkeypatch):
+    from backend_handler.api_client import (
+        BackendExperimentApiClient, BackendExperimentRequest, BackendRequestArtifact,
+    )
+
+    async def run():
+        client = BackendExperimentApiClient("http://test", poll_interval_seconds=0)
+        assert client.timeout_seconds == 180
+        calls = []
+        statuses = iter(["discussion", "ready_to_vote"])
+
+        async def request(http, method, path, json=None):
+            calls.append((method, path, json))
+            if path == "/rounds":
+                payload = {"id": "round", "status": "generating_clues"}
+            elif method == "GET":
+                payload = {"id": "round", "status": next(statuses)}
+            else:
+                payload = {"agent_votes": []}
+            return BackendRequestArtifact(
+                method=method, path=path, request_json=json, status_code=200,
+                response_json=payload, response_text=None, latency_ms=0, started_at="test",
+            ), payload
+
+        monkeypatch.setattr(client, "_request_json", request)
+        result = await client.run_request(BackendExperimentRequest("satellite", "orbit"))
+        assert result.success
+        assert calls[0][2]["include_human"] is False
+        assert [method for method, _, _ in calls] == ["POST", "GET", "GET", "POST"]
+        assert calls[-1][1:] == ("/rounds/round/vote", {})
+
+    asyncio.run(run())

@@ -7,12 +7,14 @@ from fastapi.testclient import TestClient
 from sqlalchemy import create_engine, select
 from sqlalchemy.orm import Session
 
-from app.api.routes import rounds
+from app.services.game import engine
+from app.services.game import schemas, state as game_state
 from app.core.config import Settings
 from app.db.models import DiscussionMessageModel
 from app.db.session import Base, get_db
 from app.main import create_app
 from app.services.agents import discussion as chat
+from app.services.agents.debate_agent import DebateDecision, DebateMemory
 from app.services.agents.inference import InferenceClient, InferenceResult, InferenceServiceError
 from app.services.agents.runtime_agents import list_static_agent_configs
 from app.services.voting import voting
@@ -41,28 +43,28 @@ def settings():
 def make_state():
     agents = list_static_agent_configs()
     ids = ["human", *[agent.id for agent in agents]]
-    state = rounds.RoundState(
+    state = game_state.RoundState(
         id="discussion-test", secret_word="satellite", imposter_hint="orbit",
         imposter_player_id=agents[0].id, status="generating_clues", playing_order=ids,
         player_names_by_id={"human": "You", **{a.id: a.name for a in agents}},
         prompt_technique="few_shot", current_player_index=0, turns=[],
         created_at=datetime.now(UTC), human_clue="circles earth",
-        discussion=chat.DiscussionState(enabled=True),
+        discussion=chat.DiscussionState(),
     )
     state.completed_clues = {
-        pid: rounds.AgentTurnResponse(agent_id=pid, agent_name=state.player_names_by_id[pid],
+        pid: schemas.AgentTurnResponse(agent_id=pid, agent_name=state.player_names_by_id[pid],
                                       agent_response="circles earth", inference_mode="fake")
         for pid in ids
     }
-    rounds.reveal_available_clues(state)
+    engine.reveal_available_clues(state)
     return state
 
 
 @pytest.fixture(autouse=True)
 def isolated(monkeypatch):
-    rounds.ROUNDS.clear()
+    game_state.ROUNDS.clear()
     FakeSession.saved = []
-    monkeypatch.setattr(rounds, "SessionLocal", FakeSession)
+    monkeypatch.setattr(engine, "SessionLocal", FakeSession)
     monkeypatch.setattr(chat, "SessionLocal", FakeSession)
 
 
@@ -76,7 +78,7 @@ def client():
 
 def install_state():
     state = make_state()
-    rounds.ROUNDS[state.id] = state
+    game_state.ROUNDS[state.id] = state
     return state
 
 
@@ -85,38 +87,27 @@ def test_open_only_after_final_clue_and_deadline_does_not_reset():
     deadline = state.discussion.deadline
     assert state.status == "discussion"
     assert 89 < (deadline - datetime.now(UTC)).total_seconds() <= 90
-    rounds.reveal_available_clues(state)
+    engine.reveal_available_clues(state)
     assert state.discussion.deadline == deadline
     state.current_player_index = 0
     state.turns = []
     state.completed_clues.pop("human")
-    rounds.reveal_available_clues(state)
+    engine.reveal_available_clues(state)
     assert state.status == "awaiting_human_clue"
 
 
-def test_default_human_round_opens_discussion_and_ai_only_stays_legacy(client, monkeypatch):
-    monkeypatch.setattr(rounds.random, "shuffle", lambda ids: None)
-    response = client.post("/rounds", json={})
+def test_all_rounds_require_discussion(client, monkeypatch):
+    monkeypatch.setattr(engine.random, "shuffle", lambda ids: None)
+    response = client.post("/rounds", json={"discussion_enabled": False})
     round_id = response.json()["id"]
-    assert response.json()["discussion"]["enabled"] is True
-    assert client.post(f"/rounds/{round_id}/clue", json={"clue": "space object"}).status_code == 200
-    body = client.get(f"/rounds/{round_id}").json()
-    assert body["status"] == "discussion"
-    assert body["discussion"]["deadline"] is not None
+    assert "enabled" not in response.json()["discussion"]
+    client.post(f"/rounds/{round_id}/clue", json={"clue": "space object"})
+    assert client.get(f"/rounds/{round_id}").json()["status"] == "discussion"
     assert client.post(f"/rounds/{round_id}/vote", json={"agent_id": "agent_a"}).status_code == 409
     ai = client.post("/rounds", json={"include_human": False}).json()
-    assert client.get(f'/rounds/{ai["id"]}').json()["status"] == "ready_to_vote"
-    assert ai["discussion"]["enabled"] is False
-    assert client.post("/rounds", json={"include_human": False,
-                                        "discussion_enabled": True}).status_code == 422
-
-
-def test_explicit_disable_preserves_human_legacy_flow(client, monkeypatch):
-    monkeypatch.setattr(rounds.random, "shuffle", lambda ids: None)
-    body = client.post("/rounds", json={"discussion_enabled": False}).json()
-    round_id = body["id"]
-    client.post(f"/rounds/{round_id}/clue", json={"clue": "space object"})
-    assert client.get(f"/rounds/{round_id}").json()["status"] == "ready_to_vote"
+    assert client.get(f'/rounds/{ai["id"]}').json()["status"] == "discussion"
+    assert client.post(f'/rounds/{ai["id"]}/discussion', json={"text": "hello"}).status_code == 409
+    assert client.post(f'/rounds/{ai["id"]}/clue', json={"clue": "hello"}).status_code == 409
 
 
 def test_human_can_send_without_permission(client):
@@ -186,12 +177,12 @@ def test_discussion_votes_use_public_transcript_and_validate_targets(monkeypatch
                 with pytest.raises(ValueError):
                     validate(chat.DiscussionVote(target_id=invalid))
             validate(chat.DiscussionVote(target_id="human"))
-            return chat.DiscussionVote(target_id="human"), InferenceResult(text="", inference_mode="grok")
+            return chat.DiscussionVote(target_id="human"), InferenceResult(text="", inference_mode="openrouter")
 
         monkeypatch.setattr(InferenceClient, "generate_structured", generate)
         result = await voting._build_agent_votes(state, agents, settings())
         assert len(result) == 4
-        assert all(v.inference_mode == "grok" and v.voted_for == "You" for v in result)
+        assert all(v.inference_mode == "openrouter" and v.voted_for == "human" for v in result)
         assert all(p["discussion"][0]["text"] == "That explanation makes sense." for p in prompts)
         assert all("votes" not in p and "human_vote" not in p for p in prompts)
 
@@ -244,40 +235,40 @@ def test_ai_loop_comments_silence_failure_and_expiry(monkeypatch, mode):
     async def run():
         state = make_state()
         agent = list_static_agent_configs()[0]
-        pauses = []
         contexts = []
+        config = settings()
+        config.discussion_cooldown_seconds = 0.01
+        config.discussion_debounce_seconds = 0.001
+        config.discussion_silence_seconds = 0.02
 
         async def generate(self, request, response_model, validate=None, **kwargs):
             contexts.append(request.prompt)
             if len(contexts) == 1:
-                # A human comment arriving during inference must not invalidate the AI reply.
                 chat.publish_comment(state, "human", "Explain?", "human", FakeSession())
                 if mode == "failure":
                     raise InferenceServiceError("unavailable")
+                if mode == "late":
+                    state.discussion.deadline = datetime.now(UTC) - timedelta(seconds=1)
             else:
                 state.discussion.deadline = datetime.now(UTC) - timedelta(seconds=1)
-            if mode == "late":
-                state.discussion.deadline = datetime.now(UTC) - timedelta(seconds=1)
-            decision = chat.CommentDecision(comment=None if mode == "silence" else "My response")
+            decision = DebateDecision(
+                comment=None if mode == "silence" else "My response", memory=DebateMemory(),
+            )
             validate(decision)
-            return decision, InferenceResult(text="", inference_mode="grok")
-
-        async def pause(seconds):
-            pauses.append(seconds)
+            return decision, InferenceResult(text="", inference_mode="openrouter")
 
         monkeypatch.setattr(InferenceClient, "generate_structured", generate)
-        monkeypatch.setattr(chat.asyncio, "sleep", pause)
-        await chat.ai_comment_loop(state, agent, settings())
+        await asyncio.wait_for(chat.ai_comment_loop(state, agent, config), timeout=2)
         assert state.status == "ready_to_vote"
         assert [m.player_id for m in state.discussion.messages] == (
             ["human", agent.id] if mode == "comment" else ["human"]
         )
+        memory = state.discussion._agents[agent.id].memory
+        assert memory.version == (1 if mode in {"comment", "silence"} else 0)
         if mode != "late":
-            assert pauses == [2]
             assert "Explain?" in contexts[1]
         else:
-            assert pauses == []
-
+            assert len(contexts) == 1
     asyncio.run(run())
 
 
@@ -298,27 +289,111 @@ def test_independent_loops_allow_human_send_and_shutdown(monkeypatch):
                 all_started.set()
             await release.wait()
             in_flight.remove(request.agent.id)
-            return chat.CommentDecision(comment="A comment"), InferenceResult(text="", inference_mode="fake")
+            return DebateDecision(comment="A comment", memory=DebateMemory()), InferenceResult(
+                text="", inference_mode="fake",
+            )
 
         monkeypatch.setattr(InferenceClient, "generate_structured", generate)
         chat.ensure_discussion_tasks(state, agents, settings())
         first_tasks = dict(state.discussion._ai_tasks)
         chat.ensure_discussion_tasks(state, agents, settings())
         assert state.discussion._ai_tasks == first_tasks
-        await asyncio.wait_for(all_started.wait(), timeout=2)
-        response = await rounds.submit_discussion_comment(
-            state.id, rounds.SubmitDiscussionComment(text="Human speaks now"), FakeSession(),
+        # HTTP client construction can take several seconds on Windows.
+        await asyncio.wait_for(all_started.wait(), timeout=10)
+        response = await engine.submit_discussion_comment(
+            state.id, schemas.SubmitDiscussionComment(text="Human speaks now"), FakeSession(),
         )
         assert response.discussion.messages[0].player_id == "human"
         release.set()
         # Let all independent responses publish before stopping the loops.
-        for _ in range(20):
+        for _ in range(200):
             if len(state.discussion.messages) == 5:
                 break
-            await asyncio.sleep(0)
+            await asyncio.sleep(0.005)
         assert len(state.discussion.messages) == 5
         assert [m.sequence for m in state.discussion.messages] == list(range(1, 6))
         await chat.shutdown_tasks()
         assert all(task.done() for task in first_tasks.values())
 
     asyncio.run(run())
+
+
+def test_vote_persistence_failure_rolls_back_and_can_retry(client, monkeypatch):
+    from sqlalchemy.exc import SQLAlchemyError
+
+    state = install_state()
+    state.status = "ready_to_vote"
+    rolled_back = []
+    original = FakeSession.commit
+
+    def fail(self):
+        raise SQLAlchemyError("write failed")
+
+    monkeypatch.setattr(FakeSession, "commit", fail)
+    monkeypatch.setattr(FakeSession, "rollback", lambda self: rolled_back.append(True), raising=False)
+    response = client.post(f"/rounds/{state.id}/vote", json={"agent_id": "agent_a"})
+    assert response.status_code == 503
+    assert state.status == "ready_to_vote"
+    assert state.voted_agent_id is None
+    assert not state.discussion._voting
+    assert rolled_back == [True]
+    monkeypatch.setattr(FakeSession, "commit", original)
+    assert client.post(f"/rounds/{state.id}/vote", json={"agent_id": "agent_a"}).status_code == 200
+
+
+def test_concurrent_vote_is_rejected_until_first_commits(monkeypatch):
+    async def run():
+        state = install_state()
+        state.status = "ready_to_vote"
+        started, release = asyncio.Event(), asyncio.Event()
+        original = voting._build_agent_votes
+
+        async def blocked(*args, **kwargs):
+            started.set()
+            await release.wait()
+            return await original(*args)
+
+        monkeypatch.setattr(voting, "_build_agent_votes", blocked)
+        payload = schemas.VoteRequest(agent_id="agent_a")
+        task = asyncio.create_task(engine.vote(state.id, payload, FakeSession(), settings()))
+        try:
+            await asyncio.wait_for(started.wait(), 2)
+            with pytest.raises(engine.GameError, match="Voting already"):
+                await engine.vote(state.id, payload, FakeSession(), settings())
+            release.set()
+            await task
+            assert state.status == "complete"
+        finally:
+            task.cancel()
+            await asyncio.gather(task, return_exceptions=True)
+
+    asyncio.run(run())
+
+
+def test_tied_vote_has_no_elimination():
+    agents = list_static_agent_configs()[:2]
+    votes = [voting.AgentVoteResponse(
+        voter_agent_id=a.id, voter_agent_name=a.name,
+        voted_for=agents[1 - i].id, inference_mode="fake",
+    ) for i, a in enumerate(agents)]
+    counts, target = voting._tally_round_votes(None, votes, {a.id: a.name for a in agents})
+    assert target is None
+    assert [count.votes for count in counts] == [1, 1]
+
+
+def test_removed_fields_are_absent_from_openapi(client):
+    components = client.get("/openapi.json").json()["components"]["schemas"]
+    assert "discussion_enabled" not in components["CreateRoundRequest"]["properties"]
+    assert "enabled" not in components["DiscussionState"]["properties"]
+    assert "human_clue" not in components["VoteRequest"]["properties"]
+
+
+@pytest.fixture(autouse=True)
+def application_lifespans(monkeypatch):
+    from contextlib import ExitStack
+    original = TestClient
+    with ExitStack() as stack:
+        def managed(*args, **kwargs):
+            return stack.enter_context(original(*args, **kwargs))
+        monkeypatch.setitem(globals(), "TestClient", managed)
+        yield

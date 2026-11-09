@@ -45,7 +45,6 @@ export type Turn = {
 };
 
 export type Discussion = {
-  enabled: boolean;
   deadline: string | null;
   error: string | null;
   messages: {

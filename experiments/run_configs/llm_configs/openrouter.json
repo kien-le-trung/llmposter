@@ -1,12 +1,13 @@
 {
   "llm_config": {
-    "name": "OpenRouter",
+    "name": "GLM 5.3 Flash via OpenRouter",
     "provider": "openrouter",
     "chat_url": "https://openrouter.ai/api/v1/chat/completions",
-    "model": "openrouter/free",
+    "model": "z-ai/glm-5.3-flash",
     "api_key_env": "OPENROUTER_API_KEY",
     "min_max_tokens": 10000,
     "structured_max_tokens": 10000,
-    "notes": "Remote OpenRouter config. Requires OPENROUTER_API_KEY."
+    "notes": "Paid OpenRouter GLM 5.3 Flash. Requires OPENROUTER_API_KEY and available credits.",
+    "max_concurrent_requests": 4
   }
 }

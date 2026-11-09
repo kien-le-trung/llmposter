@@ -12,13 +12,13 @@ base:
     embedding: nomic_embed_text
     prompt: few_shot
     eval_dataset: standard_benchmark
-    voting_algo: embedding_distance_v1
+    voting_algo: llm
     inference_mode: remote
     agent_config_source: static
     word_selection_mode: random
   run:
     repetitions: 2
-    timeout_seconds: 60
+    timeout_seconds: 180
     submit_vote: false
   tracking:
     experiment_name: prompt_benchmarking

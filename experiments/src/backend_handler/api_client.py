@@ -82,7 +82,7 @@ class BackendExperimentApiClient:
     def __init__(
         self,
         backend_url: str,
-        timeout_seconds: float = 60.0,
+        timeout_seconds: float = 180.0,
         request_timeout_seconds: float = 20.0,
         poll_interval_seconds: float = 0.25,
     ) -> None:

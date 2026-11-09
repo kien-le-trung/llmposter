@@ -1,0 +1,7 @@
+{
+  "voting_algorithm": {
+    "name": "llm",
+    "description": "Structured LLM voting using clues and the full public discussion.",
+    "requires_embedding_model": false
+  }
+}

@@ -1,18 +1,9 @@
-from typing import TypedDict
 from pydantic import BaseModel
-
-class VotingFeatureInput(TypedDict):
-    round_id: str
-    turn_id: str
-    candidate_turn_position: int
-    candidate_embedding: list[float]
-    other_embeddings: list[list[float]]
-    previous_embeddings: list[list[float]]
 
 class AgentVoteResponse(BaseModel):
     voter_agent_id: str
     voter_agent_name: str
-    voted_for: str
+    voted_for: str  # Stable participant ID.
     inference_mode: str
 
 

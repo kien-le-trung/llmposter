@@ -1,5 +1,7 @@
 from contextlib import asynccontextmanager
 
+import httpx
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -14,10 +16,13 @@ def create_app(app_settings: Settings | None = None) -> FastAPI:
     
     @asynccontextmanager
     async def lifespan(app):
-        try:
-            yield
-        finally:
-            await shutdown_tasks()
+        async with httpx.AsyncClient(timeout=20.0) as http_client:
+            app.state.inference_http_client = http_client
+            try:
+                yield
+            finally:
+                await shutdown_tasks()
+                app.state.inference_http_client = None
 
     app = FastAPI(title=active_settings.app_name, lifespan=lifespan)
     app.state.settings = active_settings

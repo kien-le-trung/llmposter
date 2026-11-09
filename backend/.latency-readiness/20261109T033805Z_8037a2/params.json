@@ -1,0 +1,67 @@
+{
+  "mode": "controlled",
+  "repetitions": 1,
+  "discussion_seconds": 4,
+  "seed": 42,
+  "scenario": "normal",
+  "matrix": [
+    {
+      "kind": "discussion",
+      "capacity": 4,
+      "parallel": 1,
+      "client_limit": 4,
+      "delay": 0.2
+    },
+    {
+      "kind": "discussion",
+      "capacity": 1,
+      "parallel": 1,
+      "client_limit": 4,
+      "delay": 0.2
+    }
+  ],
+  "database": "isolated_sqlite",
+  "model": "latency-stub",
+  "agents": [
+    {
+      "id": "agent_a",
+      "temperature": 0.3,
+      "top_p": 0.8,
+      "max_tokens": 24,
+      "version": "prompt-v3"
+    },
+    {
+      "id": "agent_b",
+      "temperature": 0.3,
+      "top_p": 0.8,
+      "max_tokens": 24,
+      "version": "prompt-v3"
+    },
+    {
+      "id": "agent_c",
+      "temperature": 0.3,
+      "top_p": 0.8,
+      "max_tokens": 24,
+      "version": "prompt-v3"
+    },
+    {
+      "id": "agent_d",
+      "temperature": 0.3,
+      "top_p": 0.8,
+      "max_tokens": 24,
+      "version": "prompt-v3"
+    }
+  ],
+  "scheduler": {
+    "discussion_debounce_seconds": 0.5,
+    "discussion_cooldown_seconds": 2.0,
+    "discussion_silence_seconds": 10.0
+  },
+  "token_limits": {
+    "min_max_tokens": 10000,
+    "structured_max_tokens": 10000
+  },
+  "prompt_technique": "few_shot",
+  "agent_configuration": "static",
+  "poll_interval_seconds": 0.25
+}

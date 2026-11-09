@@ -25,26 +25,19 @@ class LLMConfig(BaseModel):
 
 
 DEFAULT_LLM_CONFIG = LLMConfig(
-    name="OpenRouter default",
+    name="GLM 5.3 Flash via OpenRouter",
     provider="openrouter",
     chat_url="https://openrouter.ai/api/v1/chat/completions",
-    model="openrouter/free",
+    model="z-ai/glm-5.3-flash",
     api_key_env="OPENROUTER_API_KEY",
     min_max_tokens=10000,
     structured_max_tokens=10000,
-)
-
-DEFAULT_GROK_CONFIG = LLMConfig(
-    name="Grok default",
-    provider="grok",
-    chat_url="https://api.x.ai/v1/chat/completions",
-    model="grok-4.7",
-    api_key_env="GROK_API_KEY",
     max_concurrent_requests=4,
 )
 
 
 class Settings(BaseSettings):
+
     # Application metadata.
     app_name: str = "LLMposter API"
 
@@ -67,26 +60,15 @@ class Settings(BaseSettings):
         alias="EMBEDDING_MODEL_SERVER_URL",
     )
     agent_config_source: str = Field(default="static", alias="AGENT_CONFIG_SOURCE")
-    ml_voting_model_path: str = Field(
-        default=str(
-            BACKEND_DIR
-            / "app"
-            / "services"
-            / "voting"
-            / "models"
-            / "svm_rbf_balanced_20260712T172943Z"
-            / "model.joblib"
-        ),
-        alias="ML_VOTING_MODEL_PATH",
-    )
-
     # Experiment-tunable settings.
     llm_config: LLMConfig = DEFAULT_LLM_CONFIG
-    grok_config: LLMConfig | None = DEFAULT_GROK_CONFIG
     embedding_model_name: str = Field(default="nomic-embed-text")
     inference_mode: str = Field(default="remote")
     discussion_duration_seconds: int = Field(default=90, ge=1, le=600)
-    discussion_enabled: bool = True
+    discussion_debounce_seconds: float = Field(default=0.5, gt=0, le=60)
+    discussion_cooldown_seconds: float = Field(default=2, gt=0, le=60)
+    discussion_silence_seconds: float = Field(default=10, gt=0, le=600)
+    discussion_max_concurrent_turns: int = Field(default=4, ge=1, le=64)
     clue_prompt_technique: str = Field(default="few_shot")
     word_selection_mode: str = Field(default="random")
     fixed_secret_word: str = Field(default="satellite")

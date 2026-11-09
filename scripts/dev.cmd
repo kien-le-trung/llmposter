@@ -7,8 +7,8 @@ set "FRONTEND_DIR=%ROOT%\frontend"
 
 cd /d "%ROOT%"
 
-echo Starting Docker dependencies: db and model...
-docker compose up -d db model
+echo Starting Docker dependencies: db...
+docker compose up -d db
 if errorlevel 1 (
   echo Failed to start Docker dependencies.
   exit /b 1
@@ -36,7 +36,7 @@ echo.
 echo Live editing environment started.
 echo Frontend: http://localhost:3000
 echo Backend:  http://localhost:8000
-echo Docker dependencies are running: db, model
+echo Docker dependencies are running: db
 echo.
 echo Stop backend/frontend by closing their terminal windows or pressing Ctrl+C in each.
-echo Stop Docker dependencies with: docker compose stop db model
+echo Stop Docker dependencies with: docker compose stop db

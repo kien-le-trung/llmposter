@@ -1,3 +1,4 @@
+import pytest
 from fastapi.testclient import TestClient
 
 from app.core.config import Settings
@@ -18,7 +19,7 @@ def test_default_llm_config_uses_openrouter() -> None:
 
     llm_config = settings.llm_config
     assert llm_config.provider == "openrouter"
-    assert llm_config.model == "openrouter/free"
+    assert llm_config.model == "z-ai/glm-5.3-flash"
 
 
 def test_cors_preflight_allows_localhost_frontend() -> None:
@@ -49,3 +50,14 @@ def test_cors_preflight_allows_loopback_frontend() -> None:
     )
 
     assert response.status_code == 200
+
+
+@pytest.fixture(autouse=True)
+def application_lifespans(monkeypatch):
+    from contextlib import ExitStack
+    original = TestClient
+    with ExitStack() as stack:
+        def managed(*args, **kwargs):
+            return stack.enter_context(original(*args, **kwargs))
+        monkeypatch.setitem(globals(), "TestClient", managed)
+        yield

@@ -6,9 +6,9 @@ from fastapi.testclient import TestClient
 from pydantic import BaseModel, Field
 import pytest
 
-from app.core.config import DEFAULT_GROK_CONFIG, LLMConfig, Settings
+from app.core.config import LLMConfig, Settings
 from app.main import create_app
-from app.services.agents.clue_generation import (
+from app.services.agents.clue_agent import (
     build_instruction_clue_user_prompt,
 )
 from app.services.agents.strategy_loader import (
@@ -51,7 +51,7 @@ def build_test_settings(
             name="OpenRouter test",
             provider="openrouter",
             chat_url="https://openrouter.ai/api/v1/chat/completions",
-            model="openrouter/free",
+            model="z-ai/glm-5.3-flash",
             api_key_env="OPENROUTER_API_KEY",
             min_max_tokens=128,
             structured_max_tokens=512,
@@ -169,7 +169,7 @@ def test_generate_posts_to_openrouter(monkeypatch) -> None:
             return FakeResponse()
 
     monkeypatch.setattr("app.services.agents.inference.httpx.AsyncClient", FakeAsyncClient)
-    client = InferenceClient(settings=build_test_settings(env_values={"OPENROUTER_API_KEY": "test-key"}))
+    client = InferenceClient(settings=build_test_settings(env_values={"OPENROUTER_API_KEY": "test-key"}), http_client=FakeAsyncClient(timeout=20.0))
 
     result = asyncio.run(
         client.generate(InferenceRequest(prompt="Return a clue.", agent=build_test_agent()))
@@ -192,7 +192,7 @@ def test_generate_posts_to_openrouter(monkeypatch) -> None:
                 "temperature": 0.1,
                 "top_p": 1.0,
                 "max_tokens": 128,
-                "model": "openrouter/free",
+                "model": "z-ai/glm-5.3-flash",
             },
         }
     ]
@@ -234,7 +234,7 @@ def test_generate_uses_larger_token_budget_for_openrouter_structured_calls(monke
             return FakeResponse()
 
     monkeypatch.setattr("app.services.agents.inference.httpx.AsyncClient", FakeAsyncClient)
-    client = InferenceClient(settings=build_test_settings(env_values={"OPENROUTER_API_KEY": "test-key"}))
+    client = InferenceClient(settings=build_test_settings(env_values={"OPENROUTER_API_KEY": "test-key"}), http_client=FakeAsyncClient(timeout=20.0))
 
     asyncio.run(
         client.generate(
@@ -279,7 +279,7 @@ def test_generate_rejects_empty_openrouter_content(monkeypatch) -> None:
             return FakeResponse()
 
     monkeypatch.setattr("app.services.agents.inference.httpx.AsyncClient", FakeAsyncClient)
-    client = InferenceClient(settings=build_test_settings(env_values={"OPENROUTER_API_KEY": "test-key"}))
+    client = InferenceClient(settings=build_test_settings(env_values={"OPENROUTER_API_KEY": "test-key"}), http_client=FakeAsyncClient(timeout=20.0))
 
     with pytest.raises(InferenceServiceError, match="empty assistant content"):
         asyncio.run(
@@ -313,6 +313,7 @@ def test_generate_omits_auth_for_local_config(monkeypatch) -> None:
 
     monkeypatch.setattr("app.services.agents.inference.httpx.AsyncClient", FakeAsyncClient)
     client = InferenceClient(
+        http_client=FakeAsyncClient(timeout=20.0),
         settings=build_test_settings(
             llm_config=LLMConfig(
                 name="Local",
@@ -338,19 +339,12 @@ def test_generate_omits_auth_for_local_config(monkeypatch) -> None:
     assert calls[0]["json"]["max_tokens"] == 64
 
 
-def grok_test_settings(env_values=None):
-    settings = build_test_settings(env_values=env_values)
-    settings.grok_config = DEFAULT_GROK_CONFIG
-    return settings
-
-
 def run_mock_generation(settings, handler, *, structured=False):
     import httpx
 
     async def run():
         async with httpx.AsyncClient(transport=httpx.MockTransport(handler)) as http_client:
-            client = InferenceClient(settings)
-            client._http_client = http_client
+            client = InferenceClient(settings, http_client=http_client)
             request = InferenceRequest(prompt="Return a clue.", agent=build_test_agent())
             if structured:
                 return await client.generate_structured(request, StructuredTestResponse)
@@ -359,30 +353,28 @@ def run_mock_generation(settings, handler, *, structured=False):
     return asyncio.run(run())
 
 
-def test_grok_is_primary_and_uses_its_own_key():
+def test_default_model_posts_only_to_openrouter():
     import httpx
 
     calls = []
 
     def handler(request):
         calls.append(request)
-        assert request.headers["authorization"] == "Bearer grok-test-key"
-        payload = json.loads(request.content)
-        assert payload["model"] == DEFAULT_GROK_CONFIG.model
-        assert payload["messages"][1]["content"] == "Return a clue."
-        return httpx.Response(200, json={"choices": [{"message": {"content": "grok reply"}}]})
+        assert request.url.host == "openrouter.ai"
+        assert request.headers["authorization"] == "Bearer router-test-key"
+        assert json.loads(request.content)["model"] == "z-ai/glm-5.3-flash"
+        return httpx.Response(200, json={"choices": [{"message": {"content": "A clue"}}]})
 
-    settings = grok_test_settings({"GROK_API_KEY": "grok-test-key"})
+    settings = Settings(_env_file=None)
+    settings = build_test_settings(env_values={"OPENROUTER_API_KEY": "router-test-key"},
+                                   llm_config=settings.llm_config)
     result = run_mock_generation(settings, handler)
-
-    assert result == InferenceResult(text="grok reply", inference_mode="grok")
+    assert result == InferenceResult(text="A clue", inference_mode="openrouter")
     assert len(calls) == 1
-    assert str(calls[0].url) == DEFAULT_GROK_CONFIG.chat_url
 
 
-@pytest.mark.parametrize("failure", ["missing_key", "unauthorized", "rate_limit", "timeout",
-                                     "invalid_json", "empty_content", "malformed"])
-def test_grok_failure_falls_back_to_openrouter(monkeypatch, failure):
+@pytest.mark.parametrize("failure", ["rate_limit", "timeout", "invalid_json", "malformed"])
+def test_openrouter_transient_failure_retries_without_switching_models(monkeypatch, failure):
     import httpx
 
     calls = []
@@ -394,113 +386,81 @@ def test_grok_failure_falls_back_to_openrouter(monkeypatch, failure):
 
     def handler(request):
         calls.append(request)
-        if request.url.host == "api.x.ai":
-            if failure == "unauthorized":
-                return httpx.Response(401, text="provider error")
+        assert request.url.host == "openrouter.ai"
+        assert json.loads(request.content)["model"] == "z-ai/glm-5.3-flash"
+        if len(calls) == 1:
             if failure == "rate_limit":
                 return httpx.Response(429)
             if failure == "timeout":
                 raise httpx.ReadTimeout("timeout", request=request)
             if failure == "invalid_json":
                 return httpx.Response(200, text="not json")
-            if failure == "empty_content":
-                return httpx.Response(200, json={"choices": [{"message": {"content": ""}}]})
             return httpx.Response(200, json={"choices": [None]})
-        assert request.url.host == "openrouter.ai"
-        assert request.headers["authorization"] == "Bearer router-test-key"
-        assert json.loads(request.content)["model"] == "openrouter/free"
-        return httpx.Response(200, json={"choices": [{"message": {"content": "fallback"}}]})
+        return httpx.Response(200, json={"choices": [{"message": {"content": "A clue"}}]})
 
-    keys = {"OPENROUTER_API_KEY": "router-test-key"}
-    if failure != "missing_key":
-        keys["GROK_API_KEY"] = "grok-test-key"
-    result = run_mock_generation(grok_test_settings(keys), handler)
-
-    assert result == InferenceResult(text="fallback", inference_mode="openrouter")
-    assert calls[-1].url.host == "openrouter.ai"
-    expected_primary_calls = 0 if failure == "missing_key" else (
-        1 if failure in {"unauthorized", "empty_content"} else 3
+    result = run_mock_generation(
+        build_test_settings(env_values={"OPENROUTER_API_KEY": "router-test-key"}), handler,
     )
-    assert len(calls) == expected_primary_calls + 1
-
-
-def test_invalid_grok_structured_output_falls_back():
-    import httpx
-
-    hosts = []
-
-    def handler(request):
-        hosts.append(request.url.host)
-        content = '{"clue":"valid clue"}' if request.url.host == "openrouter.ai" else '{"wrong":1}'
-        return httpx.Response(200, json={"choices": [{"message": {"content": content}}]})
-
-    settings = grok_test_settings({"GROK_API_KEY": "grok-test-key",
-                                   "OPENROUTER_API_KEY": "router-test-key"})
-    response, result = run_mock_generation(settings, handler, structured=True)
-
-    assert response.clue == "valid clue"
     assert result.inference_mode == "openrouter"
-    assert hosts == ["api.x.ai"] * 3 + ["openrouter.ai"]
+    assert len(calls) == 2
 
 
-def test_both_providers_fail_without_exposing_response_body():
+def test_permanent_http_failure_is_sanitized_and_not_retried():
     import httpx
 
+    calls = []
+
     def handler(request):
+        calls.append(request)
         return httpx.Response(401, text="sensitive provider response")
 
-    settings = grok_test_settings({"GROK_API_KEY": "grok-test-key",
-                                   "OPENROUTER_API_KEY": "router-test-key"})
-    with pytest.raises(InferenceServiceError) as error:
-        run_mock_generation(settings, handler)
-
-    message = str(error.value)
-    assert "grok: Model provider returned HTTP 401" in message
-    assert "openrouter: Model provider returned HTTP 401" in message
-    assert "sensitive" not in message
-    assert "test-key" not in message
+    with pytest.raises(InferenceServiceError, match="HTTP 401") as error:
+        run_mock_generation(
+            build_test_settings(env_values={"OPENROUTER_API_KEY": "test-key"}), handler,
+            structured=True,
+        )
+    assert len(calls) == 1
+    assert "sensitive" not in str(error.value)
+    assert "test-key" not in str(error.value)
 
 
-def test_settings_enable_grok_by_default():
-    settings = Settings(_env_file=None)
-    assert settings.grok_config == DEFAULT_GROK_CONFIG
-    assert settings.llm_config.provider == "openrouter"
-
-
-def test_grok_does_not_override_explicit_local_provider():
-    settings = grok_test_settings()
-    settings.llm_config = settings.llm_config.model_copy(update={"provider": "openai_compatible"})
-    assert InferenceClient(settings)._provider_configs() == [settings.llm_config]
-
-
-def test_structured_http_failure_tries_each_provider_once():
+def test_structured_invalid_output_retries_same_model():
     import httpx
 
-    hosts = []
+    calls = []
 
     def handler(request):
-        hosts.append(request.url.host)
-        if request.url.host == "api.x.ai":
-            return httpx.Response(401)
-        content = '{"clue":"valid clue"}'
+        calls.append(request)
+        content = '{"wrong":1}' if len(calls) == 1 else '{"clue":"valid clue"}'
         return httpx.Response(200, json={"choices": [{"message": {"content": content}}]})
 
-    settings = grok_test_settings({"GROK_API_KEY": "grok-test-key",
-                                   "OPENROUTER_API_KEY": "router-test-key"})
-    response, result = run_mock_generation(settings, handler, structured=True)
-
+    response, result = run_mock_generation(
+        build_test_settings(env_values={"OPENROUTER_API_KEY": "test-key"}), handler,
+        structured=True,
+    )
     assert response.clue == "valid clue"
     assert result.inference_mode == "openrouter"
-    assert hosts == ["api.x.ai", "openrouter.ai"]
+    assert len(calls) == 2
+    assert all(json.loads(call.content)["model"] == "z-ai/glm-5.3-flash" for call in calls)
 
 
-def test_fake_mode_skips_both_providers():
+def test_fake_mode_skips_http():
     def handler(request):
         pytest.fail("Fake inference must not make HTTP requests")
 
-    settings = grok_test_settings()
+    settings = build_test_settings()
     settings.inference_mode = "fake"
     response, result = run_mock_generation(settings, handler, structured=True)
-
     assert response.clue == "fake clue"
     assert result.inference_mode == "fake"
+
+
+@pytest.fixture(autouse=True)
+def application_lifespans(monkeypatch):
+    from contextlib import ExitStack
+    original = TestClient
+    with ExitStack() as stack:
+        def managed(*args, **kwargs):
+            return stack.enter_context(original(*args, **kwargs))
+        monkeypatch.setitem(globals(), "TestClient", managed)
+        yield

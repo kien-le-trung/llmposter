@@ -10,6 +10,8 @@ from pydantic import BaseModel, ValidationError
 
 from app.core.config import LLMConfig
 from app.services.metrics import measure_stage
+from app.services import latency
+from uuid import uuid4
 
 StructuredModel = TypeVar("StructuredModel", bound=BaseModel)
 
@@ -53,25 +55,20 @@ class InferenceServiceError(Exception):
 
 
 class InferenceClient:
-    def __init__(self, settings, max_concurrent_requests: int | None = None) -> None:
+    def __init__(self, settings, max_concurrent_requests: int | None = None, *, http_client: httpx.AsyncClient | None = None) -> None:
         self.settings = settings
         self.llm_config = settings.llm_config
-        self.grok_config = getattr(settings, "grok_config", None)
-        primary_config = self._provider_configs()[0]
-        limit = max_concurrent_requests or primary_config.max_concurrent_requests
+        limit = max_concurrent_requests or self.llm_config.max_concurrent_requests
         if limit is None:
             limit = 1 if "localhost:8888" in self.llm_config.chat_url else 100
         self._semaphore = asyncio.Semaphore(limit)
-        self._http_client: httpx.AsyncClient | None = None
+        self._limit = limit
+        self._http_client = http_client
 
-    async def __aenter__(self) -> "InferenceClient":
-        self._http_client = httpx.AsyncClient(timeout=20.0)
-        return self
-
-    async def __aexit__(self, *args: object) -> None:
-        if self._http_client is not None:
-            await self._http_client.aclose()
-            self._http_client = None
+    def require_transport(self):
+        if self._http_client is None:
+            raise InferenceServiceError("Remote inference requires an injected HTTP client")
+        return self._http_client
 
     async def embed(self, texts: list[str]) -> EmbeddingResult:
         if self.settings.inference_mode == "fake":
@@ -116,19 +113,19 @@ class InferenceClient:
         )
 
         try:
-            async with httpx.AsyncClient(timeout=20.0) as client:
-                with measure_stage(
-                    "embedding_http",
-                    {"model": self.settings.embedding_model_name, "count": str(len(texts))},
-                ):
-                    response = await client.post(
-                        embedding_url,
-                        headers=headers,
-                        json=payload,
-                    )
-                response.raise_for_status()
-                with measure_stage("embedding_response_parse"):
-                    data = response.json()
+            client = self.require_transport()
+            with measure_stage(
+                "embedding_http",
+                {"model": self.settings.embedding_model_name, "count": str(len(texts))},
+            ):
+                response = await client.post(
+                    embedding_url,
+                    headers=headers,
+                    json=payload,
+                )
+            response.raise_for_status()
+            with measure_stage("embedding_response_parse"):
+                data = response.json()
 
             embedding_objects = data.get("embeddings")
             if not isinstance(embedding_objects, list):
@@ -172,20 +169,7 @@ class InferenceClient:
         if self.settings.inference_mode == "fake":
             return self._fake_generate(request)
 
-        errors = []
-        for llm_config in self._provider_configs():
-            try:
-                return await self._generate_with_config(request, llm_config)
-            except InferenceServiceError as exc:
-                errors.append(f"{llm_config.provider}: {exc}")
-        raise InferenceServiceError("; ".join(errors))
-
-    def _provider_configs(self) -> list[LLMConfig]:
-        # Keep explicit local/experiment providers unchanged. Existing OpenRouter
-        # configuration becomes the fallback without requiring edits to .env.
-        if self.grok_config is not None and self.llm_config.provider == "openrouter":
-            return [self.grok_config, self.llm_config]
-        return [self.llm_config]
+        return await self._generate_with_config(request, self.llm_config)
 
     async def _generate_with_config(
         self, request: InferenceRequest, llm_config: LLMConfig,
@@ -217,33 +201,47 @@ class InferenceClient:
         last_error: Exception | None = None
         for attempt in range(1, DEFAULT_MAX_ATTEMPTS + 1):
             retry_reason = "unknown"
+            request_id = str(uuid4())
             try:
-                client = self._http_client
-                owns_client = client is None
-                if client is None:
-                    owned_client = httpx.AsyncClient(timeout=20.0)
-                    client = await owned_client.__aenter__()
-                try:
-                    with measure_stage(
-                        "model_http",
-                        {
-                            "model": llm_config.model,
-                            "agent": request.agent.id,
-                            "attempt": str(attempt),
-                        },
-                    ):
-                        async with self._semaphore:
-                            response = await client.post(
-                                url=llm_config.chat_url,
-                                headers=headers,
-                                json=payload,
-                            )
-                    response.raise_for_status()
-                    with measure_stage("model_response_parse"):
-                        data = response.json()
-                finally:
-                    if owns_client:
-                        await owned_client.__aexit__(None, None, None)
+                client = self.require_transport()
+                with measure_stage(
+                    "model_http",
+                    {
+                        "model": llm_config.model,
+                        "agent": request.agent.id,
+                        "attempt": str(attempt),
+                    },
+                ):
+                    with latency.scope(request_id=request_id, attempt=attempt,
+                                       model=llm_config.model, provider=llm_config.provider,
+                                       agent_id=request.agent.id, client_limit=self._limit,
+                                       prompt_characters=len(request.prompt)):
+                        async with latency.acquire(self._semaphore, "client_semaphore_wait"):
+                            with latency.span("provider_http") as timing:
+                                response = await client.post(
+                                    url=llm_config.chat_url, headers=headers, json=payload,
+                                )
+                                status_code = getattr(response, "status_code", None)
+                                timing["status_code"] = status_code
+                                timing["outcome"] = (
+                                    "http_error" if isinstance(status_code, int) and status_code >= 400
+                                    else "ok"
+                                )
+                response.raise_for_status()
+                with measure_stage("model_response_parse"):
+                    data = response.json()
+                    if isinstance(data, dict):
+                        usage = data.get("usage") or {}
+                        token_usage = {
+                            key: value for key, value in usage.items()
+                            if key in {"prompt_tokens", "completion_tokens", "total_tokens"}
+                            and isinstance(value, int)
+                        } if isinstance(usage, dict) else {}
+                        latency.emit("provider_usage", request_id=request_id, attempt=attempt,
+                                     model=llm_config.model, provider=llm_config.provider,
+                                     routed_provider=data.get("provider"),
+                                     response_model=data.get("model"),
+                                     **token_usage)
 
                 choice = data["choices"][0]
                 text = choice["message"].get("content")
@@ -305,7 +303,11 @@ class InferenceClient:
                         "delay_seconds": f"{delay:.3f}",
                     },
                 ):
-                    await asyncio.sleep(delay)
+                    with latency.span("retry_backoff", attempt=attempt,
+                                      request_id=request_id, model=llm_config.model,
+                                      provider=llm_config.provider, agent_id=request.agent.id,
+                                      reason=retry_reason, delay_ms=delay * 1000):
+                        await asyncio.sleep(delay)
 
         if isinstance(last_error, httpx.TimeoutException):
             raise InferenceServiceError(
@@ -335,28 +337,6 @@ class InferenceClient:
         max_attempts: int = 3,
         validate: Callable[[StructuredModel], None] | None = None,
     ) -> tuple[StructuredModel, InferenceResult]:
-        configs = self._provider_configs()
-        if self.settings.inference_mode == "fake" or len(configs) < 2:
-            return await self._generate_structured(request, response_model, max_attempts, validate)
-
-        errors = []
-        for llm_config in configs:
-            try:
-                return await self._generate_structured(
-                    request, response_model, max_attempts, validate, llm_config=llm_config,
-                )
-            except InferenceServiceError as exc:
-                errors.append(f"{llm_config.provider}: {exc}")
-        raise InferenceServiceError("; ".join(errors))
-
-    async def _generate_structured(
-        self,
-        request: InferenceRequest,
-        response_model: type[StructuredModel],
-        max_attempts: int,
-        validate: Callable[[StructuredModel], None] | None,
-        llm_config: LLMConfig | None = None,
-    ) -> tuple[StructuredModel, InferenceResult]:
         response_schema = response_model.model_json_schema()
         prompt = self._build_structured_prompt(request.prompt, response_schema)
         last_error = "unknown validation error"
@@ -381,24 +361,28 @@ class InferenceClient:
                             agent=request.agent,
                             response_schema=response_schema,
                         )
-                        if llm_config is None:
+                        with latency.scope(structured_attempt=attempt + 1):
                             result = await self.generate(structured_request)
-                        else:
-                            result = await self._generate_with_config(structured_request, llm_config)
                     except InferenceServiceError as exc:
                         if "empty assistant content" not in str(exc):
                             raise
+                        latency.emit("validation_retry", structured_attempt=attempt + 1,
+                                     reason="empty_content")
                         last_error = str(exc)
                         continue
 
                 try:
-                    with measure_stage("schema_validation", {"attempt": str(attempt + 1)}):
+                    with measure_stage("schema_validation", {"attempt": str(attempt + 1)}), latency.span(
+                        "schema_validation", structured_attempt=attempt + 1,
+                    ):
                         json_text = _extract_json_object(result.text)
                         structured_response = response_model.model_validate_json(json_text)
                         if validate is not None:
                             validate(structured_response)
                     return structured_response, result
                 except (ValueError, ValidationError) as exc:
+                    latency.emit("validation_retry", structured_attempt=attempt + 1,
+                                 reason="schema_or_domain_validation")
                     last_error = str(exc)
 
         raise InferenceServiceError(
@@ -426,6 +410,14 @@ class InferenceClient:
             if "clue" in properties:
                 return InferenceResult(
                     text=json.dumps({"clue": "fake clue"}),
+                    inference_mode="fake",
+                )
+
+            if "comment" in properties and "memory" in properties:
+                return InferenceResult(
+                    text=json.dumps({"comment": "Could you explain how your clue fits?",
+                                     "memory": {"summary": "", "observations": [],
+                                                "suspicions": [], "questions": []}}),
                     inference_mode="fake",
                 )
 

@@ -1,0 +1,22 @@
+{
+  "run_id": "02-discussion-cap4-rounds1-client4-delay1.0",
+  "events_path": "C:\\Users\\ltkie\\Documents\\Projects\\llmposter\\backend\\.latency-pilot\\20261109T034639Z_cf195a\\02-discussion-cap4-rounds1-client4-delay1.0\\events.jsonl",
+  "settings": {
+    "llm_config": {
+      "name": "Local latency stub",
+      "provider": "local",
+      "chat_url": "http://127.0.0.1:51574/v1/chat/completions",
+      "model": "latency-stub",
+      "api_key_env": null,
+      "min_max_tokens": 10000,
+      "structured_max_tokens": 10000,
+      "max_concurrent_requests": 4,
+      "notes": null
+    },
+    "inference_mode": "remote",
+    "agent_config_source": "static",
+    "clue_prompt_technique": "few_shot",
+    "discussion_duration_seconds": 15,
+    "discussion_max_concurrent_turns": 4
+  }
+}

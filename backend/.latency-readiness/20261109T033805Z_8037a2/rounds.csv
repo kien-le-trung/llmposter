@@ -1,0 +1,3 @@
+clue_phase_ms,created_at,discussion_ms,latency_ms,outcome,playing_order,round_id,run_id,started_at,voting_ms,warmup
+473.5497,2026-11-09T03:38:11.072139Z,4012.8168,4968.333199998597,complete,"agent_b,agent_d,agent_c,agent_a",6d41089b-f77b-4ea4-b30f-cfb9824ee476,00-discussion-cap4-rounds1-client4-delay0.2,2026-11-09T03:38:11.059146+00:00,232.97260000254028,False
+315.4902,2026-11-09T03:38:21.966530Z,4001.9535,4764.809599990258,complete,"agent_a,agent_d,agent_b,agent_c",d10d93a7-efb3-40e9-931a-0cb911ef35fc,01-discussion-cap1-rounds1-client4-delay0.2,2026-11-09T03:38:21.954199+00:00,240.7719999901019,False
