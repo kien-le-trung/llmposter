@@ -1,0 +1,1 @@
+Debate turn completed {"round_id": "7a412540-92fe-43fa-851c-c2bf615e352e", "agent_id": "agent_a", "generation_id": "493cfd71-fb0d-481b-8ad0-a29d0d830234", "snapshot_sequence": 0, "memory_version": 0, "processed_messages": 0, "queue_wait_ms": 0.22730001364834607, "inference_ms": 20568.838899984257, "outcome": "failure"}
