@@ -1,0 +1,32 @@
+[
+  {
+    "serial": "01-discussion-cap1-rounds1-client4-delay1.0",
+    "concurrent": "02-discussion-cap4-rounds1-client4-delay1.0",
+    "serial_batches": 5,
+    "concurrent_batches": 5,
+    "serial_ms": 4124.0916,
+    "concurrent_ms": 1111.6081,
+    "speedup": 3.7100229838195675,
+    "reduction_percent": 73.04598908520849
+  },
+  {
+    "serial": "06-discussion-cap1-rounds1-client4-delay0.2",
+    "concurrent": "04-discussion-cap4-rounds1-client4-delay0.2",
+    "serial_batches": 5,
+    "concurrent_batches": 5,
+    "serial_ms": 968.4412,
+    "concurrent_ms": 311.0745,
+    "speedup": 3.1132130727526683,
+    "reduction_percent": 67.87884489011826
+  },
+  {
+    "serial": "07-discussion-cap1-rounds4-client4-delay0.2",
+    "concurrent": "00-discussion-cap4-rounds4-client4-delay0.2",
+    "serial_batches": 5,
+    "concurrent_batches": 5,
+    "serial_ms": 2253.096075,
+    "concurrent_ms": 563.34135,
+    "speedup": 3.999521915087539,
+    "reduction_percent": 74.99701161212133
+  }
+]

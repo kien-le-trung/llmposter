@@ -51,6 +51,11 @@ def comparison_report(output, rounds, events):
     (output/"opening_measurements.json").write_text(json.dumps(rows, indent=2))
     (output/"comparisons.json").write_text(json.dumps(comparisons, indent=2))
     text = "# Concurrency latency pilot\n\nDescriptive results; incomplete openings are excluded from latency comparisons and retained in opening_measurements.json.\n\n"
+    for run in sorted({r["run_id"] for r in rows}):
+        samples = [r for r in rows if r["run_id"] == run]
+        complete = sum(r["all_agents_opening_ms"] is not None for r in samples)
+        text += f"- Opening completion for {run}: {complete}/{len(samples)} rounds.\n"
+    text += "\nSpeedups use the median of batch-average complete opening latencies; a batch is excluded if any round has an incomplete opening. Missing comparisons indicate insufficient complete batches, not zero latency.\n\n"
     for c in comparisons:
         text += f"- {c['serial']} versus {c['concurrent']}: {c['serial_ms']:.1f} ms versus {c['concurrent_ms']:.1f} ms; {c['speedup']:.2f}x speedup, {c['reduction_percent']:.1f}% reduction.\n"
     text += "\nBoth conditions use asyncio. This measures request overlap, not a runtime comparison. Fixed discussion timers mask total-game speedup. SQLite, provider routing, silence, retries, and five-batch sampling limit generalization.\n"

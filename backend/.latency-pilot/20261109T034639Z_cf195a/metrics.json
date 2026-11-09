@@ -1,0 +1,2112 @@
+{
+  "metrics": [
+    {
+      "run_id": "00-discussion-cap4-rounds4-client4-delay0.2",
+      "metric": "agent_vote",
+      "count": 80,
+      "small_sample": false,
+      "p50": 226.3669,
+      "p90": 238.2719,
+      "p95": 243.4876,
+      "max": 248.8404
+    },
+    {
+      "run_id": "00-discussion-cap4-rounds4-client4-delay0.2",
+      "metric": "agent_vote.outcome_ok",
+      "count": 80,
+      "small_sample": false,
+      "p50": 226.3669,
+      "p90": 238.2719,
+      "p95": 243.4876,
+      "max": 248.8404
+    },
+    {
+      "run_id": "00-discussion-cap4-rounds4-client4-delay0.2",
+      "metric": "capacity_wait",
+      "count": 560,
+      "small_sample": false,
+      "p50": 0.0162,
+      "p90": 79.7999,
+      "p95": 290.8075,
+      "max": 856.3673
+    },
+    {
+      "run_id": "00-discussion-cap4-rounds4-client4-delay0.2",
+      "metric": "capacity_wait.outcome_ok",
+      "count": 560,
+      "small_sample": false,
+      "p50": 0.0162,
+      "p90": 79.7999,
+      "p95": 290.8075,
+      "max": 856.3673
+    },
+    {
+      "run_id": "00-discussion-cap4-rounds4-client4-delay0.2",
+      "metric": "client_semaphore_wait",
+      "count": 720,
+      "small_sample": false,
+      "p50": 0.0198,
+      "p90": 0.0392,
+      "p95": 0.05,
+      "max": 0.1514
+    },
+    {
+      "run_id": "00-discussion-cap4-rounds4-client4-delay0.2",
+      "metric": "clue_graph",
+      "count": 80,
+      "small_sample": false,
+      "p50": 293.0202,
+      "p90": 323.1255,
+      "p95": 331.1579,
+      "max": 346.6353
+    },
+    {
+      "run_id": "00-discussion-cap4-rounds4-client4-delay0.2",
+      "metric": "clue_graph.outcome_ok",
+      "count": 80,
+      "small_sample": false,
+      "p50": 293.0202,
+      "p90": 323.1255,
+      "p95": 331.1579,
+      "max": 346.6353
+    },
+    {
+      "run_id": "00-discussion-cap4-rounds4-client4-delay0.2",
+      "metric": "clue_persistence",
+      "count": 50,
+      "small_sample": false,
+      "p50": 8.264,
+      "p90": 10.6251,
+      "p95": 12.0675,
+      "max": 21.1246
+    },
+    {
+      "run_id": "00-discussion-cap4-rounds4-client4-delay0.2",
+      "metric": "clue_phase_ms",
+      "count": 20,
+      "small_sample": false,
+      "p50": 608.3222,
+      "p90": 689.5379,
+      "p95": 699.0266,
+      "max": 712.8573
+    },
+    {
+      "run_id": "00-discussion-cap4-rounds4-client4-delay0.2",
+      "metric": "discussion_graph",
+      "count": 560,
+      "small_sample": false,
+      "p50": 232.0931,
+      "p90": 263.0665,
+      "p95": 274.7017,
+      "max": 424.9412
+    },
+    {
+      "run_id": "00-discussion-cap4-rounds4-client4-delay0.2",
+      "metric": "discussion_ms",
+      "count": 20,
+      "small_sample": false,
+      "p50": 15006.5863,
+      "p90": 15013.4395,
+      "p95": 15015.4594,
+      "max": 15019.6306
+    },
+    {
+      "run_id": "00-discussion-cap4-rounds4-client4-delay0.2",
+      "metric": "discussion_turn",
+      "count": 560,
+      "small_sample": false,
+      "p50": 244.6154,
+      "p90": 338.5708,
+      "p95": 575.7226,
+      "max": 1110.4696
+    },
+    {
+      "run_id": "00-discussion-cap4-rounds4-client4-delay0.2",
+      "metric": "discussion_turn.outcome_published",
+      "count": 560,
+      "small_sample": false,
+      "p50": 244.6154,
+      "p90": 338.5708,
+      "p95": 575.7226,
+      "max": 1110.4696
+    },
+    {
+      "run_id": "00-discussion-cap4-rounds4-client4-delay0.2",
+      "metric": "game_elapsed",
+      "count": 20,
+      "small_sample": false,
+      "p50": 16014.025999989826,
+      "p90": 16114.219399983995,
+      "p95": 16158.09939999599,
+      "max": 16158.292499982053
+    },
+    {
+      "run_id": "00-discussion-cap4-rounds4-client4-delay0.2",
+      "metric": "message_persistence",
+      "count": 560,
+      "small_sample": false,
+      "p50": 8.2706,
+      "p90": 11.9321,
+      "p95": 15.0329,
+      "max": 102.834
+    },
+    {
+      "run_id": "00-discussion-cap4-rounds4-client4-delay0.2",
+      "metric": "provider_http",
+      "count": 720,
+      "small_sample": false,
+      "p50": 216.5052,
+      "p90": 234.9594,
+      "p95": 242.9106,
+      "max": 306.6832
+    },
+    {
+      "run_id": "00-discussion-cap4-rounds4-client4-delay0.2",
+      "metric": "provider_http.outcome_ok",
+      "count": 720,
+      "small_sample": false,
+      "p50": 216.5052,
+      "p90": 234.9594,
+      "p95": 242.9106,
+      "max": 306.6832
+    },
+    {
+      "run_id": "00-discussion-cap4-rounds4-client4-delay0.2",
+      "metric": "publication",
+      "count": 560,
+      "small_sample": false,
+      "p50": 8.961,
+      "p90": 12.704,
+      "p95": 15.8053,
+      "max": 103.7931
+    },
+    {
+      "run_id": "00-discussion-cap4-rounds4-client4-delay0.2",
+      "metric": "scheduler_wait",
+      "count": 640,
+      "small_sample": false,
+      "p50": 2003.306,
+      "p90": 2014.5312,
+      "p95": 2017.3507,
+      "max": 2076.121
+    },
+    {
+      "run_id": "00-discussion-cap4-rounds4-client4-delay0.2",
+      "metric": "schema_validation",
+      "count": 720,
+      "small_sample": false,
+      "p50": 0.0817,
+      "p90": 0.1477,
+      "p95": 0.1764,
+      "max": 0.9887
+    },
+    {
+      "run_id": "00-discussion-cap4-rounds4-client4-delay0.2",
+      "metric": "vote_persistence",
+      "count": 20,
+      "small_sample": false,
+      "p50": 8.2921,
+      "p90": 12.1502,
+      "p95": 13.6824,
+      "max": 14.4181
+    },
+    {
+      "run_id": "00-discussion-cap4-rounds4-client4-delay0.2",
+      "metric": "voting_graph",
+      "count": 20,
+      "small_sample": false,
+      "p50": 238.1243,
+      "p90": 255.9874,
+      "p95": 259.7992,
+      "max": 266.5836
+    },
+    {
+      "run_id": "00-discussion-cap4-rounds4-client4-delay0.2",
+      "metric": "voting_ms",
+      "count": 20,
+      "small_sample": false,
+      "p50": 272.76270001311786,
+      "p90": 296.74699998577125,
+      "p95": 298.6830000008922,
+      "max": 330.13689998188056
+    },
+    {
+      "run_id": "01-discussion-cap1-rounds1-client4-delay1.0",
+      "metric": "agent_vote",
+      "count": 20,
+      "small_sample": false,
+      "p50": 1031.3405,
+      "p90": 1040.215,
+      "p95": 1041.6725,
+      "max": 1044.3633
+    },
+    {
+      "run_id": "01-discussion-cap1-rounds1-client4-delay1.0",
+      "metric": "agent_vote.outcome_ok",
+      "count": 20,
+      "small_sample": false,
+      "p50": 1031.3405,
+      "p90": 1040.215,
+      "p95": 1041.6725,
+      "max": 1044.3633
+    },
+    {
+      "run_id": "01-discussion-cap1-rounds1-client4-delay1.0",
+      "metric": "capacity_wait",
+      "count": 80,
+      "small_sample": false,
+      "p50": 1079.3059,
+      "p90": 2054.7698,
+      "p95": 3077.1076,
+      "max": 3119.3285
+    },
+    {
+      "run_id": "01-discussion-cap1-rounds1-client4-delay1.0",
+      "metric": "capacity_wait.outcome_cancelled",
+      "count": 5,
+      "small_sample": true,
+      "p50": 637.9726,
+      "p90": 696.8738,
+      "p95": 696.8738,
+      "max": 696.8738
+    },
+    {
+      "run_id": "01-discussion-cap1-rounds1-client4-delay1.0",
+      "metric": "capacity_wait.outcome_ok",
+      "count": 75,
+      "small_sample": false,
+      "p50": 1083.1771,
+      "p90": 2063.3523,
+      "p95": 3093.2699,
+      "max": 3119.3285
+    },
+    {
+      "run_id": "01-discussion-cap1-rounds1-client4-delay1.0",
+      "metric": "client_semaphore_wait",
+      "count": 115,
+      "small_sample": false,
+      "p50": 0.0226,
+      "p90": 0.0505,
+      "p95": 0.0631,
+      "max": 0.2562
+    },
+    {
+      "run_id": "01-discussion-cap1-rounds1-client4-delay1.0",
+      "metric": "clue_graph",
+      "count": 20,
+      "small_sample": false,
+      "p50": 1041.1173,
+      "p90": 1065.9556,
+      "p95": 1079.7588,
+      "max": 1082.1652
+    },
+    {
+      "run_id": "01-discussion-cap1-rounds1-client4-delay1.0",
+      "metric": "clue_graph.outcome_ok",
+      "count": 20,
+      "small_sample": false,
+      "p50": 1041.1173,
+      "p90": 1065.9556,
+      "p95": 1079.7588,
+      "max": 1082.1652
+    },
+    {
+      "run_id": "01-discussion-cap1-rounds1-client4-delay1.0",
+      "metric": "clue_persistence",
+      "count": 11,
+      "small_sample": true,
+      "p50": 11.5237,
+      "p90": 17.9944,
+      "p95": 20.3355,
+      "max": 20.3355
+    },
+    {
+      "run_id": "01-discussion-cap1-rounds1-client4-delay1.0",
+      "metric": "clue_phase_ms",
+      "count": 5,
+      "small_sample": true,
+      "p50": 2088.5208,
+      "p90": 2134.3117,
+      "p95": 2134.3117,
+      "max": 2134.3117
+    },
+    {
+      "run_id": "01-discussion-cap1-rounds1-client4-delay1.0",
+      "metric": "discussion_graph",
+      "count": 75,
+      "small_sample": false,
+      "p50": 1018.6333,
+      "p90": 1027.5952,
+      "p95": 1032.4076,
+      "max": 1062.2623
+    },
+    {
+      "run_id": "01-discussion-cap1-rounds1-client4-delay1.0",
+      "metric": "discussion_ms",
+      "count": 5,
+      "small_sample": true,
+      "p50": 15009.1181,
+      "p90": 15016.5549,
+      "p95": 15016.5549,
+      "max": 15016.5549
+    },
+    {
+      "run_id": "01-discussion-cap1-rounds1-client4-delay1.0",
+      "metric": "discussion_turn",
+      "count": 80,
+      "small_sample": false,
+      "p50": 2106.3472,
+      "p90": 3093.1505,
+      "p95": 4104.4711,
+      "max": 4153.2618
+    },
+    {
+      "run_id": "01-discussion-cap1-rounds1-client4-delay1.0",
+      "metric": "discussion_turn.outcome_expired",
+      "count": 10,
+      "small_sample": true,
+      "p50": 697.0331,
+      "p90": 1706.2408,
+      "p95": 1711.9291,
+      "max": 1711.9291
+    },
+    {
+      "run_id": "01-discussion-cap1-rounds1-client4-delay1.0",
+      "metric": "discussion_turn.outcome_published",
+      "count": 70,
+      "small_sample": false,
+      "p50": 2112.5399,
+      "p90": 3098.4428,
+      "p95": 4116.7022,
+      "max": 4153.2618
+    },
+    {
+      "run_id": "01-discussion-cap1-rounds1-client4-delay1.0",
+      "metric": "game_elapsed",
+      "count": 5,
+      "small_sample": true,
+      "p50": 18250.57399997604,
+      "p90": 18261.521100008395,
+      "p95": 18261.521100008395,
+      "max": 18261.521100008395
+    },
+    {
+      "run_id": "01-discussion-cap1-rounds1-client4-delay1.0",
+      "metric": "message_persistence",
+      "count": 70,
+      "small_sample": false,
+      "p50": 9.222,
+      "p90": 13.7118,
+      "p95": 17.7457,
+      "max": 30.7396
+    },
+    {
+      "run_id": "01-discussion-cap1-rounds1-client4-delay1.0",
+      "metric": "provider_http",
+      "count": 115,
+      "small_sample": false,
+      "p50": 1012.9592,
+      "p90": 1030.1753,
+      "p95": 1033.7623,
+      "max": 1055.1929
+    },
+    {
+      "run_id": "01-discussion-cap1-rounds1-client4-delay1.0",
+      "metric": "provider_http.outcome_cancelled",
+      "count": 5,
+      "small_sample": true,
+      "p50": 551.1665,
+      "p90": 633.9068,
+      "p95": 633.9068,
+      "max": 633.9068
+    },
+    {
+      "run_id": "01-discussion-cap1-rounds1-client4-delay1.0",
+      "metric": "provider_http.outcome_ok",
+      "count": 110,
+      "small_sample": false,
+      "p50": 1013.3688,
+      "p90": 1030.1753,
+      "p95": 1033.7623,
+      "max": 1055.1929
+    },
+    {
+      "run_id": "01-discussion-cap1-rounds1-client4-delay1.0",
+      "metric": "publication",
+      "count": 70,
+      "small_sample": false,
+      "p50": 10.0717,
+      "p90": 15.1145,
+      "p95": 19.4571,
+      "max": 32.5345
+    },
+    {
+      "run_id": "01-discussion-cap1-rounds1-client4-delay1.0",
+      "metric": "scheduler_wait",
+      "count": 90,
+      "small_sample": false,
+      "p50": 2004.6648,
+      "p90": 2014.7136,
+      "p95": 2015.515,
+      "max": 2024.0318
+    },
+    {
+      "run_id": "01-discussion-cap1-rounds1-client4-delay1.0",
+      "metric": "schema_validation",
+      "count": 110,
+      "small_sample": false,
+      "p50": 0.0873,
+      "p90": 0.1588,
+      "p95": 0.272,
+      "max": 0.6961
+    },
+    {
+      "run_id": "01-discussion-cap1-rounds1-client4-delay1.0",
+      "metric": "vote_persistence",
+      "count": 5,
+      "small_sample": true,
+      "p50": 13.1964,
+      "p90": 19.2148,
+      "p95": 19.2148,
+      "max": 19.2148
+    },
+    {
+      "run_id": "01-discussion-cap1-rounds1-client4-delay1.0",
+      "metric": "voting_graph",
+      "count": 5,
+      "small_sample": true,
+      "p50": 1035.0332,
+      "p90": 1050.3195,
+      "p95": 1050.3195,
+      "max": 1050.3195
+    },
+    {
+      "run_id": "01-discussion-cap1-rounds1-client4-delay1.0",
+      "metric": "voting_ms",
+      "count": 5,
+      "small_sample": true,
+      "p50": 1054.747700021835,
+      "p90": 1080.0916999869514,
+      "p95": 1080.0916999869514,
+      "max": 1080.0916999869514
+    },
+    {
+      "run_id": "02-discussion-cap4-rounds1-client4-delay1.0",
+      "metric": "agent_vote",
+      "count": 20,
+      "small_sample": false,
+      "p50": 1027.3166,
+      "p90": 1061.5821,
+      "p95": 1069.9952,
+      "max": 1072.2
+    },
+    {
+      "run_id": "02-discussion-cap4-rounds1-client4-delay1.0",
+      "metric": "agent_vote.outcome_ok",
+      "count": 20,
+      "small_sample": false,
+      "p50": 1027.3166,
+      "p90": 1061.5821,
+      "p95": 1069.9952,
+      "max": 1072.2
+    },
+    {
+      "run_id": "02-discussion-cap4-rounds1-client4-delay1.0",
+      "metric": "capacity_wait",
+      "count": 100,
+      "small_sample": false,
+      "p50": 0.0175,
+      "p90": 0.0388,
+      "p95": 0.0673,
+      "max": 0.7153
+    },
+    {
+      "run_id": "02-discussion-cap4-rounds1-client4-delay1.0",
+      "metric": "capacity_wait.outcome_ok",
+      "count": 100,
+      "small_sample": false,
+      "p50": 0.0175,
+      "p90": 0.0388,
+      "p95": 0.0673,
+      "max": 0.7153
+    },
+    {
+      "run_id": "02-discussion-cap4-rounds1-client4-delay1.0",
+      "metric": "client_semaphore_wait",
+      "count": 140,
+      "small_sample": false,
+      "p50": 0.0347,
+      "p90": 0.0467,
+      "p95": 0.0526,
+      "max": 0.3187
+    },
+    {
+      "run_id": "02-discussion-cap4-rounds1-client4-delay1.0",
+      "metric": "clue_graph",
+      "count": 20,
+      "small_sample": false,
+      "p50": 1047.6827,
+      "p90": 1084.32,
+      "p95": 1088.6311,
+      "max": 1094.832
+    },
+    {
+      "run_id": "02-discussion-cap4-rounds1-client4-delay1.0",
+      "metric": "clue_graph.outcome_ok",
+      "count": 20,
+      "small_sample": false,
+      "p50": 1047.6827,
+      "p90": 1084.32,
+      "p95": 1088.6311,
+      "max": 1094.832
+    },
+    {
+      "run_id": "02-discussion-cap4-rounds1-client4-delay1.0",
+      "metric": "clue_persistence",
+      "count": 11,
+      "small_sample": true,
+      "p50": 11.9432,
+      "p90": 20.4569,
+      "p95": 23.3178,
+      "max": 23.3178
+    },
+    {
+      "run_id": "02-discussion-cap4-rounds1-client4-delay1.0",
+      "metric": "clue_phase_ms",
+      "count": 5,
+      "small_sample": true,
+      "p50": 2117.0101,
+      "p90": 2185.5,
+      "p95": 2185.5,
+      "max": 2185.5
+    },
+    {
+      "run_id": "02-discussion-cap4-rounds1-client4-delay1.0",
+      "metric": "discussion_graph",
+      "count": 100,
+      "small_sample": false,
+      "p50": 1037.582,
+      "p90": 1090.4788,
+      "p95": 1118.5511,
+      "max": 1212.1917
+    },
+    {
+      "run_id": "02-discussion-cap4-rounds1-client4-delay1.0",
+      "metric": "discussion_ms",
+      "count": 5,
+      "small_sample": true,
+      "p50": 15010.0913,
+      "p90": 15014.8529,
+      "p95": 15014.8529,
+      "max": 15014.8529
+    },
+    {
+      "run_id": "02-discussion-cap4-rounds1-client4-delay1.0",
+      "metric": "discussion_turn",
+      "count": 100,
+      "small_sample": false,
+      "p50": 1050.669,
+      "p90": 1103.3472,
+      "p95": 1130.2555,
+      "max": 1227.6661
+    },
+    {
+      "run_id": "02-discussion-cap4-rounds1-client4-delay1.0",
+      "metric": "discussion_turn.outcome_published",
+      "count": 100,
+      "small_sample": false,
+      "p50": 1050.669,
+      "p90": 1103.3472,
+      "p95": 1130.2555,
+      "max": 1227.6661
+    },
+    {
+      "run_id": "02-discussion-cap4-rounds1-client4-delay1.0",
+      "metric": "game_elapsed",
+      "count": 5,
+      "small_sample": true,
+      "p50": 18348.98159999284,
+      "p90": 18438.879199995426,
+      "p95": 18438.879199995426,
+      "max": 18438.879199995426
+    },
+    {
+      "run_id": "02-discussion-cap4-rounds1-client4-delay1.0",
+      "metric": "message_persistence",
+      "count": 100,
+      "small_sample": false,
+      "p50": 10.3525,
+      "p90": 14.3297,
+      "p95": 17.0191,
+      "max": 42.0601
+    },
+    {
+      "run_id": "02-discussion-cap4-rounds1-client4-delay1.0",
+      "metric": "provider_http",
+      "count": 140,
+      "small_sample": false,
+      "p50": 1018.955,
+      "p90": 1036.6702,
+      "p95": 1057.7481,
+      "max": 1111.8761
+    },
+    {
+      "run_id": "02-discussion-cap4-rounds1-client4-delay1.0",
+      "metric": "provider_http.outcome_ok",
+      "count": 140,
+      "small_sample": false,
+      "p50": 1018.955,
+      "p90": 1036.6702,
+      "p95": 1057.7481,
+      "max": 1111.8761
+    },
+    {
+      "run_id": "02-discussion-cap4-rounds1-client4-delay1.0",
+      "metric": "publication",
+      "count": 100,
+      "small_sample": false,
+      "p50": 11.335,
+      "p90": 16.4793,
+      "p95": 18.4777,
+      "max": 42.9032
+    },
+    {
+      "run_id": "02-discussion-cap4-rounds1-client4-delay1.0",
+      "metric": "scheduler_wait",
+      "count": 120,
+      "small_sample": false,
+      "p50": 2002.1116,
+      "p90": 2010.8872,
+      "p95": 2015.5456,
+      "max": 2023.3864
+    },
+    {
+      "run_id": "02-discussion-cap4-rounds1-client4-delay1.0",
+      "metric": "schema_validation",
+      "count": 140,
+      "small_sample": false,
+      "p50": 0.1028,
+      "p90": 0.1509,
+      "p95": 0.1846,
+      "max": 0.4527
+    },
+    {
+      "run_id": "02-discussion-cap4-rounds1-client4-delay1.0",
+      "metric": "vote_persistence",
+      "count": 5,
+      "small_sample": true,
+      "p50": 16.8105,
+      "p90": 22.9506,
+      "p95": 22.9506,
+      "max": 22.9506
+    },
+    {
+      "run_id": "02-discussion-cap4-rounds1-client4-delay1.0",
+      "metric": "voting_graph",
+      "count": 5,
+      "small_sample": true,
+      "p50": 1033.0312,
+      "p90": 1082.4472,
+      "p95": 1082.4472,
+      "max": 1082.4472
+    },
+    {
+      "run_id": "02-discussion-cap4-rounds1-client4-delay1.0",
+      "metric": "voting_ms",
+      "count": 5,
+      "small_sample": true,
+      "p50": 1065.2378000086173,
+      "p90": 1116.003900009673,
+      "p95": 1116.003900009673,
+      "max": 1116.003900009673
+    },
+    {
+      "run_id": "03-discussion-cap4-rounds4-client4-delay1.0",
+      "metric": "agent_vote",
+      "count": 80,
+      "small_sample": false,
+      "p50": 1051.1992,
+      "p90": 1073.1406,
+      "p95": 1078.2379,
+      "max": 1088.8944
+    },
+    {
+      "run_id": "03-discussion-cap4-rounds4-client4-delay1.0",
+      "metric": "agent_vote.outcome_ok",
+      "count": 80,
+      "small_sample": false,
+      "p50": 1051.1992,
+      "p90": 1073.1406,
+      "p95": 1078.2379,
+      "max": 1088.8944
+    },
+    {
+      "run_id": "03-discussion-cap4-rounds4-client4-delay1.0",
+      "metric": "capacity_wait",
+      "count": 313,
+      "small_sample": false,
+      "p50": 1261.9625,
+      "p90": 1886.6276,
+      "p95": 2157.6729,
+      "max": 3447.6465
+    },
+    {
+      "run_id": "03-discussion-cap4-rounds4-client4-delay1.0",
+      "metric": "capacity_wait.outcome_cancelled",
+      "count": 11,
+      "small_sample": true,
+      "p50": 883.4178,
+      "p90": 1042.807,
+      "p95": 1100.912,
+      "max": 1100.912
+    },
+    {
+      "run_id": "03-discussion-cap4-rounds4-client4-delay1.0",
+      "metric": "capacity_wait.outcome_ok",
+      "count": 302,
+      "small_sample": false,
+      "p50": 1269.8717,
+      "p90": 1898.1484,
+      "p95": 2157.6729,
+      "max": 3447.6465
+    },
+    {
+      "run_id": "03-discussion-cap4-rounds4-client4-delay1.0",
+      "metric": "client_semaphore_wait",
+      "count": 462,
+      "small_sample": false,
+      "p50": 0.0358,
+      "p90": 0.0568,
+      "p95": 0.0885,
+      "max": 0.4948
+    },
+    {
+      "run_id": "03-discussion-cap4-rounds4-client4-delay1.0",
+      "metric": "clue_graph",
+      "count": 80,
+      "small_sample": false,
+      "p50": 1100.7512,
+      "p90": 1298.0187,
+      "p95": 1359.542,
+      "max": 1371.7108
+    },
+    {
+      "run_id": "03-discussion-cap4-rounds4-client4-delay1.0",
+      "metric": "clue_graph.outcome_ok",
+      "count": 80,
+      "small_sample": false,
+      "p50": 1100.7512,
+      "p90": 1298.0187,
+      "p95": 1359.542,
+      "max": 1371.7108
+    },
+    {
+      "run_id": "03-discussion-cap4-rounds4-client4-delay1.0",
+      "metric": "clue_persistence",
+      "count": 50,
+      "small_sample": false,
+      "p50": 10.6528,
+      "p90": 18.1074,
+      "p95": 34.0172,
+      "max": 45.5802
+    },
+    {
+      "run_id": "03-discussion-cap4-rounds4-client4-delay1.0",
+      "metric": "clue_phase_ms",
+      "count": 20,
+      "small_sample": false,
+      "p50": 2146.0753,
+      "p90": 2465.3449,
+      "p95": 2639.4141,
+      "max": 2641.2321
+    },
+    {
+      "run_id": "03-discussion-cap4-rounds4-client4-delay1.0",
+      "metric": "discussion_graph",
+      "count": 302,
+      "small_sample": false,
+      "p50": 1057.2268,
+      "p90": 1132.2527,
+      "p95": 1177.3203,
+      "max": 1278.7845
+    },
+    {
+      "run_id": "03-discussion-cap4-rounds4-client4-delay1.0",
+      "metric": "discussion_ms",
+      "count": 20,
+      "small_sample": false,
+      "p50": 15006.388,
+      "p90": 15015.4843,
+      "p95": 15016.9928,
+      "max": 15017.9806
+    },
+    {
+      "run_id": "03-discussion-cap4-rounds4-client4-delay1.0",
+      "metric": "discussion_turn",
+      "count": 313,
+      "small_sample": false,
+      "p50": 2325.0742,
+      "p90": 2929.3595,
+      "p95": 3267.5242,
+      "max": 4559.8663
+    },
+    {
+      "run_id": "03-discussion-cap4-rounds4-client4-delay1.0",
+      "metric": "discussion_turn.outcome_expired",
+      "count": 39,
+      "small_sample": false,
+      "p50": 1472.0743,
+      "p90": 2049.6268,
+      "p95": 2106.2613,
+      "max": 2198.8329
+    },
+    {
+      "run_id": "03-discussion-cap4-rounds4-client4-delay1.0",
+      "metric": "discussion_turn.outcome_published",
+      "count": 274,
+      "small_sample": false,
+      "p50": 2357.795,
+      "p90": 3018.7261,
+      "p95": 3308.2692,
+      "max": 4559.8663
+    },
+    {
+      "run_id": "03-discussion-cap4-rounds4-client4-delay1.0",
+      "metric": "game_elapsed",
+      "count": 20,
+      "small_sample": false,
+      "p50": 18444.273100001737,
+      "p90": 18777.24220001255,
+      "p95": 18919.209999992745,
+      "max": 18919.333899975754
+    },
+    {
+      "run_id": "03-discussion-cap4-rounds4-client4-delay1.0",
+      "metric": "message_persistence",
+      "count": 274,
+      "small_sample": false,
+      "p50": 11.3539,
+      "p90": 22.2169,
+      "p95": 34.8938,
+      "max": 157.3489
+    },
+    {
+      "run_id": "03-discussion-cap4-rounds4-client4-delay1.0",
+      "metric": "provider_http",
+      "count": 462,
+      "small_sample": false,
+      "p50": 1025.9465,
+      "p90": 1071.1335,
+      "p95": 1086.879,
+      "max": 1162.842
+    },
+    {
+      "run_id": "03-discussion-cap4-rounds4-client4-delay1.0",
+      "metric": "provider_http.outcome_cancelled",
+      "count": 28,
+      "small_sample": false,
+      "p50": 436.151,
+      "p90": 1017.0438,
+      "p95": 1022.2783,
+      "max": 1025.2499
+    },
+    {
+      "run_id": "03-discussion-cap4-rounds4-client4-delay1.0",
+      "metric": "provider_http.outcome_ok",
+      "count": 434,
+      "small_sample": false,
+      "p50": 1027.1206,
+      "p90": 1073.3044,
+      "p95": 1086.9616,
+      "max": 1162.842
+    },
+    {
+      "run_id": "03-discussion-cap4-rounds4-client4-delay1.0",
+      "metric": "publication",
+      "count": 274,
+      "small_sample": false,
+      "p50": 12.2475,
+      "p90": 26.4343,
+      "p95": 35.9652,
+      "max": 158.1046
+    },
+    {
+      "run_id": "03-discussion-cap4-rounds4-client4-delay1.0",
+      "metric": "scheduler_wait",
+      "count": 354,
+      "small_sample": false,
+      "p50": 2003.1461,
+      "p90": 2013.7275,
+      "p95": 2015.7258,
+      "max": 2024.7955
+    },
+    {
+      "run_id": "03-discussion-cap4-rounds4-client4-delay1.0",
+      "metric": "schema_validation",
+      "count": 434,
+      "small_sample": false,
+      "p50": 0.0902,
+      "p90": 0.1604,
+      "p95": 0.1873,
+      "max": 10.0528
+    },
+    {
+      "run_id": "03-discussion-cap4-rounds4-client4-delay1.0",
+      "metric": "vote_persistence",
+      "count": 20,
+      "small_sample": false,
+      "p50": 12.3172,
+      "p90": 15.5158,
+      "p95": 21.2951,
+      "max": 22.3316
+    },
+    {
+      "run_id": "03-discussion-cap4-rounds4-client4-delay1.0",
+      "metric": "voting_graph",
+      "count": 20,
+      "small_sample": false,
+      "p50": 1061.8462,
+      "p90": 1106.5934,
+      "p95": 1111.7305,
+      "max": 1115.8312
+    },
+    {
+      "run_id": "03-discussion-cap4-rounds4-client4-delay1.0",
+      "metric": "voting_ms",
+      "count": 20,
+      "small_sample": false,
+      "p50": 1098.3366000000387,
+      "p90": 1183.542499988107,
+      "p95": 1184.4038999988697,
+      "max": 1188.9044000126887
+    },
+    {
+      "run_id": "04-discussion-cap4-rounds1-client4-delay0.2",
+      "metric": "agent_vote",
+      "count": 20,
+      "small_sample": false,
+      "p50": 223.2795,
+      "p90": 248.9708,
+      "p95": 249.7682,
+      "max": 250.8211
+    },
+    {
+      "run_id": "04-discussion-cap4-rounds1-client4-delay0.2",
+      "metric": "agent_vote.outcome_ok",
+      "count": 20,
+      "small_sample": false,
+      "p50": 223.2795,
+      "p90": 248.9708,
+      "p95": 249.7682,
+      "max": 250.8211
+    },
+    {
+      "run_id": "04-discussion-cap4-rounds1-client4-delay0.2",
+      "metric": "capacity_wait",
+      "count": 140,
+      "small_sample": false,
+      "p50": 0.0181,
+      "p90": 0.0381,
+      "p95": 0.0862,
+      "max": 0.9715
+    },
+    {
+      "run_id": "04-discussion-cap4-rounds1-client4-delay0.2",
+      "metric": "capacity_wait.outcome_ok",
+      "count": 140,
+      "small_sample": false,
+      "p50": 0.0181,
+      "p90": 0.0381,
+      "p95": 0.0862,
+      "max": 0.9715
+    },
+    {
+      "run_id": "04-discussion-cap4-rounds1-client4-delay0.2",
+      "metric": "client_semaphore_wait",
+      "count": 180,
+      "small_sample": false,
+      "p50": 0.0316,
+      "p90": 0.0474,
+      "p95": 0.0579,
+      "max": 0.184
+    },
+    {
+      "run_id": "04-discussion-cap4-rounds1-client4-delay0.2",
+      "metric": "clue_graph",
+      "count": 20,
+      "small_sample": false,
+      "p50": 232.2877,
+      "p90": 280.7067,
+      "p95": 287.1012,
+      "max": 290.3416
+    },
+    {
+      "run_id": "04-discussion-cap4-rounds1-client4-delay0.2",
+      "metric": "clue_graph.outcome_ok",
+      "count": 20,
+      "small_sample": false,
+      "p50": 232.2877,
+      "p90": 280.7067,
+      "p95": 287.1012,
+      "max": 290.3416
+    },
+    {
+      "run_id": "04-discussion-cap4-rounds1-client4-delay0.2",
+      "metric": "clue_persistence",
+      "count": 10,
+      "small_sample": true,
+      "p50": 10.8949,
+      "p90": 13.3566,
+      "p95": 24.8301,
+      "max": 24.8301
+    },
+    {
+      "run_id": "04-discussion-cap4-rounds1-client4-delay0.2",
+      "metric": "clue_phase_ms",
+      "count": 5,
+      "small_sample": true,
+      "p50": 467.8892,
+      "p90": 551.332,
+      "p95": 551.332,
+      "max": 551.332
+    },
+    {
+      "run_id": "04-discussion-cap4-rounds1-client4-delay0.2",
+      "metric": "discussion_graph",
+      "count": 140,
+      "small_sample": false,
+      "p50": 235.0217,
+      "p90": 269.6357,
+      "p95": 281.256,
+      "max": 326.9837
+    },
+    {
+      "run_id": "04-discussion-cap4-rounds1-client4-delay0.2",
+      "metric": "discussion_ms",
+      "count": 5,
+      "small_sample": true,
+      "p50": 15009.787,
+      "p90": 15015.5232,
+      "p95": 15015.5232,
+      "max": 15015.5232
+    },
+    {
+      "run_id": "04-discussion-cap4-rounds1-client4-delay0.2",
+      "metric": "discussion_turn",
+      "count": 140,
+      "small_sample": false,
+      "p50": 246.9983,
+      "p90": 284.0984,
+      "p95": 302.3798,
+      "max": 337.4579
+    },
+    {
+      "run_id": "04-discussion-cap4-rounds1-client4-delay0.2",
+      "metric": "discussion_turn.outcome_published",
+      "count": 140,
+      "small_sample": false,
+      "p50": 246.9983,
+      "p90": 284.0984,
+      "p95": 302.3798,
+      "max": 337.4579
+    },
+    {
+      "run_id": "04-discussion-cap4-rounds1-client4-delay0.2",
+      "metric": "game_elapsed",
+      "count": 5,
+      "small_sample": true,
+      "p50": 15978.690200019628,
+      "p90": 15991.769799991744,
+      "p95": 15991.769799991744,
+      "max": 15991.769799991744
+    },
+    {
+      "run_id": "04-discussion-cap4-rounds1-client4-delay0.2",
+      "metric": "message_persistence",
+      "count": 140,
+      "small_sample": false,
+      "p50": 10.4808,
+      "p90": 15.1787,
+      "p95": 19.0426,
+      "max": 79.7098
+    },
+    {
+      "run_id": "04-discussion-cap4-rounds1-client4-delay0.2",
+      "metric": "provider_http",
+      "count": 180,
+      "small_sample": false,
+      "p50": 217.3425,
+      "p90": 232.9799,
+      "p95": 247.4427,
+      "max": 272.7096
+    },
+    {
+      "run_id": "04-discussion-cap4-rounds1-client4-delay0.2",
+      "metric": "provider_http.outcome_ok",
+      "count": 180,
+      "small_sample": false,
+      "p50": 217.3425,
+      "p90": 232.9799,
+      "p95": 247.4427,
+      "max": 272.7096
+    },
+    {
+      "run_id": "04-discussion-cap4-rounds1-client4-delay0.2",
+      "metric": "publication",
+      "count": 140,
+      "small_sample": false,
+      "p50": 11.3586,
+      "p90": 17.0115,
+      "p95": 22.4921,
+      "max": 80.2881
+    },
+    {
+      "run_id": "04-discussion-cap4-rounds1-client4-delay0.2",
+      "metric": "scheduler_wait",
+      "count": 160,
+      "small_sample": false,
+      "p50": 2003.4447,
+      "p90": 2011.1639,
+      "p95": 2014.5111,
+      "max": 2021.995
+    },
+    {
+      "run_id": "04-discussion-cap4-rounds1-client4-delay0.2",
+      "metric": "schema_validation",
+      "count": 180,
+      "small_sample": false,
+      "p50": 0.1034,
+      "p90": 0.1719,
+      "p95": 0.2569,
+      "max": 1.1529
+    },
+    {
+      "run_id": "04-discussion-cap4-rounds1-client4-delay0.2",
+      "metric": "vote_persistence",
+      "count": 5,
+      "small_sample": true,
+      "p50": 18.2905,
+      "p90": 42.7066,
+      "p95": 42.7066,
+      "max": 42.7066
+    },
+    {
+      "run_id": "04-discussion-cap4-rounds1-client4-delay0.2",
+      "metric": "voting_graph",
+      "count": 5,
+      "small_sample": true,
+      "p50": 229.7019,
+      "p90": 252.4722,
+      "p95": 252.4722,
+      "max": 252.4722
+    },
+    {
+      "run_id": "04-discussion-cap4-rounds1-client4-delay0.2",
+      "metric": "voting_ms",
+      "count": 5,
+      "small_sample": true,
+      "p50": 256.20190001791343,
+      "p90": 302.2456999751739,
+      "p95": 302.2456999751739,
+      "max": 302.2456999751739
+    },
+    {
+      "run_id": "05-discussion-cap1-rounds4-client4-delay1.0",
+      "metric": "agent_vote",
+      "count": 80,
+      "small_sample": false,
+      "p50": 1032.527,
+      "p90": 1053.1498,
+      "p95": 1058.672,
+      "max": 1079.4179
+    },
+    {
+      "run_id": "05-discussion-cap1-rounds4-client4-delay1.0",
+      "metric": "agent_vote.outcome_ok",
+      "count": 80,
+      "small_sample": false,
+      "p50": 1032.527,
+      "p90": 1053.1498,
+      "p95": 1058.672,
+      "max": 1079.4179
+    },
+    {
+      "run_id": "05-discussion-cap1-rounds4-client4-delay1.0",
+      "metric": "capacity_wait",
+      "count": 134,
+      "small_sample": false,
+      "p50": 6748.958,
+      "p90": 12385.4789,
+      "p95": 13631.8944,
+      "max": 15011.0186
+    },
+    {
+      "run_id": "05-discussion-cap1-rounds4-client4-delay1.0",
+      "metric": "capacity_wait.outcome_cancelled",
+      "count": 55,
+      "small_sample": false,
+      "p50": 6613.175,
+      "p90": 11772.0126,
+      "p95": 11963.8545,
+      "max": 15011.0186
+    },
+    {
+      "run_id": "05-discussion-cap1-rounds4-client4-delay1.0",
+      "metric": "capacity_wait.outcome_ok",
+      "count": 79,
+      "small_sample": false,
+      "p50": 7209.4258,
+      "p90": 13422.6638,
+      "p95": 14420.6751,
+      "max": 14689.4299
+    },
+    {
+      "run_id": "05-discussion-cap1-rounds4-client4-delay1.0",
+      "metric": "client_semaphore_wait",
+      "count": 239,
+      "small_sample": false,
+      "p50": 0.027,
+      "p90": 0.051,
+      "p95": 0.0765,
+      "max": 0.5314
+    },
+    {
+      "run_id": "05-discussion-cap1-rounds4-client4-delay1.0",
+      "metric": "clue_graph",
+      "count": 80,
+      "small_sample": false,
+      "p50": 1099.0196,
+      "p90": 1282.9474,
+      "p95": 1325.1987,
+      "max": 1367.2305
+    },
+    {
+      "run_id": "05-discussion-cap1-rounds4-client4-delay1.0",
+      "metric": "clue_graph.outcome_ok",
+      "count": 80,
+      "small_sample": false,
+      "p50": 1099.0196,
+      "p90": 1282.9474,
+      "p95": 1325.1987,
+      "max": 1367.2305
+    },
+    {
+      "run_id": "05-discussion-cap1-rounds4-client4-delay1.0",
+      "metric": "clue_persistence",
+      "count": 54,
+      "small_sample": false,
+      "p50": 8.9215,
+      "p90": 19.3337,
+      "p95": 36.8671,
+      "max": 57.9193
+    },
+    {
+      "run_id": "05-discussion-cap1-rounds4-client4-delay1.0",
+      "metric": "clue_phase_ms",
+      "count": 20,
+      "small_sample": false,
+      "p50": 2181.0372,
+      "p90": 2438.2858,
+      "p95": 2692.6492,
+      "max": 2720.2074
+    },
+    {
+      "run_id": "05-discussion-cap1-rounds4-client4-delay1.0",
+      "metric": "discussion_graph",
+      "count": 79,
+      "small_sample": false,
+      "p50": 1020.6978,
+      "p90": 1044.1492,
+      "p95": 1069.2948,
+      "max": 1152.4796
+    },
+    {
+      "run_id": "05-discussion-cap1-rounds4-client4-delay1.0",
+      "metric": "discussion_ms",
+      "count": 20,
+      "small_sample": false,
+      "p50": 15005.8817,
+      "p90": 15014.9602,
+      "p95": 15015.4594,
+      "max": 15025.3217
+    },
+    {
+      "run_id": "05-discussion-cap1-rounds4-client4-delay1.0",
+      "metric": "discussion_turn",
+      "count": 134,
+      "small_sample": false,
+      "p50": 7276.1002,
+      "p90": 13422.535,
+      "p95": 14689.4101,
+      "max": 15016.1985
+    },
+    {
+      "run_id": "05-discussion-cap1-rounds4-client4-delay1.0",
+      "metric": "discussion_turn.outcome_expired",
+      "count": 60,
+      "small_sample": false,
+      "p50": 6780.2412,
+      "p90": 11966.5508,
+      "p95": 15012.7541,
+      "max": 15016.1985
+    },
+    {
+      "run_id": "05-discussion-cap1-rounds4-client4-delay1.0",
+      "metric": "discussion_turn.outcome_published",
+      "count": 74,
+      "small_sample": false,
+      "p50": 7404.1171,
+      "p90": 13422.535,
+      "p95": 14421.0765,
+      "max": 14689.4101
+    },
+    {
+      "run_id": "05-discussion-cap1-rounds4-client4-delay1.0",
+      "metric": "game_elapsed",
+      "count": 20,
+      "small_sample": false,
+      "p50": 18354.56300000078,
+      "p90": 18634.73079999676,
+      "p95": 18838.929499994265,
+      "max": 19094.43490000558
+    },
+    {
+      "run_id": "05-discussion-cap1-rounds4-client4-delay1.0",
+      "metric": "message_persistence",
+      "count": 74,
+      "small_sample": false,
+      "p50": 9.9503,
+      "p90": 18.9208,
+      "p95": 31.6665,
+      "max": 62.3791
+    },
+    {
+      "run_id": "05-discussion-cap1-rounds4-client4-delay1.0",
+      "metric": "provider_http",
+      "count": 239,
+      "small_sample": false,
+      "p50": 1028.023,
+      "p90": 1053.1195,
+      "p95": 1072.8356,
+      "max": 1159.5759
+    },
+    {
+      "run_id": "05-discussion-cap1-rounds4-client4-delay1.0",
+      "metric": "provider_http.outcome_cancelled",
+      "count": 5,
+      "small_sample": true,
+      "p50": 560.6063,
+      "p90": 661.5243,
+      "p95": 661.5243,
+      "max": 661.5243
+    },
+    {
+      "run_id": "05-discussion-cap1-rounds4-client4-delay1.0",
+      "metric": "provider_http.outcome_ok",
+      "count": 234,
+      "small_sample": false,
+      "p50": 1028.4325,
+      "p90": 1053.1195,
+      "p95": 1072.8356,
+      "max": 1159.5759
+    },
+    {
+      "run_id": "05-discussion-cap1-rounds4-client4-delay1.0",
+      "metric": "publication",
+      "count": 74,
+      "small_sample": false,
+      "p50": 10.7655,
+      "p90": 19.7231,
+      "p95": 36.247,
+      "max": 65.2511
+    },
+    {
+      "run_id": "05-discussion-cap1-rounds4-client4-delay1.0",
+      "metric": "scheduler_wait",
+      "count": 154,
+      "small_sample": false,
+      "p50": 0.3789,
+      "p90": 2028.225,
+      "p95": 7346.1823,
+      "max": 10015.0915
+    },
+    {
+      "run_id": "05-discussion-cap1-rounds4-client4-delay1.0",
+      "metric": "schema_validation",
+      "count": 234,
+      "small_sample": false,
+      "p50": 0.0548,
+      "p90": 0.133,
+      "p95": 0.1599,
+      "max": 0.5805
+    },
+    {
+      "run_id": "05-discussion-cap1-rounds4-client4-delay1.0",
+      "metric": "vote_persistence",
+      "count": 20,
+      "small_sample": false,
+      "p50": 11.6602,
+      "p90": 17.1964,
+      "p95": 19.6771,
+      "max": 23.7501
+    },
+    {
+      "run_id": "05-discussion-cap1-rounds4-client4-delay1.0",
+      "metric": "voting_graph",
+      "count": 20,
+      "small_sample": false,
+      "p50": 1042.5117,
+      "p90": 1060.7846,
+      "p95": 1063.1767,
+      "max": 1082.051
+    },
+    {
+      "run_id": "05-discussion-cap1-rounds4-client4-delay1.0",
+      "metric": "voting_ms",
+      "count": 20,
+      "small_sample": false,
+      "p50": 1071.9611000095028,
+      "p90": 1092.1840000082739,
+      "p95": 1097.1920999872964,
+      "max": 1116.0987000039313
+    },
+    {
+      "run_id": "06-discussion-cap1-rounds1-client4-delay0.2",
+      "metric": "agent_vote",
+      "count": 20,
+      "small_sample": false,
+      "p50": 240.7037,
+      "p90": 270.2672,
+      "p95": 280.5515,
+      "max": 281.8407
+    },
+    {
+      "run_id": "06-discussion-cap1-rounds1-client4-delay0.2",
+      "metric": "agent_vote.outcome_ok",
+      "count": 20,
+      "small_sample": false,
+      "p50": 240.7037,
+      "p90": 270.2672,
+      "p95": 280.5515,
+      "max": 281.8407
+    },
+    {
+      "run_id": "06-discussion-cap1-rounds1-client4-delay0.2",
+      "metric": "capacity_wait",
+      "count": 140,
+      "small_sample": false,
+      "p50": 0.0227,
+      "p90": 240.6332,
+      "p95": 480.6597,
+      "max": 798.8303
+    },
+    {
+      "run_id": "06-discussion-cap1-rounds1-client4-delay0.2",
+      "metric": "capacity_wait.outcome_ok",
+      "count": 140,
+      "small_sample": false,
+      "p50": 0.0227,
+      "p90": 240.6332,
+      "p95": 480.6597,
+      "max": 798.8303
+    },
+    {
+      "run_id": "06-discussion-cap1-rounds1-client4-delay0.2",
+      "metric": "client_semaphore_wait",
+      "count": 180,
+      "small_sample": false,
+      "p50": 0.0378,
+      "p90": 0.0738,
+      "p95": 0.1535,
+      "max": 6.7775
+    },
+    {
+      "run_id": "06-discussion-cap1-rounds1-client4-delay0.2",
+      "metric": "clue_graph",
+      "count": 20,
+      "small_sample": false,
+      "p50": 250.9622,
+      "p90": 301.7014,
+      "p95": 322.2532,
+      "max": 324.0484
+    },
+    {
+      "run_id": "06-discussion-cap1-rounds1-client4-delay0.2",
+      "metric": "clue_graph.outcome_ok",
+      "count": 20,
+      "small_sample": false,
+      "p50": 250.9622,
+      "p90": 301.7014,
+      "p95": 322.2532,
+      "max": 324.0484
+    },
+    {
+      "run_id": "06-discussion-cap1-rounds1-client4-delay0.2",
+      "metric": "clue_persistence",
+      "count": 10,
+      "small_sample": true,
+      "p50": 11.9545,
+      "p90": 59.9333,
+      "p95": 78.6284,
+      "max": 78.6284
+    },
+    {
+      "run_id": "06-discussion-cap1-rounds1-client4-delay0.2",
+      "metric": "clue_phase_ms",
+      "count": 5,
+      "small_sample": true,
+      "p50": 517.5649,
+      "p90": 606.1273,
+      "p95": 606.1273,
+      "max": 606.1273
+    },
+    {
+      "run_id": "06-discussion-cap1-rounds1-client4-delay0.2",
+      "metric": "discussion_graph",
+      "count": 140,
+      "small_sample": false,
+      "p50": 222.7312,
+      "p90": 242.0669,
+      "p95": 256.4767,
+      "max": 356.0916
+    },
+    {
+      "run_id": "06-discussion-cap1-rounds1-client4-delay0.2",
+      "metric": "discussion_ms",
+      "count": 5,
+      "small_sample": true,
+      "p50": 15014.3695,
+      "p90": 15030.2352,
+      "p95": 15030.2352,
+      "max": 15030.2352
+    },
+    {
+      "run_id": "06-discussion-cap1-rounds1-client4-delay0.2",
+      "metric": "discussion_turn",
+      "count": 140,
+      "small_sample": false,
+      "p50": 242.8301,
+      "p90": 504.1064,
+      "p95": 723.0763,
+      "max": 1044.1905
+    },
+    {
+      "run_id": "06-discussion-cap1-rounds1-client4-delay0.2",
+      "metric": "discussion_turn.outcome_published",
+      "count": 140,
+      "small_sample": false,
+      "p50": 242.8301,
+      "p90": 504.1064,
+      "p95": 723.0763,
+      "max": 1044.1905
+    },
+    {
+      "run_id": "06-discussion-cap1-rounds1-client4-delay0.2",
+      "metric": "game_elapsed",
+      "count": 5,
+      "small_sample": true,
+      "p50": 15879.49939997634,
+      "p90": 16168.485100002727,
+      "p95": 16168.485100002727,
+      "max": 16168.485100002727
+    },
+    {
+      "run_id": "06-discussion-cap1-rounds1-client4-delay0.2",
+      "metric": "message_persistence",
+      "count": 140,
+      "small_sample": false,
+      "p50": 11.653,
+      "p90": 29.3574,
+      "p95": 43.3988,
+      "max": 196.3755
+    },
+    {
+      "run_id": "06-discussion-cap1-rounds1-client4-delay0.2",
+      "metric": "provider_http",
+      "count": 180,
+      "small_sample": false,
+      "p50": 215.132,
+      "p90": 235.5091,
+      "p95": 245.9151,
+      "max": 292.0007
+    },
+    {
+      "run_id": "06-discussion-cap1-rounds1-client4-delay0.2",
+      "metric": "provider_http.outcome_ok",
+      "count": 180,
+      "small_sample": false,
+      "p50": 215.132,
+      "p90": 235.5091,
+      "p95": 245.9151,
+      "max": 292.0007
+    },
+    {
+      "run_id": "06-discussion-cap1-rounds1-client4-delay0.2",
+      "metric": "publication",
+      "count": 140,
+      "small_sample": false,
+      "p50": 12.5607,
+      "p90": 30.478,
+      "p95": 44.6939,
+      "max": 197.1133
+    },
+    {
+      "run_id": "06-discussion-cap1-rounds1-client4-delay0.2",
+      "metric": "scheduler_wait",
+      "count": 160,
+      "small_sample": false,
+      "p50": 2007.1203,
+      "p90": 2015.7616,
+      "p95": 2033.1268,
+      "max": 2190.001
+    },
+    {
+      "run_id": "06-discussion-cap1-rounds1-client4-delay0.2",
+      "metric": "schema_validation",
+      "count": 180,
+      "small_sample": false,
+      "p50": 0.1183,
+      "p90": 0.1667,
+      "p95": 0.1908,
+      "max": 0.3832
+    },
+    {
+      "run_id": "06-discussion-cap1-rounds1-client4-delay0.2",
+      "metric": "vote_persistence",
+      "count": 5,
+      "small_sample": true,
+      "p50": 14.3037,
+      "p90": 69.0848,
+      "p95": 69.0848,
+      "max": 69.0848
+    },
+    {
+      "run_id": "06-discussion-cap1-rounds1-client4-delay0.2",
+      "metric": "voting_graph",
+      "count": 5,
+      "small_sample": true,
+      "p50": 256.5225,
+      "p90": 292.2261,
+      "p95": 292.2261,
+      "max": 292.2261
+    },
+    {
+      "run_id": "06-discussion-cap1-rounds1-client4-delay0.2",
+      "metric": "voting_ms",
+      "count": 5,
+      "small_sample": true,
+      "p50": 323.27220001025125,
+      "p90": 367.5939999811817,
+      "p95": 367.5939999811817,
+      "max": 367.5939999811817
+    },
+    {
+      "run_id": "07-discussion-cap1-rounds4-client4-delay0.2",
+      "metric": "agent_vote",
+      "count": 80,
+      "small_sample": false,
+      "p50": 227.0082,
+      "p90": 240.1058,
+      "p95": 240.429,
+      "max": 263.1461
+    },
+    {
+      "run_id": "07-discussion-cap1-rounds4-client4-delay0.2",
+      "metric": "agent_vote.outcome_ok",
+      "count": 80,
+      "small_sample": false,
+      "p50": 227.0082,
+      "p90": 240.1058,
+      "p95": 240.429,
+      "max": 263.1461
+    },
+    {
+      "run_id": "07-discussion-cap1-rounds4-client4-delay0.2",
+      "metric": "capacity_wait",
+      "count": 360,
+      "small_sample": false,
+      "p50": 1350.2147,
+      "p90": 1814.0687,
+      "p95": 2560.8921,
+      "max": 3390.6558
+    },
+    {
+      "run_id": "07-discussion-cap1-rounds4-client4-delay0.2",
+      "metric": "capacity_wait.outcome_cancelled",
+      "count": 25,
+      "small_sample": false,
+      "p50": 658.31,
+      "p90": 1223.574,
+      "p95": 1272.6901,
+      "max": 1510.3162
+    },
+    {
+      "run_id": "07-discussion-cap1-rounds4-client4-delay0.2",
+      "metric": "capacity_wait.outcome_ok",
+      "count": 335,
+      "small_sample": false,
+      "p50": 1383.428,
+      "p90": 1869.6096,
+      "p95": 2674.7815,
+      "max": 3390.6558
+    },
+    {
+      "run_id": "07-discussion-cap1-rounds4-client4-delay0.2",
+      "metric": "client_semaphore_wait",
+      "count": 494,
+      "small_sample": false,
+      "p50": 0.0169,
+      "p90": 0.0464,
+      "p95": 0.0574,
+      "max": 0.3979
+    },
+    {
+      "run_id": "07-discussion-cap1-rounds4-client4-delay0.2",
+      "metric": "clue_graph",
+      "count": 80,
+      "small_sample": false,
+      "p50": 276.7003,
+      "p90": 301.3518,
+      "p95": 315.9035,
+      "max": 342.9133
+    },
+    {
+      "run_id": "07-discussion-cap1-rounds4-client4-delay0.2",
+      "metric": "clue_graph.outcome_ok",
+      "count": 80,
+      "small_sample": false,
+      "p50": 276.7003,
+      "p90": 301.3518,
+      "p95": 315.9035,
+      "max": 342.9133
+    },
+    {
+      "run_id": "07-discussion-cap1-rounds4-client4-delay0.2",
+      "metric": "clue_persistence",
+      "count": 43,
+      "small_sample": false,
+      "p50": 7.4254,
+      "p90": 12.1133,
+      "p95": 15.6653,
+      "max": 43.0059
+    },
+    {
+      "run_id": "07-discussion-cap1-rounds4-client4-delay0.2",
+      "metric": "clue_phase_ms",
+      "count": 20,
+      "small_sample": false,
+      "p50": 551.8248,
+      "p90": 644.8512,
+      "p95": 655.2488,
+      "max": 672.8124
+    },
+    {
+      "run_id": "07-discussion-cap1-rounds4-client4-delay0.2",
+      "metric": "discussion_graph",
+      "count": 334,
+      "small_sample": false,
+      "p50": 219.5433,
+      "p90": 226.6882,
+      "p95": 229.7585,
+      "max": 277.0938
+    },
+    {
+      "run_id": "07-discussion-cap1-rounds4-client4-delay0.2",
+      "metric": "discussion_ms",
+      "count": 20,
+      "small_sample": false,
+      "p50": 15004.9689,
+      "p90": 15011.9465,
+      "p95": 15012.1722,
+      "max": 15014.2414
+    },
+    {
+      "run_id": "07-discussion-cap1-rounds4-client4-delay0.2",
+      "metric": "discussion_turn",
+      "count": 360,
+      "small_sample": false,
+      "p50": 1581.0663,
+      "p90": 2067.1139,
+      "p95": 2799.9561,
+      "max": 3626.1603
+    },
+    {
+      "run_id": "07-discussion-cap1-rounds4-client4-delay0.2",
+      "metric": "discussion_turn.outcome_expired",
+      "count": 37,
+      "small_sample": false,
+      "p50": 904.7334,
+      "p90": 1510.5401,
+      "p95": 1662.3766,
+      "max": 1761.4278
+    },
+    {
+      "run_id": "07-discussion-cap1-rounds4-client4-delay0.2",
+      "metric": "discussion_turn.outcome_published",
+      "count": 323,
+      "small_sample": false,
+      "p50": 1614.7491,
+      "p90": 2199.963,
+      "p95": 2893.7973,
+      "max": 3626.1603
+    },
+    {
+      "run_id": "07-discussion-cap1-rounds4-client4-delay0.2",
+      "metric": "game_elapsed",
+      "count": 20,
+      "small_sample": false,
+      "p50": 15995.489900000393,
+      "p90": 16079.049199994188,
+      "p95": 16178.732500004116,
+      "max": 16180.001300002914
+    },
+    {
+      "run_id": "07-discussion-cap1-rounds4-client4-delay0.2",
+      "metric": "message_persistence",
+      "count": 323,
+      "small_sample": false,
+      "p50": 9.1275,
+      "p90": 18.045,
+      "p95": 22.5749,
+      "max": 135.5456
+    },
+    {
+      "run_id": "07-discussion-cap1-rounds4-client4-delay0.2",
+      "metric": "provider_http",
+      "count": 494,
+      "small_sample": false,
+      "p50": 215.4754,
+      "p90": 233.2329,
+      "p95": 247.3856,
+      "max": 265.7059
+    },
+    {
+      "run_id": "07-discussion-cap1-rounds4-client4-delay0.2",
+      "metric": "provider_http.outcome_cancelled",
+      "count": 10,
+      "small_sample": true,
+      "p50": 34.3021,
+      "p90": 185.496,
+      "p95": 217.5659,
+      "max": 217.5659
+    },
+    {
+      "run_id": "07-discussion-cap1-rounds4-client4-delay0.2",
+      "metric": "provider_http.outcome_ok",
+      "count": 484,
+      "small_sample": false,
+      "p50": 215.6124,
+      "p90": 234.5767,
+      "p95": 247.3856,
+      "max": 265.7059
+    },
+    {
+      "run_id": "07-discussion-cap1-rounds4-client4-delay0.2",
+      "metric": "publication",
+      "count": 323,
+      "small_sample": false,
+      "p50": 9.8145,
+      "p90": 18.8911,
+      "p95": 23.1789,
+      "max": 135.9809
+    },
+    {
+      "run_id": "07-discussion-cap1-rounds4-client4-delay0.2",
+      "metric": "scheduler_wait",
+      "count": 403,
+      "small_sample": false,
+      "p50": 2005.0014,
+      "p90": 2124.9091,
+      "p95": 2455.7656,
+      "max": 3602.0505
+    },
+    {
+      "run_id": "07-discussion-cap1-rounds4-client4-delay0.2",
+      "metric": "schema_validation",
+      "count": 484,
+      "small_sample": false,
+      "p50": 0.0769,
+      "p90": 0.1493,
+      "p95": 0.1927,
+      "max": 0.5367
+    },
+    {
+      "run_id": "07-discussion-cap1-rounds4-client4-delay0.2",
+      "metric": "vote_persistence",
+      "count": 20,
+      "small_sample": false,
+      "p50": 10.2015,
+      "p90": 18.1428,
+      "p95": 19.7594,
+      "max": 40.5218
+    },
+    {
+      "run_id": "07-discussion-cap1-rounds4-client4-delay0.2",
+      "metric": "voting_graph",
+      "count": 20,
+      "small_sample": false,
+      "p50": 234.9625,
+      "p90": 265.565,
+      "p95": 277.6768,
+      "max": 289.2412
+    },
+    {
+      "run_id": "07-discussion-cap1-rounds4-client4-delay0.2",
+      "metric": "voting_ms",
+      "count": 20,
+      "small_sample": false,
+      "p50": 262.6958999899216,
+      "p90": 316.8319000105839,
+      "p95": 316.9752000248991,
+      "max": 317.4064999911934
+    }
+  ],
+  "rates": [
+    {
+      "run_id": "00-discussion-cap4-rounds4-client4-delay0.2",
+      "discussion_window_seconds": 79.7290628,
+      "published_per_second": 7.023787566708988,
+      "completed_turns_per_second": 7.023787566708988,
+      "outcomes": {
+        "published": 560
+      },
+      "outcome_rates": {
+        "published": 1.0
+      }
+    },
+    {
+      "run_id": "01-discussion-cap1-rounds1-client4-delay1.0",
+      "discussion_window_seconds": 87.0877304,
+      "published_per_second": 0.8037871658669382,
+      "completed_turns_per_second": 0.8037871658669382,
+      "outcomes": {
+        "published": 70,
+        "expired": 10
+      },
+      "outcome_rates": {
+        "published": 0.875,
+        "expired": 0.125
+      }
+    },
+    {
+      "run_id": "02-discussion-cap4-rounds1-client4-delay1.0",
+      "discussion_window_seconds": 88.4758268,
+      "published_per_second": 1.130252223876364,
+      "completed_turns_per_second": 1.130252223876364,
+      "outcomes": {
+        "published": 100
+      },
+      "outcome_rates": {
+        "published": 1.0
+      }
+    },
+    {
+      "run_id": "03-discussion-cap4-rounds4-client4-delay1.0",
+      "discussion_window_seconds": 91.156514,
+      "published_per_second": 3.005819200150633,
+      "completed_turns_per_second": 3.005819200150633,
+      "outcomes": {
+        "published": 274,
+        "expired": 39
+      },
+      "outcome_rates": {
+        "published": 0.8753993610223643,
+        "expired": 0.12460063897763578
+      }
+    },
+    {
+      "run_id": "04-discussion-cap4-rounds1-client4-delay0.2",
+      "discussion_window_seconds": 78.4413089,
+      "published_per_second": 1.784773889717692,
+      "completed_turns_per_second": 1.784773889717692,
+      "outcomes": {
+        "published": 140
+      },
+      "outcome_rates": {
+        "published": 1.0
+      }
+    },
+    {
+      "run_id": "05-discussion-cap1-rounds4-client4-delay1.0",
+      "discussion_window_seconds": 90.8207162,
+      "published_per_second": 0.8147920771406556,
+      "completed_turns_per_second": 0.8147920771406556,
+      "outcomes": {
+        "published": 74,
+        "expired": 60
+      },
+      "outcome_rates": {
+        "published": 0.5522388059701493,
+        "expired": 0.44776119402985076
+      }
+    },
+    {
+      "run_id": "06-discussion-cap1-rounds1-client4-delay0.2",
+      "discussion_window_seconds": 78.6539362,
+      "published_per_second": 1.779949062485699,
+      "completed_turns_per_second": 1.779949062485699,
+      "outcomes": {
+        "published": 140
+      },
+      "outcome_rates": {
+        "published": 1.0
+      }
+    },
+    {
+      "run_id": "07-discussion-cap1-rounds4-client4-delay0.2",
+      "discussion_window_seconds": 79.3351131,
+      "published_per_second": 4.071337234912192,
+      "completed_turns_per_second": 4.071337234912192,
+      "outcomes": {
+        "published": 323,
+        "expired": 37
+      },
+      "outcome_rates": {
+        "published": 0.8972222222222223,
+        "expired": 0.10277777777777777
+      }
+    }
+  ],
+  "measured_games": 100,
+  "failed_games": 0,
+  "notes": [
+    "Percentiles use nearest rank; fewer than 20 samples are descriptive only.",
+    "HTTP duration includes network and provider-side queueing, not just model compute.",
+    "Scheduler wait includes intentional debounce, cooldown and silence timers.",
+    "Cancelled/expired durations end at cancellation; use outcome-specific rows for completed latency.",
+    "Game duration includes the fixed discussion timer; compare phases and throughput."
+  ],
+  "games_missing_lifecycle_events": [],
+  "comparisons": [
+    {
+      "serial": "01-discussion-cap1-rounds1-client4-delay1.0",
+      "concurrent": "02-discussion-cap4-rounds1-client4-delay1.0",
+      "serial_batches": 5,
+      "concurrent_batches": 5,
+      "serial_ms": 4124.0916,
+      "concurrent_ms": 1111.6081,
+      "speedup": 3.7100229838195675,
+      "reduction_percent": 73.04598908520849
+    },
+    {
+      "serial": "06-discussion-cap1-rounds1-client4-delay0.2",
+      "concurrent": "04-discussion-cap4-rounds1-client4-delay0.2",
+      "serial_batches": 5,
+      "concurrent_batches": 5,
+      "serial_ms": 968.4412,
+      "concurrent_ms": 311.0745,
+      "speedup": 3.1132130727526683,
+      "reduction_percent": 67.87884489011826
+    },
+    {
+      "serial": "07-discussion-cap1-rounds4-client4-delay0.2",
+      "concurrent": "00-discussion-cap4-rounds4-client4-delay0.2",
+      "serial_batches": 5,
+      "concurrent_batches": 5,
+      "serial_ms": 2253.096075,
+      "concurrent_ms": 563.34135,
+      "speedup": 3.999521915087539,
+      "reduction_percent": 74.99701161212133
+    }
+  ]
+}

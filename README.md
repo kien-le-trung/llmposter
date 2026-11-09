@@ -266,8 +266,29 @@ include a `discussion` object. `POST /rounds/{id}/discussion` accepts
 server. The former action/player-ID parameters and raised-hand/floor fields
 have been removed. Existing discussion tables need no migration for free flow.
 
-Before using this feature with an existing database, run the existing initializer
-to create the additive `discussion_messages` table:
+Before starting the new backend against production, run Alembic migrations once
+from the deployed backend environment (using its production `DATABASE_URL`):
+
+```sh
+cd backend
+python -m alembic upgrade head
+python -m alembic current
+```
+
+For container deployments the working directory is already `/app`; omit `cd backend`.
+Use `python -m alembic upgrade head` as the hosting service's pre-deploy/release
+command. Run it once before starting workers, rather than in every worker.
+The backend image includes Alembic and the revision files.
+
+The first revision adopts the existing agent, clue, and vote tables or creates them
+on an empty database. The next revision adds `discussion_messages`. Existing rows
+are preserved, and databases previously initialized with `create_all()` need no
+manual stamp. Incompatible columns or legacy clue/vote foreign keys stop the
+upgrade for manual reconciliation; do not delete production data or use
+`alembic stamp head` to bypass the migration. Automatic downgrades are disabled
+because the adopted tables may contain pre-existing data.
+
+The existing initializer now runs these migrations before seeding agent configs:
 
 ```powershell
 cd backend

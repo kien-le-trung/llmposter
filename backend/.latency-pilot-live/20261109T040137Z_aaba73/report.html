@@ -1,0 +1,24 @@
+<!doctype html><html><meta charset="utf-8"><title>AI game latency</title>
+<style>body{font:15px system-ui;max-width:1200px;margin:30px auto;padding:15px;background:#f6f8fb}
+table{border-collapse:collapse;width:100%;background:white}td,th{padding:8px;text-align:left;border-bottom:1px solid #ddd}
+svg{background:white;width:100%;border:1px solid #ddd}select{padding:8px}small{color:#555}</style>
+<h1>AI-only game latency</h1><p id="summary"></p><select id="cell"></select>
+<h2>Opening comparison</h2><pre id="comparisons"></pre><h2>Latency distributions</h2><p>p50 / p90 / p95 / max in milliseconds. * Fewer than 20 samples.</p>
+<table><thead><tr><th>Metric</th><th>Samples</th><th>p50</th><th>p90</th><th>p95</th><th>Max</th></tr></thead><tbody id="metrics"></tbody></table>
+<h2>Queue wait and HTTP duration</h2><p>Bars compare p95; HTTP includes upstream waiting.</p><svg id="bars" viewBox="0 0 1100 180"></svg>
+<h2>Request overlap</h2><p>One row per provider HTTP attempt; hover for identity and duration. At most 400 rows shown per cell.</p><svg id="timeline"></svg>
+<h2>Throughput and turn outcomes</h2><pre id="rates"></pre><ul id="notes"></ul>
+<script>const data={"metrics": [], "rates": [], "measured_games": 0, "failed_games": 0, "notes": ["Percentiles use nearest rank; fewer than 20 samples are descriptive only.", "HTTP duration includes network and provider-side queueing, not just model compute.", "Scheduler wait includes intentional debounce, cooldown and silence timers.", "Cancelled/expired durations end at cancellation; use outcome-specific rows for completed latency.", "Game duration includes the fixed discussion timer; compare phases and throughput.", "Runner stopped early (RuntimeError); results are partial.", "Opening comparisons are in comparisons.json and findings.md; incomplete openings remain explicit in opening_measurements.json."], "runner_error_type": "RuntimeError", "games_missing_lifecycle_events": [], "comparisons": [], "timeline": []};const ns='http://www.w3.org/2000/svg';
+const [cell,summary,notes,metrics,rates,bars,timeline]=['cell','summary','notes','metrics','rates','bars','timeline'].map(id=>document.getElementById(id));
+function node(tag,attrs,text){const e=document.createElementNS(ns,tag);Object.entries(attrs).forEach(([k,v])=>e.setAttribute(k,v));if(text)e.textContent=text;return e}
+const cells=[...new Set(data.metrics.map(x=>x.run_id))];for(const c of cells){let o=document.createElement('option');o.value=c;o.textContent=c;cell.append(o)}
+summary.textContent=`${data.measured_games} measured games; ${data.failed_games} failed games. Warm-up excluded.`;
+for(const n of data.notes){let li=document.createElement('li');li.textContent=n;notes.append(li)}
+function draw(){const c=cell.value;metrics.replaceChildren();const ms=data.metrics.filter(x=>x.run_id===c);
+for(const m of ms){let tr=document.createElement('tr');for(const v of [m.metric,m.count+(m.small_sample?' *':''),m.p50,m.p90,m.p95,m.max]){let td=document.createElement('td');td.textContent=typeof v==='number'?v.toFixed(1):v??'';tr.append(td)}metrics.append(tr)}
+document.getElementById('comparisons').textContent=JSON.stringify((data.comparisons||[]).filter(x=>x.serial===c||x.concurrent===c),null,2);
+rates.textContent=JSON.stringify(data.rates.find(x=>x.run_id===c)||{},null,2);
+bars.replaceChildren();const bs=ms.filter(x=>['capacity_wait','client_semaphore_wait','provider_http.outcome_ok'].includes(x.metric));const max=Math.max(1,...bs.map(x=>x.p95));bs.forEach((x,i)=>{bars.append(node('text',{x:10,y:i*50+25},x.metric));bars.append(node('rect',{x:230,y:i*50+8,width:780*x.p95/max,height:25,fill:'#4576cc'}));bars.append(node('text',{x:235,y:i*50+26,fill:'white'},x.p95.toFixed(1)+' ms'))});
+timeline.replaceChildren();let ts=data.timeline.filter(x=>x.run_id===c).sort((a,b)=>a.start_ns-b.start_ns).slice(0,400);timeline.setAttribute('viewBox',`0 0 1100 ${Math.max(60,ts.length*20+30)}`);if(!ts.length)return;
+const start=Math.min(...ts.map(x=>x.start_ns)),end=Math.max(...ts.map(x=>x.end_ns)),range=Math.max(1,end-start);ts.forEach((x,i)=>{timeline.append(node('text',{x:5,y:i*20+15,'font-size':10},x.phase+' '+x.agent_id));let r=node('rect',{x:180+900*(x.start_ns-start)/range,y:i*20+3,width:Math.max(1,900*(x.end_ns-x.start_ns)/range),height:14,fill:x.outcome==='ok'?'#397bb8':'#c45b49'});r.append(node('title',{},`${x.round_id} ${x.agent_id}: ${x.duration_ms.toFixed(1)} ms (${x.outcome})`));timeline.append(r)})}
+cell.addEventListener('change',draw);draw();</script></html>

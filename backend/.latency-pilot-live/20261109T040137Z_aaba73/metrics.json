@@ -1,0 +1,17 @@
+{
+  "metrics": [],
+  "rates": [],
+  "measured_games": 0,
+  "failed_games": 0,
+  "notes": [
+    "Percentiles use nearest rank; fewer than 20 samples are descriptive only.",
+    "HTTP duration includes network and provider-side queueing, not just model compute.",
+    "Scheduler wait includes intentional debounce, cooldown and silence timers.",
+    "Cancelled/expired durations end at cancellation; use outcome-specific rows for completed latency.",
+    "Game duration includes the fixed discussion timer; compare phases and throughput.",
+    "Runner stopped early (RuntimeError); results are partial."
+  ],
+  "runner_error_type": "RuntimeError",
+  "games_missing_lifecycle_events": [],
+  "comparisons": []
+}

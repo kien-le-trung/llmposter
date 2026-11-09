@@ -1,0 +1,802 @@
+[
+  {
+    "run_id": "00-discussion-cap4-rounds4-client4-delay0.2",
+    "round_id": "44a2297f-5ea9-450e-8655-62cb69bfcfd3",
+    "batch_index": 0,
+    "all_agents_opening_ms": 441.4542,
+    "initial_turn_completion_ms": 442.0873,
+    "first_message_ms": 338.8486
+  },
+  {
+    "run_id": "00-discussion-cap4-rounds4-client4-delay0.2",
+    "round_id": "e09a6571-57a4-48c4-abd2-1d089cd9f308",
+    "batch_index": 0,
+    "all_agents_opening_ms": 795.2522,
+    "initial_turn_completion_ms": 795.576,
+    "first_message_ms": 630.0534
+  },
+  {
+    "run_id": "00-discussion-cap4-rounds4-client4-delay0.2",
+    "round_id": "7c933fde-e82d-4ee5-9aa2-af83ea9cfcee",
+    "batch_index": 0,
+    "all_agents_opening_ms": 289.9233,
+    "initial_turn_completion_ms": 290.9074,
+    "first_message_ms": 240.0612
+  },
+  {
+    "run_id": "00-discussion-cap4-rounds4-client4-delay0.2",
+    "round_id": "76e7546d-4766-4451-b85f-9f27e7f5667b",
+    "batch_index": 0,
+    "all_agents_opening_ms": 539.3737,
+    "initial_turn_completion_ms": 539.6527,
+    "first_message_ms": 407.4621
+  },
+  {
+    "run_id": "00-discussion-cap4-rounds4-client4-delay0.2",
+    "round_id": "5ee3ffcc-9c7d-450c-8806-ef24a2725d35",
+    "batch_index": 1,
+    "all_agents_opening_ms": 548.4848,
+    "initial_turn_completion_ms": 548.776,
+    "first_message_ms": 515.2504
+  },
+  {
+    "run_id": "00-discussion-cap4-rounds4-client4-delay0.2",
+    "round_id": "f5d492ac-f9cf-43d5-9c8e-45251f9b7c6c",
+    "batch_index": 1,
+    "all_agents_opening_ms": 298.8032,
+    "initial_turn_completion_ms": 299.165,
+    "first_message_ms": 271.9695
+  },
+  {
+    "run_id": "00-discussion-cap4-rounds4-client4-delay0.2",
+    "round_id": "fbc448a4-e1c3-4d1e-82ac-efd8ac8ad1b1",
+    "batch_index": 1,
+    "all_agents_opening_ms": 582.3289,
+    "initial_turn_completion_ms": 582.6222,
+    "first_message_ms": 552.438
+  },
+  {
+    "run_id": "00-discussion-cap4-rounds4-client4-delay0.2",
+    "round_id": "b6fbccb8-ea5c-4902-bf00-e934245d1db0",
+    "batch_index": 1,
+    "all_agents_opening_ms": 823.7485,
+    "initial_turn_completion_ms": 824.0279,
+    "first_message_ms": 792.3089
+  },
+  {
+    "run_id": "00-discussion-cap4-rounds4-client4-delay0.2",
+    "round_id": "b1db19c1-220b-432a-9bfa-8291ada51190",
+    "batch_index": 2,
+    "all_agents_opening_ms": 606.5395,
+    "initial_turn_completion_ms": 606.8455,
+    "first_message_ms": 572.465
+  },
+  {
+    "run_id": "00-discussion-cap4-rounds4-client4-delay0.2",
+    "round_id": "86c786dc-c4cf-4c24-a1f7-c7a418264f3a",
+    "batch_index": 2,
+    "all_agents_opening_ms": 323.8076,
+    "initial_turn_completion_ms": 324.121,
+    "first_message_ms": 291.0976
+  },
+  {
+    "run_id": "00-discussion-cap4-rounds4-client4-delay0.2",
+    "round_id": "3e547f86-56cf-4305-bf2c-eafbc4580a73",
+    "batch_index": 2,
+    "all_agents_opening_ms": 553.7102,
+    "initial_turn_completion_ms": 554.0614,
+    "first_message_ms": 532.7525
+  },
+  {
+    "run_id": "00-discussion-cap4-rounds4-client4-delay0.2",
+    "round_id": "80de9641-6c89-4d46-86db-16f3acceebfd",
+    "batch_index": 2,
+    "all_agents_opening_ms": 806.117,
+    "initial_turn_completion_ms": 806.259,
+    "first_message_ms": 785.0268
+  },
+  {
+    "run_id": "00-discussion-cap4-rounds4-client4-delay0.2",
+    "round_id": "75341fde-ca37-438f-be60-e0ba87a865ca",
+    "batch_index": 3,
+    "all_agents_opening_ms": 328.7153,
+    "initial_turn_completion_ms": 329.0547,
+    "first_message_ms": 296.2628
+  },
+  {
+    "run_id": "00-discussion-cap4-rounds4-client4-delay0.2",
+    "round_id": "1ef51486-99b4-427e-9662-324b828de6e1",
+    "batch_index": 3,
+    "all_agents_opening_ms": 979.561,
+    "initial_turn_completion_ms": 979.7922,
+    "first_message_ms": 956.8801
+  },
+  {
+    "run_id": "00-discussion-cap4-rounds4-client4-delay0.2",
+    "round_id": "3fe799ec-41cd-4758-aa74-6338f2a28cdd",
+    "batch_index": 3,
+    "all_agents_opening_ms": 324.8632,
+    "initial_turn_completion_ms": 325.1324,
+    "first_message_ms": 278.1276
+  },
+  {
+    "run_id": "00-discussion-cap4-rounds4-client4-delay0.2",
+    "round_id": "fbb2eb22-77af-4e1f-97b4-6cbaeba00faf",
+    "batch_index": 3,
+    "all_agents_opening_ms": 587.8038,
+    "initial_turn_completion_ms": 587.9422,
+    "first_message_ms": 558.551
+  },
+  {
+    "run_id": "00-discussion-cap4-rounds4-client4-delay0.2",
+    "round_id": "a04ce5df-9399-41f3-b2ae-70f3c97bd043",
+    "batch_index": 4,
+    "all_agents_opening_ms": 1117.2574,
+    "initial_turn_completion_ms": 1117.4207,
+    "first_message_ms": 1095.3993
+  },
+  {
+    "run_id": "00-discussion-cap4-rounds4-client4-delay0.2",
+    "round_id": "b7377ecd-b8bb-4dc9-a321-08e936de2ac8",
+    "batch_index": 4,
+    "all_agents_opening_ms": 863.2018,
+    "initial_turn_completion_ms": 863.6643,
+    "first_message_ms": 828.4584
+  },
+  {
+    "run_id": "00-discussion-cap4-rounds4-client4-delay0.2",
+    "round_id": "108cd167-ffef-4283-9924-cfd30de2e211",
+    "batch_index": 4,
+    "all_agents_opening_ms": 576.9387,
+    "initial_turn_completion_ms": 577.3508,
+    "first_message_ms": 548.2932
+  },
+  {
+    "run_id": "00-discussion-cap4-rounds4-client4-delay0.2",
+    "round_id": "953833ff-8f64-406d-852e-42db7a99f878",
+    "batch_index": 4,
+    "all_agents_opening_ms": 304.1203,
+    "initial_turn_completion_ms": 304.4427,
+    "first_message_ms": 273.5041
+  },
+  {
+    "run_id": "01-discussion-cap1-rounds1-client4-delay1.0",
+    "round_id": "ac2d0262-5b0a-4765-8da8-3ac368b6efd4",
+    "batch_index": 0,
+    "all_agents_opening_ms": 4119.7173,
+    "initial_turn_completion_ms": 4119.8805,
+    "first_message_ms": 1021.8824
+  },
+  {
+    "run_id": "01-discussion-cap1-rounds1-client4-delay1.0",
+    "round_id": "7c08e6f0-c74f-414a-a389-7210f491ce4e",
+    "batch_index": 1,
+    "all_agents_opening_ms": 4124.0916,
+    "initial_turn_completion_ms": 4124.3548,
+    "first_message_ms": 1027.5274
+  },
+  {
+    "run_id": "01-discussion-cap1-rounds1-client4-delay1.0",
+    "round_id": "10b819d7-80c5-4a4e-a967-9b0b52d71bba",
+    "batch_index": 2,
+    "all_agents_opening_ms": 4155.7455,
+    "initial_turn_completion_ms": 4156.0385,
+    "first_message_ms": 1042.085
+  },
+  {
+    "run_id": "01-discussion-cap1-rounds1-client4-delay1.0",
+    "round_id": "59e4cf73-8038-4c88-ad2f-b997c91deb19",
+    "batch_index": 3,
+    "all_agents_opening_ms": 4106.5843,
+    "initial_turn_completion_ms": 4106.9688,
+    "first_message_ms": 1024.5794
+  },
+  {
+    "run_id": "01-discussion-cap1-rounds1-client4-delay1.0",
+    "round_id": "99596487-2672-418e-a848-eecfc24bfaf2",
+    "batch_index": 4,
+    "all_agents_opening_ms": 4155.867,
+    "initial_turn_completion_ms": 4156.7729,
+    "first_message_ms": 1033.7386
+  },
+  {
+    "run_id": "02-discussion-cap4-rounds1-client4-delay1.0",
+    "round_id": "1076a8e1-bd99-45aa-82ae-5730044e2e48",
+    "batch_index": 0,
+    "all_agents_opening_ms": 1089.8845,
+    "initial_turn_completion_ms": 1090.19,
+    "first_message_ms": 1054.4754
+  },
+  {
+    "run_id": "02-discussion-cap4-rounds1-client4-delay1.0",
+    "round_id": "97ad4eab-1cf6-4e17-943e-5540455dca29",
+    "batch_index": 1,
+    "all_agents_opening_ms": 1133.8948,
+    "initial_turn_completion_ms": 1134.3524,
+    "first_message_ms": 1092.0898
+  },
+  {
+    "run_id": "02-discussion-cap4-rounds1-client4-delay1.0",
+    "round_id": "2a97faeb-b186-4d92-9326-de109a038106",
+    "batch_index": 2,
+    "all_agents_opening_ms": 1111.6081,
+    "initial_turn_completion_ms": 1111.9433,
+    "first_message_ms": 1073.929
+  },
+  {
+    "run_id": "02-discussion-cap4-rounds1-client4-delay1.0",
+    "round_id": "6dc2741c-6327-4be1-b449-c96cda0e4165",
+    "batch_index": 3,
+    "all_agents_opening_ms": 1058.8753,
+    "initial_turn_completion_ms": 1059.3683,
+    "first_message_ms": 1032.0569
+  },
+  {
+    "run_id": "02-discussion-cap4-rounds1-client4-delay1.0",
+    "round_id": "c29d11d5-c2ee-469d-8c67-5c9044c36009",
+    "batch_index": 4,
+    "all_agents_opening_ms": 1141.8863,
+    "initial_turn_completion_ms": 1142.3104,
+    "first_message_ms": 1086.0215
+  },
+  {
+    "run_id": "03-discussion-cap4-rounds4-client4-delay1.0",
+    "round_id": "4a128688-e106-4bb0-b4e4-19907c0168fc",
+    "batch_index": 0,
+    "all_agents_opening_ms": 1264.1869,
+    "initial_turn_completion_ms": 1264.454,
+    "first_message_ms": 1224.1887
+  },
+  {
+    "run_id": "03-discussion-cap4-rounds4-client4-delay1.0",
+    "round_id": "a981477b-8b3b-40c8-a1b1-e3c6ab626bda",
+    "batch_index": 0,
+    "all_agents_opening_ms": 2175.6157,
+    "initial_turn_completion_ms": 2175.8046,
+    "first_message_ms": 2143.8949
+  },
+  {
+    "run_id": "03-discussion-cap4-rounds4-client4-delay1.0",
+    "round_id": "af4b5b80-e5fc-45f3-941f-a27a9e1621c8",
+    "batch_index": 0,
+    "all_agents_opening_ms": 3280.0287,
+    "initial_turn_completion_ms": 3280.2891,
+    "first_message_ms": 3242.656
+  },
+  {
+    "run_id": "03-discussion-cap4-rounds4-client4-delay1.0",
+    "round_id": "a98db9d5-46b5-4971-bc52-0dcfa094956b",
+    "batch_index": 0,
+    "all_agents_opening_ms": 1118.4987,
+    "initial_turn_completion_ms": 1118.6611,
+    "first_message_ms": 1089.0354
+  },
+  {
+    "run_id": "03-discussion-cap4-rounds4-client4-delay1.0",
+    "round_id": "cb021ec1-6107-48fb-81c9-7e6f87fa244a",
+    "batch_index": 1,
+    "all_agents_opening_ms": 1257.4455,
+    "initial_turn_completion_ms": 1257.7364,
+    "first_message_ms": 1147.4788
+  },
+  {
+    "run_id": "03-discussion-cap4-rounds4-client4-delay1.0",
+    "round_id": "e9b22693-adab-4242-aec9-e91869f3cb4d",
+    "batch_index": 1,
+    "all_agents_opening_ms": 2372.7912,
+    "initial_turn_completion_ms": 2373.2034,
+    "first_message_ms": 2341.4125
+  },
+  {
+    "run_id": "03-discussion-cap4-rounds4-client4-delay1.0",
+    "round_id": "a3931096-9065-44b1-a7b9-a3bb22e96929",
+    "batch_index": 1,
+    "all_agents_opening_ms": 4563.9065,
+    "initial_turn_completion_ms": 4564.2513,
+    "first_message_ms": 4515.7654
+  },
+  {
+    "run_id": "03-discussion-cap4-rounds4-client4-delay1.0",
+    "round_id": "5c09c25b-d01f-43e4-b759-c61d14f5975e",
+    "batch_index": 1,
+    "all_agents_opening_ms": 3463.1148,
+    "initial_turn_completion_ms": 3463.2845,
+    "first_message_ms": 3443.9229
+  },
+  {
+    "run_id": "03-discussion-cap4-rounds4-client4-delay1.0",
+    "round_id": "b681a5be-58ec-4533-bf63-454f92aac31d",
+    "batch_index": 2,
+    "all_agents_opening_ms": 1094.3035,
+    "initial_turn_completion_ms": 1094.8176,
+    "first_message_ms": 1065.5208
+  },
+  {
+    "run_id": "03-discussion-cap4-rounds4-client4-delay1.0",
+    "round_id": "4522c0a0-c8d0-428b-9788-af53b8769f82",
+    "batch_index": 2,
+    "all_agents_opening_ms": 2148.16,
+    "initial_turn_completion_ms": 2148.3255,
+    "first_message_ms": 2078.1016
+  },
+  {
+    "run_id": "03-discussion-cap4-rounds4-client4-delay1.0",
+    "round_id": "7d3a0723-5b82-449f-9254-6379dd91deea",
+    "batch_index": 2,
+    "all_agents_opening_ms": 4277.7414,
+    "initial_turn_completion_ms": 4278.2392,
+    "first_message_ms": 4255.3401
+  },
+  {
+    "run_id": "03-discussion-cap4-rounds4-client4-delay1.0",
+    "round_id": "88f01645-1bc0-4263-85c2-051ca70c5bce",
+    "batch_index": 2,
+    "all_agents_opening_ms": 3220.8188,
+    "initial_turn_completion_ms": 3220.9927,
+    "first_message_ms": 3194.063
+  },
+  {
+    "run_id": "03-discussion-cap4-rounds4-client4-delay1.0",
+    "round_id": "30085654-d9f8-4493-aabd-3972a6f2ee82",
+    "batch_index": 3,
+    "all_agents_opening_ms": 1665.9415,
+    "initial_turn_completion_ms": 1666.1866,
+    "first_message_ms": 1581.2
+  },
+  {
+    "run_id": "03-discussion-cap4-rounds4-client4-delay1.0",
+    "round_id": "266cf6cb-c080-4034-85b7-abf55259dbd4",
+    "batch_index": 3,
+    "all_agents_opening_ms": 3327.9494,
+    "initial_turn_completion_ms": 3330.9253,
+    "first_message_ms": 3236.1326
+  },
+  {
+    "run_id": "03-discussion-cap4-rounds4-client4-delay1.0",
+    "round_id": "d158b32b-3013-48f9-a506-fb1f20268b08",
+    "batch_index": 3,
+    "all_agents_opening_ms": 2241.8071,
+    "initial_turn_completion_ms": 2242.1285,
+    "first_message_ms": 2133.1511
+  },
+  {
+    "run_id": "03-discussion-cap4-rounds4-client4-delay1.0",
+    "round_id": "f1470598-0015-46dc-8a28-d32f4e8335af",
+    "batch_index": 3,
+    "all_agents_opening_ms": 1352.3323,
+    "initial_turn_completion_ms": 1352.6752,
+    "first_message_ms": 1212.0457
+  },
+  {
+    "run_id": "03-discussion-cap4-rounds4-client4-delay1.0",
+    "round_id": "3df85061-2dfe-4d34-b16e-c06a601651ab",
+    "batch_index": 4,
+    "all_agents_opening_ms": 1302.5259,
+    "initial_turn_completion_ms": 1305.2376,
+    "first_message_ms": 1195.4066
+  },
+  {
+    "run_id": "03-discussion-cap4-rounds4-client4-delay1.0",
+    "round_id": "e1e5784e-0989-4d04-99f9-108a995e3356",
+    "batch_index": 4,
+    "all_agents_opening_ms": 2021.3884,
+    "initial_turn_completion_ms": 2021.8453,
+    "first_message_ms": 1905.9461
+  },
+  {
+    "run_id": "03-discussion-cap4-rounds4-client4-delay1.0",
+    "round_id": "38649268-974d-4f76-bf65-df627ef8fa83",
+    "batch_index": 4,
+    "all_agents_opening_ms": 3053.689,
+    "initial_turn_completion_ms": 3054.0769,
+    "first_message_ms": 2929.7333
+  },
+  {
+    "run_id": "03-discussion-cap4-rounds4-client4-delay1.0",
+    "round_id": "280419bd-c23b-415e-ac81-a0722c58b7ba",
+    "batch_index": 4,
+    "all_agents_opening_ms": 3053.0013,
+    "initial_turn_completion_ms": 3053.399,
+    "first_message_ms": 2934.8318
+  },
+  {
+    "run_id": "04-discussion-cap4-rounds1-client4-delay0.2",
+    "round_id": "59fa6ee3-9f0b-4a6b-ac03-94cd1df685f2",
+    "batch_index": 0,
+    "all_agents_opening_ms": 316.4087,
+    "initial_turn_completion_ms": 322.199,
+    "first_message_ms": 266.0954
+  },
+  {
+    "run_id": "04-discussion-cap4-rounds1-client4-delay0.2",
+    "round_id": "91179785-60da-4b7e-8b1c-6c49044be3f3",
+    "batch_index": 1,
+    "all_agents_opening_ms": 311.0745,
+    "initial_turn_completion_ms": 311.4074,
+    "first_message_ms": 267.1905
+  },
+  {
+    "run_id": "04-discussion-cap4-rounds1-client4-delay0.2",
+    "round_id": "a4df8162-5e5a-4877-8089-e0f16f6f5c5b",
+    "batch_index": 2,
+    "all_agents_opening_ms": 335.1297,
+    "initial_turn_completion_ms": 335.5694,
+    "first_message_ms": 288.1401
+  },
+  {
+    "run_id": "04-discussion-cap4-rounds1-client4-delay0.2",
+    "round_id": "62a72205-fe51-4b69-b59c-f716dece0560",
+    "batch_index": 3,
+    "all_agents_opening_ms": 258.1225,
+    "initial_turn_completion_ms": 258.3043,
+    "first_message_ms": 235.4278
+  },
+  {
+    "run_id": "04-discussion-cap4-rounds1-client4-delay0.2",
+    "round_id": "858833c7-3c76-4a92-b68f-af30bc92be18",
+    "batch_index": 4,
+    "all_agents_opening_ms": 262.9796,
+    "initial_turn_completion_ms": 263.2434,
+    "first_message_ms": 241.3177
+  },
+  {
+    "run_id": "05-discussion-cap1-rounds4-client4-delay1.0",
+    "round_id": "6ea0d18f-cab0-4680-bc7b-d9336e9925f0",
+    "batch_index": 0,
+    "all_agents_opening_ms": 7239.0263,
+    "initial_turn_completion_ms": 7239.1894,
+    "first_message_ms": 4169.4318
+  },
+  {
+    "run_id": "05-discussion-cap1-rounds4-client4-delay1.0",
+    "round_id": "4d11f552-3110-49f0-b08d-3a4b30afed8d",
+    "batch_index": 0,
+    "all_agents_opening_ms": 11269.6112,
+    "initial_turn_completion_ms": 11269.955,
+    "first_message_ms": 8192.7
+  },
+  {
+    "run_id": "05-discussion-cap1-rounds4-client4-delay1.0",
+    "round_id": "cf6a83ec-1aa9-4cd8-812b-4982eac5dea6",
+    "batch_index": 0,
+    "all_agents_opening_ms": null,
+    "initial_turn_completion_ms": null,
+    "first_message_ms": 12302.39
+  },
+  {
+    "run_id": "05-discussion-cap1-rounds4-client4-delay1.0",
+    "round_id": "02ed1a48-8337-4898-ac14-9cbd61feed3f",
+    "batch_index": 0,
+    "all_agents_opening_ms": 4135.7156,
+    "initial_turn_completion_ms": 4136.0652,
+    "first_message_ms": 1044.975
+  },
+  {
+    "run_id": "05-discussion-cap1-rounds4-client4-delay1.0",
+    "round_id": "4a8f564c-7465-4616-b60e-6c78cbf65ba8",
+    "batch_index": 1,
+    "all_agents_opening_ms": 4124.2217,
+    "initial_turn_completion_ms": 4124.52,
+    "first_message_ms": 1032.5035
+  },
+  {
+    "run_id": "05-discussion-cap1-rounds4-client4-delay1.0",
+    "round_id": "0fe332b6-576e-442d-b5b6-c0e5a41f733f",
+    "batch_index": 1,
+    "all_agents_opening_ms": 8254.9254,
+    "initial_turn_completion_ms": 8255.3399,
+    "first_message_ms": 5106.6965
+  },
+  {
+    "run_id": "05-discussion-cap1-rounds4-client4-delay1.0",
+    "round_id": "edc24120-bfa3-4a99-92f1-e5edc0b36d9b",
+    "batch_index": 1,
+    "all_agents_opening_ms": null,
+    "initial_turn_completion_ms": null,
+    "first_message_ms": 13401.2587
+  },
+  {
+    "run_id": "05-discussion-cap1-rounds4-client4-delay1.0",
+    "round_id": "9410368c-2d87-4492-91c9-113b826b535c",
+    "batch_index": 1,
+    "all_agents_opening_ms": 12387.1982,
+    "initial_turn_completion_ms": 12387.6315,
+    "first_message_ms": 9261.8
+  },
+  {
+    "run_id": "05-discussion-cap1-rounds4-client4-delay1.0",
+    "round_id": "468dbad0-842e-4880-984b-3f06e8fc67b7",
+    "batch_index": 2,
+    "all_agents_opening_ms": null,
+    "initial_turn_completion_ms": null,
+    "first_message_ms": 12386.8772
+  },
+  {
+    "run_id": "05-discussion-cap1-rounds4-client4-delay1.0",
+    "round_id": "34c53ff8-61ee-463a-ba29-ee996432303b",
+    "batch_index": 2,
+    "all_agents_opening_ms": 7405.5518,
+    "initial_turn_completion_ms": 7405.8401,
+    "first_message_ms": 4321.2632
+  },
+  {
+    "run_id": "05-discussion-cap1-rounds4-client4-delay1.0",
+    "round_id": "404e3b4f-8f76-4f7c-92be-fe0110601507",
+    "batch_index": 2,
+    "all_agents_opening_ms": 11411.9676,
+    "initial_turn_completion_ms": 11412.2332,
+    "first_message_ms": 8316.0998
+  },
+  {
+    "run_id": "05-discussion-cap1-rounds4-client4-delay1.0",
+    "round_id": "6f150a89-3db0-4b33-9d2e-3820adaeaad9",
+    "batch_index": 2,
+    "all_agents_opening_ms": 4252.7164,
+    "initial_turn_completion_ms": 4253.0072,
+    "first_message_ms": 1044.9111
+  },
+  {
+    "run_id": "05-discussion-cap1-rounds4-client4-delay1.0",
+    "round_id": "03d26d0d-916f-4d33-b14f-5656ddea45ba",
+    "batch_index": 3,
+    "all_agents_opening_ms": 11578.271,
+    "initial_turn_completion_ms": 11578.6406,
+    "first_message_ms": 8375.6626
+  },
+  {
+    "run_id": "05-discussion-cap1-rounds4-client4-delay1.0",
+    "round_id": "0715db35-7384-41f5-88ab-dfa00a000952",
+    "batch_index": 3,
+    "all_agents_opening_ms": 8370.7763,
+    "initial_turn_completion_ms": 8371.1068,
+    "first_message_ms": 5206.8478
+  },
+  {
+    "run_id": "05-discussion-cap1-rounds4-client4-delay1.0",
+    "round_id": "5ffa2ed4-1708-4702-8433-e3f3d6343aba",
+    "batch_index": 3,
+    "all_agents_opening_ms": 4198.7269,
+    "initial_turn_completion_ms": 4198.9982,
+    "first_message_ms": 1080.9862
+  },
+  {
+    "run_id": "05-discussion-cap1-rounds4-client4-delay1.0",
+    "round_id": "967447b5-4bb6-472f-98fc-974efc52a792",
+    "batch_index": 3,
+    "all_agents_opening_ms": null,
+    "initial_turn_completion_ms": null,
+    "first_message_ms": 12602.2491
+  },
+  {
+    "run_id": "05-discussion-cap1-rounds4-client4-delay1.0",
+    "round_id": "ca893c9c-98e8-4226-b79e-33a6f86d4d60",
+    "batch_index": 4,
+    "all_agents_opening_ms": 7667.712,
+    "initial_turn_completion_ms": 7668.934,
+    "first_message_ms": 4550.6815
+  },
+  {
+    "run_id": "05-discussion-cap1-rounds4-client4-delay1.0",
+    "round_id": "a3f6ddbd-1f13-469f-ada5-b8f597dddba9",
+    "batch_index": 4,
+    "all_agents_opening_ms": null,
+    "initial_turn_completion_ms": null,
+    "first_message_ms": 12593.7521
+  },
+  {
+    "run_id": "05-discussion-cap1-rounds4-client4-delay1.0",
+    "round_id": "e986e464-50e5-42fb-bf86-8b9bd3bbf537",
+    "batch_index": 4,
+    "all_agents_opening_ms": 11561.5692,
+    "initial_turn_completion_ms": 11561.9482,
+    "first_message_ms": 8392.5609
+  },
+  {
+    "run_id": "05-discussion-cap1-rounds4-client4-delay1.0",
+    "round_id": "888069b7-a7c5-4806-8cb3-3f20709aed91",
+    "batch_index": 4,
+    "all_agents_opening_ms": 4498.4456,
+    "initial_turn_completion_ms": 4498.9317,
+    "first_message_ms": 1228.3446
+  },
+  {
+    "run_id": "06-discussion-cap1-rounds1-client4-delay0.2",
+    "round_id": "2b785739-c7bb-4e7e-a58f-03ff80e1abae",
+    "batch_index": 0,
+    "all_agents_opening_ms": 978.0412,
+    "initial_turn_completion_ms": 978.3657,
+    "first_message_ms": 254.5823
+  },
+  {
+    "run_id": "06-discussion-cap1-rounds1-client4-delay0.2",
+    "round_id": "c7215e41-f43a-4091-9adc-3ebfe1eda2be",
+    "batch_index": 1,
+    "all_agents_opening_ms": 968.4412,
+    "initial_turn_completion_ms": 968.8342,
+    "first_message_ms": 250.3699
+  },
+  {
+    "run_id": "06-discussion-cap1-rounds1-client4-delay0.2",
+    "round_id": "22e98998-a65a-4858-8ae2-f0d9eceab9fa",
+    "batch_index": 2,
+    "all_agents_opening_ms": 961.1265,
+    "initial_turn_completion_ms": 961.4623,
+    "first_message_ms": 234.781
+  },
+  {
+    "run_id": "06-discussion-cap1-rounds1-client4-delay0.2",
+    "round_id": "de9ff722-dd74-4b76-a19b-3ea96bf9e919",
+    "batch_index": 3,
+    "all_agents_opening_ms": 940.5654,
+    "initial_turn_completion_ms": 940.8734,
+    "first_message_ms": 240.8797
+  },
+  {
+    "run_id": "06-discussion-cap1-rounds1-client4-delay0.2",
+    "round_id": "c91a10ad-2bf0-43e1-b8f6-d4573526b9ef",
+    "batch_index": 4,
+    "all_agents_opening_ms": 1048.9856,
+    "initial_turn_completion_ms": 1049.4701,
+    "first_message_ms": 271.5241
+  },
+  {
+    "run_id": "07-discussion-cap1-rounds4-client4-delay0.2",
+    "round_id": "56a63367-06da-4ce1-bb13-993efd1f98dd",
+    "batch_index": 0,
+    "all_agents_opening_ms": 917.7107,
+    "initial_turn_completion_ms": 918.0288,
+    "first_message_ms": 233.7245
+  },
+  {
+    "run_id": "07-discussion-cap1-rounds4-client4-delay0.2",
+    "round_id": "3e2ea4f0-7be2-4973-b9ff-a0d41df5731e",
+    "batch_index": 0,
+    "all_agents_opening_ms": 2703.1461,
+    "initial_turn_completion_ms": 2703.3312,
+    "first_message_ms": 2020.2505
+  },
+  {
+    "run_id": "07-discussion-cap1-rounds4-client4-delay0.2",
+    "round_id": "ebfb0c13-5144-49cc-b357-c6f7ffe1112a",
+    "batch_index": 0,
+    "all_agents_opening_ms": 3593.7977,
+    "initial_turn_completion_ms": 3594.0766,
+    "first_message_ms": 2909.451
+  },
+  {
+    "run_id": "07-discussion-cap1-rounds4-client4-delay0.2",
+    "round_id": "30b89c48-29e3-4635-828d-621756596d3d",
+    "batch_index": 0,
+    "all_agents_opening_ms": 1797.7298,
+    "initial_turn_completion_ms": 1797.8982,
+    "first_message_ms": 1108.0121
+  },
+  {
+    "run_id": "07-discussion-cap1-rounds4-client4-delay0.2",
+    "round_id": "2cb80a30-c598-4ebe-834b-aa5d5176daa4",
+    "batch_index": 1,
+    "all_agents_opening_ms": 970.3283,
+    "initial_turn_completion_ms": 970.69,
+    "first_message_ms": 266.1252
+  },
+  {
+    "run_id": "07-discussion-cap1-rounds4-client4-delay0.2",
+    "round_id": "3b341332-6d54-49d0-bff5-dd62d8ab0050",
+    "batch_index": 1,
+    "all_agents_opening_ms": 1890.3572,
+    "initial_turn_completion_ms": 1890.9248,
+    "first_message_ms": 1181.5042
+  },
+  {
+    "run_id": "07-discussion-cap1-rounds4-client4-delay0.2",
+    "round_id": "396aed4b-0b51-402c-ae96-0e843a88f3c0",
+    "batch_index": 1,
+    "all_agents_opening_ms": 3482.3563,
+    "initial_turn_completion_ms": 3482.5262,
+    "first_message_ms": 2800.2487
+  },
+  {
+    "run_id": "07-discussion-cap1-rounds4-client4-delay0.2",
+    "round_id": "5df1c51f-7a5a-49d5-aa56-102ad533df3d",
+    "batch_index": 1,
+    "all_agents_opening_ms": 2801.3068,
+    "initial_turn_completion_ms": 2801.8736,
+    "first_message_ms": 2101.3065
+  },
+  {
+    "run_id": "07-discussion-cap1-rounds4-client4-delay0.2",
+    "round_id": "d28559f4-5798-4413-9cc9-77235def931b",
+    "batch_index": 2,
+    "all_agents_opening_ms": 3328.8123,
+    "initial_turn_completion_ms": 3328.9743,
+    "first_message_ms": 2675.5111
+  },
+  {
+    "run_id": "07-discussion-cap1-rounds4-client4-delay0.2",
+    "round_id": "f36debb4-07d9-43cf-ac21-58ee357af333",
+    "batch_index": 2,
+    "all_agents_opening_ms": 1595.3466,
+    "initial_turn_completion_ms": 1595.7953,
+    "first_message_ms": 911.7746
+  },
+  {
+    "run_id": "07-discussion-cap1-rounds4-client4-delay0.2",
+    "round_id": "be319b11-535e-4089-b9d1-92dcde5c39de",
+    "batch_index": 2,
+    "all_agents_opening_ms": 2465.9354,
+    "initial_turn_completion_ms": 2466.1194,
+    "first_message_ms": 1811.0844
+  },
+  {
+    "run_id": "07-discussion-cap1-rounds4-client4-delay0.2",
+    "round_id": "bae7d72b-f6ee-4a79-a655-bd3029b0a051",
+    "batch_index": 2,
+    "all_agents_opening_ms": 945.7738,
+    "initial_turn_completion_ms": 945.9512,
+    "first_message_ms": 240.9599
+  },
+  {
+    "run_id": "07-discussion-cap1-rounds4-client4-delay0.2",
+    "round_id": "7c26ac7e-dc8f-4276-b526-a74f95e9c8d4",
+    "batch_index": 3,
+    "all_agents_opening_ms": 1784.0344,
+    "initial_turn_completion_ms": 1784.2551,
+    "first_message_ms": 1050.228
+  },
+  {
+    "run_id": "07-discussion-cap1-rounds4-client4-delay0.2",
+    "round_id": "ef67a3f8-936a-4f5b-9d01-2d6ddda52d28",
+    "batch_index": 3,
+    "all_agents_opening_ms": 3629.4333,
+    "initial_turn_completion_ms": 3629.883,
+    "first_message_ms": 2929.2444
+  },
+  {
+    "run_id": "07-discussion-cap1-rounds4-client4-delay0.2",
+    "round_id": "622c2648-1932-4d44-b19c-b695681b451d",
+    "batch_index": 3,
+    "all_agents_opening_ms": 1094.5142,
+    "initial_turn_completion_ms": 1094.6884,
+    "first_message_ms": 305.1103
+  },
+  {
+    "run_id": "07-discussion-cap1-rounds4-client4-delay0.2",
+    "round_id": "ccabb25e-3deb-4555-8d73-6be13b913871",
+    "batch_index": 3,
+    "all_agents_opening_ms": 2698.5866,
+    "initial_turn_completion_ms": 2699.0321,
+    "first_message_ms": 1971.8548
+  },
+  {
+    "run_id": "07-discussion-cap1-rounds4-client4-delay0.2",
+    "round_id": "67dc733a-a02d-455b-b73c-63678ef18307",
+    "batch_index": 4,
+    "all_agents_opening_ms": 937.828,
+    "initial_turn_completion_ms": 938.0751,
+    "first_message_ms": 250.1228
+  },
+  {
+    "run_id": "07-discussion-cap1-rounds4-client4-delay0.2",
+    "round_id": "28e950ad-e4a2-4a6d-9068-b6eab8b2b212",
+    "batch_index": 4,
+    "all_agents_opening_ms": 3456.9681,
+    "initial_turn_completion_ms": 3457.3398,
+    "first_message_ms": 2753.6407
+  },
+  {
+    "run_id": "07-discussion-cap1-rounds4-client4-delay0.2",
+    "round_id": "13974edb-b43f-4593-afec-12bdaf6f0749",
+    "batch_index": 4,
+    "all_agents_opening_ms": 2521.3464,
+    "initial_turn_completion_ms": 2521.5255,
+    "first_message_ms": 1820.3149
+  },
+  {
+    "run_id": "07-discussion-cap1-rounds4-client4-delay0.2",
+    "round_id": "7986cee9-22c7-457c-b5da-c914d4aab74f",
+    "batch_index": 4,
+    "all_agents_opening_ms": 1598.3699,
+    "initial_turn_completion_ms": 1598.7581,
+    "first_message_ms": 912.9047
+  }
+]

@@ -125,3 +125,29 @@ isolates the small interval after a turn becomes eligible. Silent, expired,
 cancelled, and failed turns remain in the results. Percentiles use nearest rank
 and are marked as small samples below 20 observations. Outcome-specific rows
 separate successful completions from durations cut short by cancellation.
+
+
+### Concurrency pilot
+
+The runner now warms every configuration and records batch indexes and source/environment metadata.
+Live execution requires a non-resetting OpenRouter key with no more than $5 remaining; the
+runner checks this before inference. Use a dedicated key for the pilot.
+
+Controlled pilot (100 measured games):
+
+```powershell
+backend/venv/Scripts/python.exe experiments/src/runner/run_latency.py --capacities 1,4 --parallel-rounds 1,4 --delays 0.2,1 --skip-client-sweep --repetitions 5 --discussion-seconds 15 --no-mlflow
+```
+
+Live pilot (10 measured games plus excluded warm-ups):
+
+```powershell
+backend/venv/Scripts/python.exe experiments/src/runner/run_latency.py --mode live --capacities 1,4 --parallel-rounds 1 --skip-client-sweep --repetitions 5 --discussion-seconds 30 --no-mlflow
+```
+
+`opening_measurements.json` retains missing speakers as null. `comparisons.json` and
+`findings.md` report matched serial/concurrent opening comparisons, averaging rounds within
+batches before taking medians. Incomplete batches are excluded from speedup calculations,
+so inspect completion counts too. Throughput excludes gaps between discussion intervals.
+Both conditions use asyncio; these experiments measure request overlap, not runtime choice.
+Five batches provide descriptive evidence, especially for tail latency.

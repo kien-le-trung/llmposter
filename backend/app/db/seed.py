@@ -2,7 +2,8 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.db.models import AgentConfigModel
-from app.db.session import SessionLocal, create_db_and_tables
+from app.db.migrate import upgrade_database
+from app.db.session import SessionLocal
 from app.services.agents.runtime_agents import list_static_agent_configs
 
 
@@ -31,6 +32,6 @@ def seed_agent_configs(db: Session) -> None:
 
 
 def init_database() -> None:
-    create_db_and_tables()
+    upgrade_database()
     with SessionLocal() as db:
         seed_agent_configs(db)

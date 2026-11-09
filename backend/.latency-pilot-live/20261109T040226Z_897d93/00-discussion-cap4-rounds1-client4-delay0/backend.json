@@ -1,0 +1,22 @@
+{
+  "run_id": "00-discussion-cap4-rounds1-client4-delay0",
+  "events_path": "C:\\Users\\ltkie\\Documents\\Projects\\llmposter\\backend\\.latency-pilot-live\\20261109T040226Z_897d93\\00-discussion-cap4-rounds1-client4-delay0\\events.jsonl",
+  "settings": {
+    "llm_config": {
+      "name": "GLM 5.3 Flash via OpenRouter",
+      "provider": "openrouter",
+      "chat_url": "https://openrouter.ai/api/v1/chat/completions",
+      "model": "z-ai/glm-5.3-flash",
+      "api_key_env": "OPENROUTER_API_KEY",
+      "min_max_tokens": 10000,
+      "structured_max_tokens": 10000,
+      "max_concurrent_requests": 4,
+      "notes": null
+    },
+    "inference_mode": "remote",
+    "agent_config_source": "static",
+    "clue_prompt_technique": "few_shot",
+    "discussion_duration_seconds": 30,
+    "discussion_max_concurrent_turns": 4
+  }
+}
