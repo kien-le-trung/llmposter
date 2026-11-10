@@ -10,7 +10,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
 from app.core.config import Settings
-from app.db.models import ClueModel, VoteModel
+from app.db.models import ClueModel, VoteModel, WordFeedbackModel
 from app.db.session import SessionLocal
 from app.services import latency
 from app.services.agents import discussion as chat
@@ -28,7 +28,7 @@ from app.services.word_bank import normalize_imposter_hint, select_random_word
 from app.services.game.schemas import (
     AgentTurnResponse, TurnResponse, PlayerResponse, RoundResponse,
     CreateRoundRequest, VoteRequest, SubmitClueRequest,
-    SubmitDiscussionComment,
+    SubmitDiscussionComment, SubmitWordFeedback, WordFeedbackResponse,
 )
 from app.services.game.state import (
     RoundState, ROUNDS, ACTIVE_GENERATION_ROUNDS, HUMAN_PLAYER_ID,
@@ -362,6 +362,39 @@ async def create_round(
     )
 
     return round_state_to_round_response(round_state)
+
+
+async def submit_word_feedback(
+    round_id: str, payload: SubmitWordFeedback, db: Session,
+) -> WordFeedbackResponse:
+    state = ROUNDS.get(round_id)
+    if state is None:
+        raise GameError("not_found", "Round not found.")
+    if not state.include_human:
+        raise GameError("conflict", "Word feedback requires a human player.")
+    if state.status not in {"discussion", "ready_to_vote", "complete"}:
+        raise GameError("conflict", "Word feedback is available after debate begins.")
+
+    async with state.discussion._lock:
+        try:
+            feedback = db.get(WordFeedbackModel, round_id)
+            if feedback is None:
+                imposter = state.imposter_player_id == HUMAN_PLAYER_ID
+                feedback = WordFeedbackModel(
+                    round_id=round_id,
+                    secret_word=state.secret_word,
+                    given_word=state.imposter_hint if imposter else state.secret_word,
+                    user_role="imposter" if imposter else "player",
+                    answer=payload.answer,
+                )
+                db.add(feedback)
+            else:
+                feedback.answer = payload.answer
+            db.commit()
+        except SQLAlchemyError as exc:
+            db.rollback()
+            raise GameError("unavailable", "Could not save word feedback. Please try again.") from exc
+    return WordFeedbackResponse(round_id=round_id, answer=payload.answer)
 
 
 async def get_round(round_id: str) -> RoundResponse:

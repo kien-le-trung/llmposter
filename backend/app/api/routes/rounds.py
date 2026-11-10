@@ -82,3 +82,15 @@ async def submit_discussion_comment(
         return await engine.submit_discussion_comment(round_id, payload, db)
     except engine.GameError as exc:
         raise _http_error(exc) from exc
+
+
+@router.post("/{round_id}/word-feedback", response_model=schemas.WordFeedbackResponse)
+async def submit_word_feedback(
+    round_id: str,
+    payload: schemas.SubmitWordFeedback,
+    db: Session = Depends(get_db),
+) -> schemas.WordFeedbackResponse:
+    try:
+        return await engine.submit_word_feedback(round_id, payload, db)
+    except engine.GameError as exc:
+        raise _http_error(exc) from exc

@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Literal
 
 from pydantic import BaseModel, Field, field_validator
 
@@ -64,3 +65,12 @@ class SubmitClueRequest(BaseModel):
 
 class SubmitDiscussionComment(BaseModel):
     text: str = Field(min_length=1, max_length=500)
+
+
+class SubmitWordFeedback(BaseModel):
+    answer: Literal["yes", "no"]
+
+
+class WordFeedbackResponse(BaseModel):
+    round_id: str
+    answer: Literal["yes", "no"]

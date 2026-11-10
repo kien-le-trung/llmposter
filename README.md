@@ -230,9 +230,12 @@ saved immediately, independently of AI requests.
 
 At the start of each round's discussion, a temporary Yes/No pop-up asks whether
 the given word is suitable for The Chameleon (the hint for an imposter). Answers
-are saved only in the current browser's local storage under
-`llmposter:word-feedback:<round_id>`; they are not sent to the backend. The debate
-timer continues while the pop-up is open.
+are saved through `POST /rounds/{round_id}/word-feedback` to Neon's `word_feedback`
+table, with the round ID, secret word, shown word/hint, role, and timestamps.
+The request accepts `{"answer": "yes"}` or `{"answer": "no"}`; retries update the
+same row. The pop-up closes after a confirmed save and offers retry on failure.
+The debate timer continues while the pop-up is open. Previously collected
+browser-only responses are not automatically uploaded.
 
 Each AI runs a LangGraph debate turn: prepare a private snapshot, generate a
 structured memory update plus a comment or `null`, and validate the output.

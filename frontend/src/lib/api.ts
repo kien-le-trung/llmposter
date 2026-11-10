@@ -156,3 +156,10 @@ export function submitDiscussionComment(roundId: string, text: string) {
     body: JSON.stringify({ text }),
   });
 }
+
+export function submitWordFeedback(roundId: string, answer: "yes" | "no") {
+  return request<{ round_id: string; answer: "yes" | "no" }>(`/rounds/${roundId}/word-feedback`, {
+    method: "POST",
+    body: JSON.stringify({ answer }),
+  });
+}

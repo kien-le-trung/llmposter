@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from sqlalchemy import Boolean, DateTime, Float, Integer, String, Text, UniqueConstraint, func
+from sqlalchemy import Boolean, CheckConstraint, DateTime, Float, Integer, String, Text, UniqueConstraint, func
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.db.session import Base
@@ -74,3 +74,20 @@ class DiscussionMessageModel(Base):
     sequence: Mapped[int] = mapped_column(Integer, nullable=False)
     inference_mode: Mapped[str] = mapped_column(String(64), nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+
+
+class WordFeedbackModel(Base):
+    __tablename__ = "word_feedback"
+    __table_args__ = (CheckConstraint("answer IN ('yes', 'no')", name="ck_word_feedback_answer"),)
+
+    round_id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    secret_word: Mapped[str] = mapped_column(String(80), nullable=False)
+    given_word: Mapped[str] = mapped_column(String(160), nullable=False)
+    user_role: Mapped[str] = mapped_column(String(16), nullable=False)
+    answer: Mapped[str] = mapped_column(String(3), nullable=False)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, server_default=func.now(),
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, server_default=func.now(), onupdate=func.now(),
+    )

@@ -51,7 +51,7 @@ def test_upgrade_preserves_data_and_matches_models(existing):
         command.upgrade(config, "head")
         command.upgrade(config, "head")
         assert (
-            connection.scalar(text("SELECT version_num FROM alembic_version")) == "0002_discussion"
+            connection.scalar(text("SELECT version_num FROM alembic_version")) == "0003_word_feedback"
         )
         assert compare_metadata(MigrationContext.configure(connection), Base.metadata) == []
         if existing != "empty":

@@ -3,7 +3,7 @@
 import { FormEvent, useEffect, useRef, useState } from "react";
 import {
   Round, VoteResult, createRound, submitDiscussionComment, getRound,
-  submitRoundClue, voteRound,
+  submitRoundClue, submitWordFeedback, voteRound,
 } from "@/lib/api";
 import { playerDisplayName } from "@/lib/player-names";
 
@@ -24,6 +24,7 @@ export function GameConsole() {
   const feedbackRef = useRef<HTMLDialogElement>(null);
   const feedbackShownFor = useRef<string | null>(null);
   const [feedbackError, setFeedbackError] = useState<string | null>(null);
+  const [feedbackSaving, setFeedbackSaving] = useState(false);
   const followMessages = useRef(true);
   const actionVersion = useRef(0);
   const actionPending = useRef(false);
@@ -49,10 +50,7 @@ export function GameConsole() {
   useEffect(() => {
     const dialog = feedbackRef.current;
     if (!dialog) return;
-    if (roundStatus !== "discussion") {
-      dialog.close();
-      return;
-    }
+    if (roundStatus !== "discussion") return;
     if (roundId && feedbackShownFor.current !== roundId) {
       feedbackShownFor.current = roundId;
       setFeedbackError(null);
@@ -195,22 +193,24 @@ export function GameConsole() {
     setIsSubmittingClue(false);
     setIsVoting(false);
     setDiscussionBusy(false);
+    setFeedbackSaving(false);
+    setFeedbackError(null);
   }
 
-  function handleWordFeedback(answer: "yes" | "no") {
-    if (!round) return;
+  async function handleWordFeedback(answer: "yes" | "no") {
+    if (!round || feedbackSaving) return;
+    const dialog = feedbackRef.current;
+    setFeedbackSaving(true);
+    setFeedbackError(null);
     try {
-      localStorage.setItem(`llmposter:word-feedback:${round.id}`, JSON.stringify({
-        round_id: round.id,
-        given_word: round.visible_word ?? round.imposter_hint,
-        user_role: round.user_role,
-        answer,
-        created_at: new Date().toISOString(),
-      }));
-      setFeedbackError(null);
-      feedbackRef.current?.close();
-    } catch {
-      setFeedbackError("Could not save your feedback. Please allow browser storage and try again.");
+      await submitWordFeedback(round.id, answer);
+      if (feedbackRef.current === dialog) dialog?.close();
+    } catch (caught) {
+      if (feedbackRef.current === dialog) {
+        setFeedbackError(caught instanceof Error ? caught.message : "Could not save your feedback. Please try again.");
+      }
+    } finally {
+      if (feedbackRef.current === dialog) setFeedbackSaving(false);
     }
   }
 
@@ -267,14 +267,16 @@ export function GameConsole() {
   return (
     <div className="game-screen">
       <dialog ref={feedbackRef} className="help-dialog word-feedback-dialog"
-        aria-labelledby="word-feedback-title" aria-describedby="word-feedback-question">
+        aria-labelledby="word-feedback-title" aria-describedby="word-feedback-question"
+        aria-busy={feedbackSaving} onCancel={(event) => { if (feedbackSaving) event.preventDefault(); }}>
         <h2 id="word-feedback-title">Quick word feedback</h2>
         <p>{round.user_role === "imposter" ? "Your hint" : "Your word"}: <strong>{round.visible_word ?? round.imposter_hint}</strong></p>
         <p id="word-feedback-question">Is the {round.user_role === "imposter" ? "hint" : "word"} you were given a good word for The Chameleon?</p>
         <div className="actions">
-          <button type="button" onClick={() => handleWordFeedback("yes")}>Yes</button>
-          <button type="button" className="secondary-button" onClick={() => handleWordFeedback("no")}>No</button>
+          <button type="button" disabled={feedbackSaving} onClick={() => handleWordFeedback("yes")}>Yes</button>
+          <button type="button" className="secondary-button" disabled={feedbackSaving} onClick={() => handleWordFeedback("no")}>No</button>
         </div>
+        {feedbackSaving && <p role="status">Saving your feedback...</p>}
         {feedbackError && <p className="error" role="alert">{feedbackError}</p>}
       </dialog>
       <header className="header game-header">
