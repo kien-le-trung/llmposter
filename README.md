@@ -223,10 +223,16 @@ name. The browser displays these same names and marks the human's name
 with `(You)`. Clue, discussion, and voting prompts use that round roster, including
 each agent's own name; internal player IDs remain stable for structured references.
 
-All rounds follow clues -> discussion -> voting. Clues use a private LangGraph pipeline: prepare context -> select strategy -> build prompt -> generate clue -> normalize output. Voting uses structured LLM decisions from each player?s own knowledge and the full public transcript. Discussion lasts 90 seconds
+All rounds follow clues -> discussion -> voting. Clues use a private LangGraph pipeline: prepare context -> select strategy -> build prompt -> generate clue -> normalize output. Voting uses structured LLM decisions from each player?s own knowledge and the full public transcript. Discussion lasts 120 seconds
 by default (`DISCUSSION_DURATION_SECONDS`, 1-600). Anyone can comment at any time;
 there are no raised hands, floor grants, or personalities. Human messages are
 saved immediately, independently of AI requests.
+
+At the start of each round's discussion, a temporary Yes/No pop-up asks whether
+the given word is suitable for The Chameleon (the hint for an imposter). Answers
+are saved only in the current browser's local storage under
+`llmposter:word-feedback:<round_id>`; they are not sent to the backend. The debate
+timer continues while the pop-up is open.
 
 Each AI runs a LangGraph debate turn: prepare a private snapshot, generate a
 structured memory update plus a comment or `null`, and validate the output.

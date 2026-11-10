@@ -22,7 +22,7 @@ class RoundState(BaseModel):
     created_at: datetime
     include_human: bool = True
     discussion: chat.DiscussionState = Field(default_factory=chat.DiscussionState)
-    discussion_duration_seconds: int = 90
+    discussion_duration_seconds: int = 120
     human_clue: str | None = None
     voted_agent_id: str | None = None
     completed_clues: dict[str, AgentTurnResponse] = Field(default_factory=dict)

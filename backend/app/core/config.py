@@ -64,7 +64,7 @@ class Settings(BaseSettings):
     llm_config: LLMConfig = DEFAULT_LLM_CONFIG
     embedding_model_name: str = Field(default="nomic-embed-text")
     inference_mode: str = Field(default="remote")
-    discussion_duration_seconds: int = Field(default=90, ge=1, le=600)
+    discussion_duration_seconds: int = Field(default=120, ge=1, le=600)
     discussion_debounce_seconds: float = Field(default=0.5, gt=0, le=60)
     discussion_cooldown_seconds: float = Field(default=2, gt=0, le=60)
     discussion_silence_seconds: float = Field(default=10, gt=0, le=600)

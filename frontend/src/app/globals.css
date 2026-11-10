@@ -510,7 +510,13 @@ textarea::placeholder { color: var(--muted); }
   padding: 48px 16px;
   text-align: center;
 }
-.welcome-screen::before {
+.game-screen {
+  isolation: isolate;
+  position: relative;
+  min-height: calc(100svh - 64px);
+}
+.welcome-screen::before,
+.game-screen::before {
   background: url("/chameleons-lowered.png") center / cover no-repeat;
   border-radius: 24px;
   content: "";
@@ -519,6 +525,11 @@ textarea::placeholder { color: var(--muted); }
   pointer-events: none;
   position: absolute;
   z-index: -1;
+}
+.game-screen::before {
+  border-radius: 0;
+  inset: 0;
+  position: fixed;
 }
 .welcome-screen h1 { font-size: clamp(4.5rem, 14vw, 9rem); margin: 14px 0 24px; }
 .welcome-description { color: var(--muted); font-size: 1.15rem; max-width: 32rem; margin: 0; }

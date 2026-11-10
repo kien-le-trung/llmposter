@@ -21,6 +21,9 @@ export function GameConsole() {
   const [now, setNow] = useState(() => Date.now());
   const transcriptRef = useRef<HTMLOListElement>(null);
   const helpRef = useRef<HTMLDialogElement>(null);
+  const feedbackRef = useRef<HTMLDialogElement>(null);
+  const feedbackShownFor = useRef<string | null>(null);
+  const [feedbackError, setFeedbackError] = useState<string | null>(null);
   const followMessages = useRef(true);
   const actionVersion = useRef(0);
   const actionPending = useRef(false);
@@ -42,6 +45,20 @@ export function GameConsole() {
   }, [roundId, messageCount, typingPlayer?.id]);
 
   useEffect(() => () => { actionVersion.current += 1; }, []);
+
+  useEffect(() => {
+    const dialog = feedbackRef.current;
+    if (!dialog) return;
+    if (roundStatus !== "discussion") {
+      dialog.close();
+      return;
+    }
+    if (roundId && feedbackShownFor.current !== roundId) {
+      feedbackShownFor.current = roundId;
+      setFeedbackError(null);
+      dialog.showModal();
+    }
+  }, [roundId, roundStatus]);
 
   useEffect(() => {
     if (!roundId || !["generating_clues", "discussion"].includes(roundStatus ?? "")) return;
@@ -180,6 +197,23 @@ export function GameConsole() {
     setDiscussionBusy(false);
   }
 
+  function handleWordFeedback(answer: "yes" | "no") {
+    if (!round) return;
+    try {
+      localStorage.setItem(`llmposter:word-feedback:${round.id}`, JSON.stringify({
+        round_id: round.id,
+        given_word: round.visible_word ?? round.imposter_hint,
+        user_role: round.user_role,
+        answer,
+        created_at: new Date().toISOString(),
+      }));
+      setFeedbackError(null);
+      feedbackRef.current?.close();
+    } catch {
+      setFeedbackError("Could not save your feedback. Please allow browser storage and try again.");
+    }
+  }
+
   if (!round) {
     return (
       <section className="welcome-screen" aria-labelledby="welcome-title">
@@ -231,7 +265,18 @@ export function GameConsole() {
     : "";
 
   return (
-    <>
+    <div className="game-screen">
+      <dialog ref={feedbackRef} className="help-dialog word-feedback-dialog"
+        aria-labelledby="word-feedback-title" aria-describedby="word-feedback-question">
+        <h2 id="word-feedback-title">Quick word feedback</h2>
+        <p>{round.user_role === "imposter" ? "Your hint" : "Your word"}: <strong>{round.visible_word ?? round.imposter_hint}</strong></p>
+        <p id="word-feedback-question">Is the {round.user_role === "imposter" ? "hint" : "word"} you were given a good word for The Chameleon?</p>
+        <div className="actions">
+          <button type="button" onClick={() => handleWordFeedback("yes")}>Yes</button>
+          <button type="button" className="secondary-button" onClick={() => handleWordFeedback("no")}>No</button>
+        </div>
+        {feedbackError && <p className="error" role="alert">{feedbackError}</p>}
+      </dialog>
       <header className="header game-header">
         <h1><span className="brand-accent">llm</span>poster</h1>
         <button type="button" className="secondary-button" onClick={resetRound}>New Round</button>
@@ -346,7 +391,7 @@ export function GameConsole() {
           {error && <p className="error" role="alert">{error}</p>}
         </section>
       </section>
-    </>
+    </div>
   );
 }
 

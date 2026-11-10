@@ -86,7 +86,8 @@ def test_open_only_after_final_clue_and_deadline_does_not_reset():
     state = make_state()
     deadline = state.discussion.deadline
     assert state.status == "discussion"
-    assert 89 < (deadline - datetime.now(UTC)).total_seconds() <= 90
+    assert settings().discussion_duration_seconds == 120
+    assert 119 < (deadline - datetime.now(UTC)).total_seconds() <= 120
     engine.reveal_available_clues(state)
     assert state.discussion.deadline == deadline
     state.current_player_index = 0
